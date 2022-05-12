@@ -1,0 +1,24 @@
+{
+  "name": "is2-msgc-parket",
+  "version": "0.0.1",
+  "description": "project for IS2 course @ UNITN CS 3d year",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matteo-gatti/IS2-MSGC-Parket.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matteo-gatti/IS2-MSGC-Parket/issues"
+  },
+  "homepage": "https://github.com/matteo-gatti/IS2-MSGC-Parket#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "mongoose": "^6.3.3"
+  }
+}

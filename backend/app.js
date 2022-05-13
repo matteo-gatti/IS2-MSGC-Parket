@@ -6,6 +6,8 @@ const app = express()
 
 app.use(express.json())
 
+app.use('/', express.static('static')) //serves front-end static files?
+
 app.use('/api/v1/users', users)
 
 app.all('*', (req, res) => {res.redirect('/') })

@@ -2,33 +2,35 @@ import mongoose from 'mongoose'
 var Schema = mongoose.Schema
 
 const userSchema = new Schema({
-    Username: {
-        type: 'String',
-        required: true,
-        trim: true,
-        unique: true
-    },
-    Password: {
-        type: 'String',
-        required: true,
-        trim: true,
-    },
-    Name: {
-        type: 'String',
-        required: true,
-        trim: true,
-    },
-    Surname: {
-        type: 'String',
-        required: true,
-        trim: true,
-    },
-    Email: {
+    username: {
         type: 'String',
         required: true,
         trim: true,
         unique: true,
+        immutable: true
+    },
+    password: {
+        type: 'String',
+        required: true,
+        trim: true,
+    },
+    name: {
+        type: 'String',
+        required: true,
+        trim: true,
+    },
+    surname: {
+        type: 'String',
+        required: true,
+        trim: true,
+    },
+    email: {
+        type: 'String',
+        required: true,
+        trim: true,
+        unique: true,
+        lowercase: true,
     }
 })
 
-model.exports = mongoose.model('User', userSchema)
+export default mongoose.model('User', userSchema)

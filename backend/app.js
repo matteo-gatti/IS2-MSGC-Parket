@@ -1,12 +1,14 @@
 import express from 'express'
 
 import { users } from './users.js'
+import statics from './statics.js'
 
 const app = express()
 
 app.use(express.json())
 
-app.use('/', express.static('static')) //serves front-end static files?
+//app.use('/', express.static('static')) //serves front-end static files?
+app.use('/', statics)
 
 app.use('/api/v1/users', users)
 
@@ -18,4 +20,4 @@ app.use((req, res) => {
     res.json({ error: 'Not found' })
 })
 
-export { app as app }
+export default app

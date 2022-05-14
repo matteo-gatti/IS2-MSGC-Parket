@@ -13,10 +13,13 @@
 
     <div class="col-md-3 text-end postion-relative r-1">
       <a href="login" class="text-decoration-none">
-        <button type="button" id="logBtn" class="btn btn-outline-primary me-2">Login</button>
+        <button type="button" id="logInBtn" class="btn btn-outline-primary me-2">Login</button>
       </a>
       <a href="register" class="text-decoration-none">
-        <button type="button" class="btn btn-primary">Sign-up</button>
+        <button type="button" id="signUpBtn" class="btn btn-primary">Sign up</button>
+      </a>
+      <a href="/static/index.html" class="text-decoration-none">
+        <button type="button" id="logOutBtn" class="btn btn-danger" onclick="logout()" hidden>Log out</button>
       </a>
     </div>
 

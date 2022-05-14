@@ -10,6 +10,7 @@
         integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
         crossorigin="anonymous">
     </script>    
+    <script src="script.js"></script>
     <script>//carichiamo header e footer
         $(function(){
             $(header).load("header.html")
@@ -24,26 +25,26 @@
         <div class="row"> 
         <div class="col-sm" ></div>
         <div class="col-sm form-signin ">
-            <form>
+            <form id="login">
             <img class="mb-4" src="img/logo.png" alt="" width="200" height="200">
             <h1 class="h3 mb-3 fw-normal">Accedi con le tue credenziali!</h1>
         
             <div class="form-floating">
-                <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+                <input type="email" class="form-control" id="email" placeholder="name@example.com">
                 <label for="floatingInput">Email address</label>
             </div>
             <div class="mb-3"></div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+                <input type="password" class="form-control" id="password" placeholder="Password">
                 <label for="floatingPassword">Password</label>
             </div>
         
-             <div class="checkbox mb-3">
+            <div class="checkbox mb-3">
                 <!-- <label>
                 <input type="checkbox" value="remember-me"> Remember me
                 </label> -->
             </div> 
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Accedi</button>
+            <button class="w-100 btn btn-lg btn-primary" type="button" onclick="login()">Accedi</button>
             <!-- <p class="mt-5 mb-3 text-muted">MSGC© 2022–2023</p> -->
             </form>
         </div>

@@ -1,13 +1,37 @@
 import express from 'express'
 
+import { tokenValid } from './tokenChecker.js'
+
 const router = express.Router()
 
-router.get('/login', function(req,res){
-    res.sendFile('./static/login.html', { root: '.'})
+function isAuthToken(req) {
+    if(!req.loggedInUser) {
+        return false
+    }
+    return true
+}
+
+router.get('/login', tokenValid, function(req, res){
+    if(!isAuthToken(req)) {
+        res.sendFile('./static/login.html', { root: '.'})
+    }
+    else {
+        res.redirect("/")
+    }
 })
 
-router.get('/register', function(req,res){
-    res.sendFile('./static/register.html', { root: '.'})
+router.get('/register', tokenValid, function(req, res){
+    if(!isAuthToken(req))
+        res.sendFile('./static/register.html', { root: '.'})
+    else
+        res.redirect("/")
+})
+
+router.get('/', tokenValid, function(req, res){
+    if(!isAuthToken(req))
+        res.sendFile('./static/index.html', { root: '.'})
+    else
+        res.sendFile('./static/loggedIn.html', { root: '.'})
 })
 
 //router.all('/*', (req, res) => {res.redirect('/') })

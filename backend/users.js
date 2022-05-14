@@ -1,79 +1,82 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 import User from './models/user.js'
 import config from '../config.js'
+import tokenChecker from './tokenChecker.js'
 
 const router = express.Router()
 
 const environment = process.env.NODE_ENV
 const stage = config[environment]
 
+function checkUserAuthorization(req, res) {
+    if (req.loggedInUser.userId !== req.params.userId) {
+        res.status(403).send({message: 'User is not authorized to do this action'})
+        return false
+    }
+    return true
+}
+
 router.post('', async (req, res) => {
     console.log("Printing new user", req.body)
     const user = new User(req.body)
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
-    await user.save().then((newUser) => {
+    try {
+        let newUser = await user.save()
         let userId = newUser._id
         // Link to the newly created resource is returned in the location header
-        res.location('/api/v1/users/' + userId)
-        res.contentType('application/json')
-        return res.status(200).send({ userId: userId })
-    })
-        .catch((err) => {
-            console.log(err)
-            if (err.code === 11000) {
-                return res.status(409).send("Username or email already exists")
-            }
-            return res.status(400).send("Some fields are empty or undefined")
-        })
-})
-
-router.get('/:userId', async (req, res) => {
-    await User.findById(req.params.userId).then((user) => {
-        if(user) {
-            return res.status(200).json(user)
+        res.location('/api/v1/users/' + userId).status(200).send()
+    } catch(err) {
+        console.log(err)
+        if (err.code === 11000) {
+            return res.status(409).send({ message: "Username or email already exists" })
         }
-        return res.status(404).send('User not found')
-    }).catch(() => {
-        return res.status(404).send('User not found')
-    })
-
+        return res.status(400).send({ message: "Some fields are empty or undefined" })
+    }
 })
 
-router.put('/:userId', async (req, res) => {
+router.get('/:userId', tokenChecker, async (req, res) => {
+    if (!checkUserAuthorization(req, res)) return
+    try {
+        const user = await User.findById(req.params.userId)
+        return res.status(200).json({ name: user.name, surname: user.surname, email: user.email, username: user.username })
+    } catch (err) {
+        console.log(err)
+        return res.status(404).send({ message: 'User not found' })
+    }
+})
+
+router.put('/:userId', tokenChecker, async (req, res) => {
+    if (!checkUserAuthorization(req, res)) return
     if(req.body["username"]) {
-        return res.status(400).send("Username cannot be updated")
+        return res.status(400).send({ message: "Username cannot be updated"} )
     }
     if(req.body["password"]) {
         req.body["password"] = await bcrypt.hash(req.body["password"], stage.saltingRounds)
     }
-    await User.findByIdAndUpdate(req.params.userId, req.body).then(() => {
-        return res.status(200).send('Update successful')
-    }).catch((err) => {
+    try {   
+        await User.findByIdAndUpdate(req.params.userId, req.body, { runValidators: true })
+        return res.status(200).send({ message: 'Update successful'})
+    } catch(err) {
         console.log(err)
-        return res.status(404).send('User not found')
-    })
-
-    /* await User.findById(req.params.userId).then((user) => {
-        user
-        await user.save()
-        return res.status(200).json(user)
-    }).catch(() => {
-        return res.status(404).send('User not found')
-    }) */
-
-    /* await User.updateOne({_id: req.params.id}, req.body)
-    return res.status(200).send('Update successful') */
+        if (err.code === 11000) {
+            return res.status(409).send({ message: "Email is already in use" })
+        }
+        return res.status(404).send({ message: 'User not found' })
+    }
 })
 
-router.delete('/:userId', async (req, res) => {
-    await User.findByIdAndDelete((req.params.userId)).then(() => {
-        return res.status(200).send('User deleted')
-    }).catch(() => {
-         return res.status(404).send('User not found')
-    })
+router.delete('/:userId', tokenChecker, async (req, res) => {
+    if (!checkUserAuthorization(req, res)) return
+    try {
+        await User.findByIdAndDelete((req.params.userId))
+        return res.status(200).send({ message: 'User deleted' })
+    } catch {
+        return res.status(404).send({ message: 'User not found'})
+    }
 })
 
 export { router as users }

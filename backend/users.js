@@ -23,11 +23,16 @@ function checkUserAuthorization(req, res) {
 router.post('', async (req, res) => {
     console.log("Printing new user", req.body)
     const user = new User(req.body)
+    // if password is not provided, return error
+    if (!req.body.password) {
+        res.status(400).send({message: 'Password is required'})
+        return
+    }
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
     try {
         let newUser = await user.save()
         let userId = newUser._id
-        // Link to the newly created resource is returned in the location header
+        // link to the newly created resource is returned in the location header
         res.location('/api/v1/users/' + userId).status(200).send()
     } catch(err) {
         console.log(err)

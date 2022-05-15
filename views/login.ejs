@@ -13,29 +13,44 @@
     <script src="script.js"></script>
     <script>//carichiamo header e footer
         $(function(){
-            $(header).load("header.html")
-            $(footer).load("footer.html")
+            //$(header).load("header.html")
+            //$(footer).load("footer.html")
         })
     </script>
+    <style>
+        /* GLOBAL STYLES
+  -------------------------------------------------- */
+        /* Padding below the footer and lighter body text */
+        body {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+            color: #5a5a5a;
+        }
+    </style>
 </head>
 
-<body class="text-center">
-    <div id="header"></div>
-    <div class="container">
+<body class="">
+    <div id="header">
+        <%- include("header.ejs") %>
+    </div>
+    <div class="container text-center">
         <div class="row"> 
         <div class="col-sm" ></div>
         <div class="col-sm form-signin ">
+            
             <form id="login">
             <img class="mb-4" src="img/logo.png" alt="" width="200" height="200">
             <h1 class="h3 mb-3 fw-normal">Accedi con le tue credenziali!</h1>
-        
+            
+            <p class="text-danger" id="message" hidden>Messaggio</p>
+
             <div class="form-floating">
-                <input type="email" class="form-control" id="email" placeholder="name@example.com">
-                <label for="floatingInput">Email address</label>
+                <input type="text" class="form-control" id="identifier" placeholder="name@example.com" required>
+                <label for="floatingInput">Email address or Username</label>
             </div>
             <div class="mb-3"></div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="password" placeholder="Password">
+                <input type="password" class="form-control" id="password" placeholder="Password" required>
                 <label for="floatingPassword">Password</label>
             </div>
         
@@ -51,7 +66,9 @@
         <div class="col-sm"></div>
     </div>
     </div>
-    <div id="footer"></div>
+    <div id="footer">
+        <%- include("footer.ejs") %>
+    </div>
 
 </body>
 </html>

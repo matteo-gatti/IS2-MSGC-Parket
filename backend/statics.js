@@ -13,7 +13,8 @@ function isAuthToken(req) {
 
 router.get('/login', tokenValid, function(req, res){
     if(!isAuthToken(req)) {
-        res.sendFile('./static/login.html', { root: '.'})
+        res.render('./login.ejs')
+        //res.sendFile('./static/login.html', { root: '.'})
     }
     else {
         res.redirect("/")
@@ -22,16 +23,19 @@ router.get('/login', tokenValid, function(req, res){
 
 router.get('/register', tokenValid, function(req, res){
     if(!isAuthToken(req))
-        res.sendFile('./static/register.html', { root: '.'})
+        res.render('./register.ejs')
+        //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/")
 })
 
 router.get('/', tokenValid, function(req, res){
-    if(!isAuthToken(req))
-        res.sendFile('./static/index.html', { root: '.'})
-    else
-        res.sendFile('./static/loggedIn.html', { root: '.'})
+    let loggedBool = false
+    if(isAuthToken(req))
+        loggedBool = true
+    res.render('./index.ejs', {logged: loggedBool})
+        //res.sendFile('./static/index.html', { root: '.'})
+        //res.sendFile('./static/loggedIn.html', { root: '.'})
 })
 
 //router.all('/*', (req, res) => {res.redirect('/') })

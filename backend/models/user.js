@@ -30,7 +30,11 @@ const userSchema = new Schema({
         trim: true,
         unique: true,
         lowercase: true,
-    }
+    },
+    parkings: [{
+        type: 'Array',
+        ref: 'Parking',
+    }],
 })
 
 export default mongoose.model('User', userSchema)

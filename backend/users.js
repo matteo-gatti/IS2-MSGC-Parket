@@ -46,8 +46,9 @@ router.post('', async (req, res) => {
 router.get('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
+        console.log("Printing user", req.params.userId)
         const user = await User.findById(req.params.userId)
-        return res.status(200).json({ name: user.name, surname: user.surname, email: user.email, username: user.username })
+        return res.status(200).send({ name: user.name, surname: user.surname, email: user.email, username: user.username, parkings: user.parkings })
     } catch (err) {
         console.log(err)
         return res.status(404).send({ message: 'User not found' })

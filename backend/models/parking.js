@@ -2,6 +2,10 @@ import mongoose from 'mongoose'
 var Schema = mongoose.Schema
 
 const parkingSchema = new Schema({
+    self: {
+        type: 'String',
+        trim: 'true'
+    },
     owner: {
         type: 'String',
         trim: true,
@@ -34,14 +38,13 @@ const parkingSchema = new Schema({
     },
     image: {
         type: 'String',
-        required: true,
         trim: true,
     },
-    latitud: {
+    latitude: {
         type: 'Number',
         trim: true,
     },
-    longitud: {
+    longitude: {
         type: 'Number',
         trim: true,
     },

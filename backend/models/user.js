@@ -32,7 +32,7 @@ const userSchema = new Schema({
         lowercase: true,
     },
     parkings: [{
-        type: 'Array',
+        type: Schema.Types.ObjectId,
         ref: 'Parking',
     }],
 })

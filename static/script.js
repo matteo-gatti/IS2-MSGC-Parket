@@ -18,11 +18,17 @@ async function register() {
                 password: password,
             }),
         })
-        data = await res.json()
 
-        if (!res.ok)
-            throw data
+        if (!res.ok) {
+            throw await res.json()
+        } else {
+            window.location.href = "/login"
+        }
+
+        //if()
+          //  console.log("ciao mamma")
     } catch (err) {
+        console.log("ERROR", err)
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
     }

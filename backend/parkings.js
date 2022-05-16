@@ -1,8 +1,9 @@
 import express from 'express'
 
 import Parking from './models/parking.js'
-import tokenChecker from './tokenChecker.js'
+import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 import User from './models/user.js'
+import { runInNewContext } from 'vm'
 
 const router = express.Router()
 
@@ -16,10 +17,12 @@ router.post('', tokenChecker, async (req, res) => {
         let newParking = await parking.save()
 
         let parkingId = newParking._id
+        newParking.self = "/api/v1/parkings/" + parkingId
+        newParking = await newParking.save()
 
         // add reference into the user object
         let user = await User.findById(req.loggedInUser.userId)
-        user.parkings.push('/api/v1/parkings/' + parkingId)
+        user.parkings.push(newParking) //'/api/v1/parkings/' + 
         await user.save()
 
         // link to the newly created resource is returned in the location header
@@ -28,6 +31,29 @@ router.post('', tokenChecker, async (req, res) => {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
+})
+
+// Get all parkings of the requester
+router.get('/myParkings', tokenValid, async (req, res) => {
+    if (!isAuthToken(req)) {
+        res.redirect("/login")
+    } else {
+        console.log("PROVA")
+        try {
+            const idUser = req.loggedInUser.userId
+            const user = await User.findById(idUser).populate("parkings")
+            console.log("crash dopo find")
+            console.log(user.parkings)
+            /* console.log(req.params)
+            const parkings = await Parking.find() */
+            return res.status(200).json(user)
+        } catch (err) {
+            console.log(err)
+            return res.status(404).send({ message: 'Parkings not found' })
+        }
+        
+    }
+    
 })
 
 // Get a parking

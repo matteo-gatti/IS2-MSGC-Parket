@@ -15,7 +15,7 @@ const tokenChecker = (req, res, next) => {
                 res.status(500).send({ auth: false, message: 'Failed to authenticate token.' })
             } else {
                 // if everything is good, save to request for use in other routes
-                req.loggedInUser = decoded
+                req.loggedInUser = decoded 
                 next()
             }
         })

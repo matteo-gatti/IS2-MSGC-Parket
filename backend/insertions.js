@@ -1,87 +1,67 @@
 import express from 'express'
 
+import Insertion from './models/insertion.js'
+import Reservation from './models/reservation.js'
 import Parking from './models/parking.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
-import User from './models/user.js'
+import async from 'async'
 
 const router = express.Router()
 
 // Create a new insertion
-router.post('', tokenChecker, async (req, res) => {
-    console.log(req.params.parkId)
-    let insertion = new Insertion(req.body)
-    // set the owner of the parking to the logged in user
-    insertion.owner = '/api/v1/users/' + req.loggedInUser.userId
+router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
     try {
-        console.log("Printing new parking", parking)
-        let newParking = await parking.save()
+        let parking = await Parking.findById(req.params.parkId).populate("owner")
+        if(req.loggedInUser.userId !== parking.owner.id) {
+            return res.status(403).send({ message: "User is not authorized to perform this action" })
+        }
+        let insertion = new Insertion()
+        insertion.name = req.body.name
+        
+        insertion.parking = parking
+        insertion = await insertion.save()
+        
+        for(const resv of req.body.reservations) {
+            let reservation = new Reservation()
+            reservation.datetimeStart = resv.datetimeStart
+            reservation.datetimeEnd = resv.datetimeEnd
+            reservation.insertion = insertion
+            reservation = await reservation.save()
 
-        let parkingId = newParking._id
-        newParking.self = "/api/v1/parkings/" + parkingId
-        newParking = await newParking.save()
+            reservation.self = "/api/v1/reservations/" + reservation.id
+            reservation = await reservation.save()
+            insertion.reservations.push(reservation)
+        }
 
-        // add reference into the user object
-        let user = await User.findById(req.loggedInUser.userId)
-        user.parkings.push(newParking) //'/api/v1/parkings/' + 
-        await user.save()
+        insertion.self = "/api/v1/parkings/" + req.params.parkId + "/insertions/" + insertion.id
+        insertion = await insertion.save()
+
+        parking.insertions.push(insertion)
+        await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + parkingId).status(200).send()
+        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id ).status(200).send()
     } catch(err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 })
 
-// Get all parkings of the requester
-router.get('/myParkings', tokenValid, async (req, res) => {
-    if (!isAuthToken(req)) {
-        res.redirect("/login")
-    } else {
-        console.log("PROVA")
-        try {
-            const idUser = req.loggedInUser.userId
-            const user = await User.findById(idUser).populate("parkings")
-            console.log("crash dopo find")
-            console.log(user.parkings)
-            /* console.log(req.params)
-            const parkings = await Parking.find() */
-            return res.status(200).json(user)
-        } catch (err) {
-            console.log(err)
-            return res.status(404).send({ message: 'Parkings not found' })
-        }
-        
-    }
-    
-})
-
-// Get a parking
-router.get('/:parkingId', async (req, res) => {
+// Get all insertions of the parking
+router.get('/:parkId/insertions/:insertionId', async (req, res) => {
     try {
-        console.log("Printing parking", req.params.parkingId)
-        const parking = await Parking.findById(req.params.parkingId)
-        return res.status(200).json(parking)
-    } catch (err) {
+        let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0, parking: 0}).populate("reservations", {_id: 0, __v:0, insertion: 0}).populate("reservations.client")
+
+        console.log(insertion)
+        return res.status(200).json(insertion)
+    } catch(err) {
         console.log(err)
-        return res.status(404).send({ message: 'Parking not found' })
+        return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 })
 
-// Get all parkings
-router.get('', async (req, res) => {
-    try {
-        console.log(req.params)
-        const parkings = await Parking.find()
-        return res.status(200).json(parkings)
-    } catch (err) {
-        console.log(err)
-        return res.status(404).send({ message: 'Parkings not found' })
-    }
-})
-
-// Modify a parking
-router.put('/:parkingId', tokenChecker, async (req, res) => {
+//TODO Modify a parking 
+router.put('/:parkId/insertions/:insertionId', tokenChecker, async (req, res) => {
     // if user is trying to change the parking's owner, return error
     if (req.body["owner"]) {
         return res.status(400).send({ message: "Owner cannot be updated"} )
@@ -112,8 +92,8 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
     }
 })
 
-// Delete a parking
-router.delete('/:parkingId', tokenChecker, async (req, res) => {
+//TODO Delete a parking
+router.delete('/:parkId/insertions/:insertionId', tokenChecker, async (req, res) => {
     try {
         const parking = await Parking.findById(req.params.parkingId)
 

@@ -17,7 +17,7 @@ const insertionSchema = new Schema({
     }],
     parking: {
         type: Schema.Types.ObjectId,
-        ref: "Parking"
+        ref: 'Parking'
     }
 })
 

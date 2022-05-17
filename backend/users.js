@@ -23,7 +23,7 @@ function checkUserAuthorization(req, res) {
 router.post('', async (req, res) => {
     console.log("Printing new user", req.body)
     const user = new User(req.body)
-    user.self = "/api/v1/users" + user.id
+    user.self = "/api/v1/users/" + user.id
     // if password is not provided, return error
     if (!req.body.password) {
         return res.status(400).send({ message: 'Password is required' })

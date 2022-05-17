@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from 'mongoose'
+import mongoose from 'mongoose'
 var Schema = mongoose.Schema
 
 const reservationSchema = new Schema({
@@ -12,7 +12,7 @@ const reservationSchema = new Schema({
     },
     client: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'User'
     },
     insertion: {
         type: Schema.Types.ObjectId,

@@ -6,12 +6,16 @@ import User from './models/user.js'
 
 const router = express.Router()
 
+
 // Create a new parking
 router.post('', tokenChecker, async (req, res) => {
+    console.log("AAAAaaa")
     let parking = new Parking(req.body)
+    console.log("BBBBBBbbb")
     // set the owner of the parking to the logged in user
-    parking.owner = '/api/v1/users/' + req.loggedInUser.userId
     try {
+        let user = await User.findById(req.loggedInUser.userId)
+        parking.owner = user
         console.log("Printing new parking", parking)
         let newParking = await parking.save()
 
@@ -20,7 +24,6 @@ router.post('', tokenChecker, async (req, res) => {
         newParking = await newParking.save()
 
         // add reference into the user object
-        let user = await User.findById(req.loggedInUser.userId)
         user.parkings.push(newParking) //'/api/v1/parkings/' + 
         await user.save()
 
@@ -37,12 +40,9 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     if (!isAuthToken(req)) {
         res.redirect("/login")
     } else {
-        console.log("PROVA")
         try {
             const idUser = req.loggedInUser.userId
             const user = await User.findById(idUser).populate("parkings")
-            console.log("crash dopo find")
-            console.log(user.parkings)
             /* console.log(req.params)
             const parkings = await Parking.find() */
             return res.status(200).json(user)

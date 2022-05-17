@@ -48,6 +48,10 @@ const parkingSchema = new Schema({
         type: 'Number',
         trim: true,
     },
+    insertions: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Insertion',
+    }],
 })
 
 export default mongoose.model('Parking', parkingSchema)

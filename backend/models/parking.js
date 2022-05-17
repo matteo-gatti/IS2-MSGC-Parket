@@ -7,8 +7,8 @@ const parkingSchema = new Schema({
         trim: 'true'
     },
     owner: {
-        type: 'String',
-        trim: true,
+        type: Schema.Types.ObjectId,
+        ref: "User",
         immutable: true,
     },
     name: {

@@ -6,11 +6,12 @@ import User from './models/user.js'
 
 const router = express.Router()
 
-// Create a new parking
+// Create a new insertion
 router.post('', tokenChecker, async (req, res) => {
-    let parking = new Parking(req.body)
+    console.log(req.params.parkId)
+    let insertion = new Insertion(req.body)
     // set the owner of the parking to the logged in user
-    parking.owner = '/api/v1/users/' + req.loggedInUser.userId
+    insertion.owner = '/api/v1/users/' + req.loggedInUser.userId
     try {
         console.log("Printing new parking", parking)
         let newParking = await parking.save()
@@ -131,4 +132,4 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
 })
 
 
-export { router as parkings }
+export { router as insertions }

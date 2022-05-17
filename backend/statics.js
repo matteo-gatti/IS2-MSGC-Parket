@@ -1,19 +1,12 @@
 import express from 'express'
 
-import { tokenValid } from './tokenChecker.js'
+import { tokenValid, isAuthToken } from './tokenChecker.js'
 
 const router = express.Router()
 
-function isAuthToken(req) {
-    if(!req.loggedInUser) {
-        return false
-    }
-    return true
-}
-
 router.get('/login', tokenValid, function(req, res){
     if(!isAuthToken(req)) {
-        res.render('./login.ejs')
+        res.render('./login.ejs', {logged: false})
         //res.sendFile('./static/login.html', { root: '.'})
     }
     else {
@@ -23,10 +16,29 @@ router.get('/login', tokenValid, function(req, res){
 
 router.get('/register', tokenValid, function(req, res){
     if(!isAuthToken(req))
-        res.render('./register.ejs')
+        res.render('./register.ejs', {logged: false})
         //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/")
+})
+
+router.get('/privateArea', tokenValid, function(req, res){
+    if(isAuthToken(req)){
+        console.log("auth and render")
+        res.render('./parkings.ejs', {logged: true})
+    }
+        //res.sendFile('./static/register.html', { root: '.'})
+    else
+        res.redirect("/login")
+})
+
+router.get('/createParking', tokenValid, function(req, res){
+    if(isAuthToken(req)){
+        res.render('./newPark.ejs', {logged: true})
+    }
+        //res.sendFile('./static/register.html', { root: '.'})
+    else
+        res.redirect("/login")
 })
 
 router.get('/', tokenValid, function(req, res){

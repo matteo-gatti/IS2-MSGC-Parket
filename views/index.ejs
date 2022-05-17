@@ -119,11 +119,7 @@
 
   <body>
     <div id="header">
-      <% if (logged) { %>
-        <%- include("./headerLogged.ejs"); %>
-      <% } else { %>
-        <%- include("./header.ejs"); %>
-      <% } %>
+      <%- include("./header.ejs", { logged: logged }); %>
     </div>
     
     <!--<h1 style="text-align:center;"> Parket: The park market</h1>-->

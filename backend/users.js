@@ -25,29 +25,30 @@ router.post('', async (req, res) => {
     const user = new User(req.body)
     // if password is not provided, return error
     if (!req.body.password) {
-        res.status(400).send({message: 'Password is required'})
-        return
+        return res.status(400).send({message: 'Password is required'})
     }
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
     try {
         let newUser = await user.save()
         let userId = newUser._id
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/users/' + userId).status(200).send()
+        return res.location('/api/v1/users/' + userId).status(200).send()
     } catch(err) {
-        console.log(err)
+        console.log("our", err)
         if (err.code === 11000) {
-            return res.status(409).send({ message: "Username or email already exists" })
+            return res.status(409).json({ message: "Username or email already exists" })
         }
-        return res.status(400).send({ message: "Some fields are empty or undefined" })
+        return res.status(400).json({ message: "Some fields are empty or undefined" })
     }
 })
 
 router.get('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
-        const user = await User.findById(req.params.userId)
-        return res.status(200).json({ name: user.name, surname: user.surname, email: user.email, username: user.username })
+        console.log("Printing user", req.params.userId)
+        const user = await User.findById(req.params.userId).populate("parkings")
+        console.log(user)
+        return res.status(200).send({ name: user.name, surname: user.surname, email: user.email, username: user.username, parkings: user.parkings })
     } catch (err) {
         console.log(err)
         return res.status(404).send({ message: 'User not found' })

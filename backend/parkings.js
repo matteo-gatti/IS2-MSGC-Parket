@@ -9,9 +9,7 @@ const router = express.Router()
 
 // Create a new parking
 router.post('', tokenChecker, async (req, res) => {
-    console.log("AAAAaaa")
     let parking = new Parking(req.body)
-    console.log("BBBBBBbbb")
     // set the owner of the parking to the logged in user
     try {
         let user = await User.findById(req.loggedInUser.userId)
@@ -29,7 +27,7 @@ router.post('', tokenChecker, async (req, res) => {
 
         // link to the newly created resource is returned in the location header
         res.location('/api/v1/parkings/' + parkingId).status(200).send()
-    } catch(err) {
+    } catch (err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
@@ -42,7 +40,7 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            const user = await User.findById(idUser).populate("parkings")
+            const user = await User.findById(idUser, {username: 0, password: 0, name: 0, surname: 0, email: 0, _id: 0, __v: 0}).populate("parkings", {__v: 0, owner: 0})
             /* console.log(req.params)
             const parkings = await Parking.find() */
             return res.status(200).json(user)
@@ -50,16 +48,14 @@ router.get('/myParkings', tokenValid, async (req, res) => {
             console.log(err)
             return res.status(404).send({ message: 'Parkings not found' })
         }
-        
     }
-    
 })
 
 // Get a parking
 router.get('/:parkingId', async (req, res) => {
     try {
         console.log("Printing parking", req.params.parkingId)
-        const parking = await Parking.findById(req.params.parkingId)
+        const parking = await Parking.findById(req.params.parkingId, {__v: 0})
         return res.status(200).json(parking)
     } catch (err) {
         console.log(err)
@@ -83,12 +79,12 @@ router.get('', async (req, res) => {
 router.put('/:parkingId', tokenChecker, async (req, res) => {
     // if user is trying to change the parking's owner, return error
     if (req.body["owner"]) {
-        return res.status(400).send({ message: "Owner cannot be updated"} )
+        return res.status(400).send({ message: "Owner cannot be modified" })
     }
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
-        let parkingOwner = parking.owner
+        let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
         if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })

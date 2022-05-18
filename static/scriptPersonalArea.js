@@ -23,10 +23,10 @@ async function getMyParkings() {
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
                 $(tmpParkHTML.find("p")[0]).text(data.parkings[parking].name)
-                $(tmpParkHTML.find("p")[1]).text(data.parkings[parking].description)
                 $(tmpParkHTML.find("p")[2]).text(data.parkings[parking].address + " " + data.parkings[parking].city + " " + data.parkings[parking].country)
                 $(tmpParkHTML.find("p")[3]).text(data.parkings[parking].self)
-                container.append(tmpParkHTML)
+                $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data.parkings[parking]._id}')`);
+                container.append(tmpParkHTML)   
             }
         }
 
@@ -40,3 +40,8 @@ function newParking() {
     window.location.href = "/createParking"
 }
 getMyParkings()
+
+function detailParking(id) {
+    window.location.href = "/detailParking?id=" + id
+    console.log(window.location.href)
+}

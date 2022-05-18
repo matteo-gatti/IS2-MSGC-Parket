@@ -40,17 +40,32 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id ).status(200).send()
+        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id ).status(201).send()
     } catch(err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 })
 
-// Get all insertions of the parking
+
+
+// Get an insertion of the parking
 router.get('/:parkId/insertions/:insertionId', async (req, res) => {
     try {
         let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0, parking: 0}).populate("reservations", {_id: 0, __v:0, insertion: 0}).populate("reservations.client")
+
+        console.log(insertion)
+        return res.status(200).json(insertion)
+    } catch(err) {
+        console.log(err)
+        return res.status(400).send({ message: "Some fields are empty or undefined" })
+    }
+})
+
+// Get all the insertions of a parking
+router.get('/:parkId/insertions', async (req, res) => {
+    try {
+        let insertion = await Parking.findById(req.params.parkId, {insertions: 1}).populate("insertions").populate("insertions.reservations", {_id: 0, __v:0, insertion: 0}).populate("insertions.reservations.client")
 
         console.log(insertion)
         return res.status(200).json(insertion)

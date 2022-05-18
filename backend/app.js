@@ -6,6 +6,7 @@ import { insertions } from './insertions.js'
 import authentication from './authentication.js'
 import tokenChecker from './tokenChecker.js'
 import statics from './statics.js'
+import cors from 'cors'
 //tentativo immagini
 
 
@@ -13,6 +14,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors())
 
 app.set('view engine', 'ejs');
 // Serve static files

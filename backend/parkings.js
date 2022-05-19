@@ -40,7 +40,7 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            const user = await User.findById(idUser, {username: 0, password: 0, name: 0, surname: 0, email: 0, _id: 0, __v: 0}).populate("parkings", {__v: 0, owner: 0})
+            const user = await User.findById(idUser, { username: 0, password: 0, name: 0, surname: 0, email: 0, _id: 0, __v: 0 }).populate("parkings", { __v: 0, owner: 0 })
             /* console.log(req.params)
             const parkings = await Parking.find() */
             return res.status(200).json(user)
@@ -55,7 +55,7 @@ router.get('/myParkings', tokenValid, async (req, res) => {
 router.get('/:parkingId', async (req, res) => {
     try {
         console.log("Printing parking", req.params.parkingId)
-        const parking = await Parking.findById(req.params.parkingId, {__v: 0})
+        const parking = await Parking.findById(req.params.parkingId, { __v: 0 })
         return res.status(200).json(parking)
     } catch (err) {
         console.log(err) //wewe
@@ -67,7 +67,7 @@ router.get('/:parkingId', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         console.log(req.params)
-        const parkings = await Parking.find()
+        const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)
@@ -77,12 +77,12 @@ router.get('', async (req, res) => {
 
 // Modify a parking
 router.put('/:parkingId', tokenChecker, async (req, res) => {
-    let validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude"]
-    req.body.forEach((field) => {
-        if(!validFields.includes(field)) {
+    let validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+    for (let field in req.body) {
+        if (!validFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
         }
-    })
+    }
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
@@ -91,6 +91,7 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
         if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
+
         //TODO basta mettere update senza sta colonna di if orrida
         if (req.body.name) parking.name = req.body.name
         if (req.body.address) parking.address = req.body.address
@@ -100,8 +101,10 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
         if (req.body.image) parking.image = req.body.image
         if (req.body.latitude) parking.latitude = req.body.latitude
         if (req.body.longitude) parking.longitude = req.body.longitude
+        if (req.body.visible != null) parking.visible = req.body.visible
 
-        let updatedParking = await parking.save()
+        const updatedParking = await parking.save()
+        console.log("upd", updatedParking)
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)

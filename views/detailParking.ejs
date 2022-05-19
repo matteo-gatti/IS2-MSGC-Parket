@@ -49,7 +49,7 @@ crossorigin="anonymous"></script>
   <div class="row">
     <div class="col-md-2">
       <div class="container mt-5" style="padding-left: 25%">
-        <btn class="btn btn-lg btn-primary mx-auto" onclick="goBack()">Torna indietro</btn>
+        <btn class="btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</btn>
       </div>
     </div>
     <div class="col-md-10" style="margin: 0px">
@@ -66,7 +66,7 @@ crossorigin="anonymous"></script>
           />
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-4 d-flex flex-column">
           <!--<h3 class="my-3" id="parkingName"></h3>-->
           <p id="parkingId" hidden></p>
           Indirizzo:
@@ -78,10 +78,7 @@ crossorigin="anonymous"></script>
           Descrizione:
           <h5 id="parkingDesc"></h5>
 
-          
-
-
-
+          <btn class="btn btn-lg btn-success mt-auto mx-auto" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
 
         </div>
       </div>
@@ -91,22 +88,24 @@ crossorigin="anonymous"></script>
       <!-- Related Projects Row -->
       <h3 class="my-4">Inserzioni</h3>
       <btn class="btn btn-lg btn-primary mb-3" id="newInsertion" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-name="" data-bs-id="">Nuova Inserzione</btn>
-
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="insertionContainer">
-        <div class="col" id="firstInsertion" hidden>
-            <div class="card shadow-sm">
-              <div class="card-body">
-                <p class="card-text insertionName"></p>
-                <p class="card-text insertionId" hidden></p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <button onclick="detailInsertion()" type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                    <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
+      <div class="row">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 col-md-11" id="insertionContainer">
+          <div class="col" id="firstInsertion" hidden>
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <p class="card-text insertionName"></p>
+                  <p class="card-text insertionId" hidden></p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                      <button onclick="detailInsertion()" type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                      <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-        </div>
+          </div>
+      </div>
+      <div class="col-md-1"></div>
     </div>
 
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -121,7 +120,7 @@ crossorigin="anonymous"></script>
                 <div class="mb-3">
                   <label id="message" class="text-danger d-block"></label>
                   <label id="parkId" hidden></label>
-                  <label for="recipient-name" class="col-form-label">Name:</label>
+                  <label for="recipient-name" class="col-form-label">Nome:</label>
                   <input type="text" class="form-control" id="insertion-name">
                 </div>
                 <!-- <div class="mb-3">

@@ -58,11 +58,11 @@ router.get('/:userId', tokenChecker, async (req, res) => {
 router.put('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     let validFields = ["name", "surname", "password", "email"]
-    req.body.forEach((field) => {
+    for (let field in req.body) {
         if(!validFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
         }
-    })
+    }
     if (req.body["password"]) {
         req.body["password"] = await bcrypt.hash(req.body["password"], stage.saltingRounds)
     }

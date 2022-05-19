@@ -1,12 +1,12 @@
 async function createInsertion() {
-    
+
     function convertToISO(date) {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
-        date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0]  + "T" +  splitDate[1]
+        date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
         return date + ":00+01:00"
     }
-    
+
     console.log("Creazione inserzione")
     const id = $("#parkId").text()
     const name = $("#insertion-name").val()
@@ -76,6 +76,7 @@ async function loadDetails() {
             $("#parkingCity").text(data.city)
             $("#parkingCountry").text(data.country)
             $("#parkingId").text(data._id)
+            $("#lblVisible").text(data.visible ? "Sì" : "No")
             $("#newInsertion").attr("data-bs-name", `${data.name}`);
             $("#newInsertion").attr("data-bs-id", `${data._id}`);
         }
@@ -100,7 +101,7 @@ async function getMyInsertions() {
         // fetch the user from the database
         const id = $('#parkingId').html()
         console.log(id)
-        console.log("req" +  `/api/v1/parkings/${id}/insertions`)
+        console.log("req" + `/api/v1/parkings/${id}/insertions`)
         const res = await fetch(`/api/v1/parkings/${id}/insertions`, {
             method: "GET",
         })
@@ -113,20 +114,58 @@ async function getMyInsertions() {
         if (data) {
             //console.log(data)
             const container = $('#insertionContainer')
+            container.children().not(":first").remove()
             const insertionHTML = $('#firstInsertion')
             for (insertion in data.insertions) {
                 tmpInsHTML = insertionHTML.clone()
                 tmpInsHTML.removeAttr("hidden")
                 $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion].name)
                 $(tmpInsHTML.find("p")[1]).text(data.insertions[insertion]._id)
-                $(tmpInsHTML.find("button")[0]).attr("onclick",`detailInsertion('${data.insertions[insertion]._id}')`);
-                container.append(tmpInsHTML)   
+                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${data.insertions[insertion]._id}')`);
+                container.append(tmpInsHTML)
             }
         }
 
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
+        //alert("Wrong email or password");
+    }
+}
+
+async function toggleVisible() {
+    // get the values from the form
+    //const identifier = $("#identifier").val()
+    //const password = $("#password").val()
+    console.log("toggling visible")
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has("id")) {
+            throw { message: "id not in URL" }
+        }
+        const lblVisible = $("#lblVisible").text()
+        // fetch the user from the database
+        const res = await fetch(`/api/v1/parkings/${urlParams.get('id')}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                visible: lblVisible === "Sì" ? false : true
+            })
+        })
+        data = await res.json()
+
+        if (!res.ok)
+            throw data
+
+        console.log("data", data)
+        if (data) {
+            $("#lblVisible").text(data.visible ? "Sì" : "No")
+            $("#btnVisible").removeClass(data.visible ? "btn-danger" : "btn-success")
+            $("#btnVisible").addClass(data.visible ? "btn-success" : "btn-danger")
+        }
+
+    } catch (err) {
+        console.log(err.message)
         //alert("Wrong email or password");
     }
 }
@@ -156,7 +195,7 @@ tempusDominus.loadLocale(tempusDominus.locales.it);
 tempusDominus.locale(tempusDominus.locales.it.name);
 // date time
 const linkedPicker1Element = document.getElementById('linkedPickers1');
-const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);  
+const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
 //linked1.locale(localization)
 linked1.updateOptions({
     restrictions: {
@@ -199,6 +238,6 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
 
 async function main() {
     await loadDetails()
-    await getMyInsertions()   
+    await getMyInsertions()
 }
 main()

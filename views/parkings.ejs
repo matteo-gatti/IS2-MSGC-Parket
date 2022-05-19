@@ -29,7 +29,13 @@
       /* GLOBAL STYLES
 -------------------------------------------------- */
       /* Padding below the footer and lighter body text */
-
+      .card-img-top {
+    width: 100%;
+    height: 25vw;
+    object-fit: cover;
+}
+      
+      
       body {
         padding-top: 3rem;
         padding-bottom: 3rem;
@@ -139,7 +145,12 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="parkContainer">
             <div class="col" id="firstPark" hidden>
                 <div class="card shadow-sm">
-                  <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+                  <img style="vertical-align:middle"
+                  class="card-img-top img-fluid imgPark"
+                  width="500"
+                  height="500"
+                  src="https://via.placeholder.com/500x500"
+                >
                   <div class="card-body">
                     <p class="card-text parkName"></p>
                     <p class="card-text parkDesc"></p>
@@ -150,7 +161,6 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
                         <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
                       </div>
-                      <small class="text-muted">9 mins</small>
                     </div>
                   </div>
                 </div>

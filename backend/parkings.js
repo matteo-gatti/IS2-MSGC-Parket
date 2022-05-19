@@ -3,7 +3,7 @@ import path from 'path'
 import Parking from './models/parking.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 import User from './models/user.js'
-import { runInNewContext } from 'vm'
+
 import multer from 'multer'
 
 const storage = multer.diskStorage({
@@ -44,8 +44,9 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
     let parking = new Parking(bodyJSON)
     
     // set the owner of the parking to the logged in user
-    parking.owner = '/api/v1/users/' + req.loggedInUser.userId
     try {
+        let user = await User.findById(req.loggedInUser.userId)
+        parking.owner = user
         console.log("Printing new parking", parking)
         let newParking = await parking.save()
 
@@ -54,13 +55,12 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         newParking = await newParking.save()
 
         // add reference into the user object
-        let user = await User.findById(req.loggedInUser.userId)
         user.parkings.push(newParking) //'/api/v1/parkings/' + 
         await user.save()
 
         // link to the newly created resource is returned in the location header
         res.location('/api/v1/parkings/' + parkingId).status(200).send()
-    } catch(err) {
+    } catch (err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
@@ -73,26 +73,25 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            const user = await User.findById(idUser).populate("parkings")
-
+            const user = await User.findById(idUser, { username: 0, password: 0, name: 0, surname: 0, email: 0, _id: 0, __v: 0 }).populate("parkings", { __v: 0, owner: 0 })
+            /* console.log(req.params)
+            const parkings = await Parking.find() */
             return res.status(200).json(user)
         } catch (err) {
             console.log(err)
-            return res.status(404).send({ message: 'Parkings not found' })
+            return res.status(404).send({ message: 'User not found' })
         }
-        
     }
-    
 })
 
 // Get a parking
 router.get('/:parkingId', async (req, res) => {
     try {
         console.log("Printing parking", req.params.parkingId)
-        const parking = await Parking.findById(req.params.parkingId)
+        const parking = await Parking.findById(req.params.parkingId, { __v: 0 })
         return res.status(200).json(parking)
     } catch (err) {
-        console.log(err)
+        console.log(err) //wewe
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
@@ -101,29 +100,32 @@ router.get('/:parkingId', async (req, res) => {
 router.get('', async (req, res) => {
     try {
         console.log(req.params)
-        const parkings = await Parking.find()
+        const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)
-        return res.status(404).send({ message: 'Parkings not found' })
+        return res.status(500).send({ message: 'Unexpected error' })
     }
 })
 
 // Modify a parking
 router.put('/:parkingId', tokenChecker, async (req, res) => {
-    // if user is trying to change the parking's owner, return error
-    if (req.body["owner"]) {
-        return res.status(400).send({ message: "Owner cannot be updated"} )
+    let validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+    for (let field in req.body) {
+        if (!validFields.includes(field)) {
+            return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+        }
     }
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
-        let parkingOwner = parking.owner
+        let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
         if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
+        //TODO basta mettere update senza sta colonna di if orrida
         if (req.body.name) parking.name = req.body.name
         if (req.body.address) parking.address = req.body.address
         if (req.body.city) parking.city = req.body.city
@@ -132,8 +134,10 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
         if (req.body.image) parking.image = req.body.image
         if (req.body.latitude) parking.latitude = req.body.latitude
         if (req.body.longitude) parking.longitude = req.body.longitude
+        if (req.body.visible != null) parking.visible = req.body.visible
 
-        let updatedParking = await parking.save()
+        const updatedParking = await parking.save()
+        console.log("upd", updatedParking)
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)

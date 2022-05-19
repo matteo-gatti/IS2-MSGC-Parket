@@ -31,9 +31,9 @@ router.post('/login', async (req, res) => {
 
 // Route to deauthenticate a user (POST http://localhost:port/api/v1/deauth)
 router.post('/logout', async(req, res) => {
-    console.log("LOGGING OUT")
+    console.log("Logging out")
     const token = jwt.sign({userId: "ciao"}, process.env.SUPER_SECRET, {
-        expiresIn: 0 // expires in 1 second
+        expiresIn: 0 // expires in 0 seconds
     })
     console.log("New token: " + token)
     res.status(200).send({ auth: false, token: token })

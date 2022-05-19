@@ -7,8 +7,8 @@ const parkingSchema = new Schema({
         trim: 'true'
     },
     owner: {
-        type: 'String',
-        trim: true,
+        type: Schema.Types.ObjectId,
+        ref: "User",
         immutable: true,
     },
     name: {
@@ -48,6 +48,14 @@ const parkingSchema = new Schema({
         type: 'Number',
         trim: true,
     },
+    visible: {
+        type: 'Boolean',
+        default: true
+    },
+    insertions: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Insertion',
+    }],
 })
 
 export default mongoose.model('Parking', parkingSchema)

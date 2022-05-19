@@ -14,7 +14,7 @@ const stage = config[environment]
 
 function checkUserAuthorization(req, res) {
     if (req.loggedInUser.userId !== req.params.userId) {
-        res.status(403).send({message: 'User is not authorized to do this action'})
+        res.status(403).send({ message: 'User is not authorized to do this action' })
         return false
     }
     return true
@@ -23,9 +23,10 @@ function checkUserAuthorization(req, res) {
 router.post('', async (req, res) => {
     console.log("Printing new user", req.body)
     const user = new User(req.body)
+    user.self = "/api/v1/users/" + user.id
     // if password is not provided, return error
     if (!req.body.password) {
-        return res.status(400).send({message: 'Password is required'})
+        return res.status(400).send({ message: 'Password is required' })
     }
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
     try {
@@ -33,8 +34,7 @@ router.post('', async (req, res) => {
         let userId = newUser._id
         // link to the newly created resource is returned in the location header
         return res.location('/api/v1/users/' + userId).status(200).send()
-    } catch(err) {
-        console.log("our", err)
+    } catch (err) {
         if (err.code === 11000) {
             return res.status(409).json({ message: "Username or email already exists" })
         }
@@ -57,16 +57,19 @@ router.get('/:userId', tokenChecker, async (req, res) => {
 
 router.put('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
-    if(req.body["username"]) {
-        return res.status(400).send({ message: "Username cannot be updated"} )
+    let validFields = ["name", "surname", "password", "email"]
+    for (let field in req.body) {
+        if(!validFields.includes(field)) {
+            return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+        }
     }
-    if(req.body["password"]) {
+    if (req.body["password"]) {
         req.body["password"] = await bcrypt.hash(req.body["password"], stage.saltingRounds)
     }
-    try {   
+    try {
         await User.findByIdAndUpdate(req.params.userId, req.body, { runValidators: true })
-        return res.status(200).send({ message: 'Update successful'})
-    } catch(err) {
+        return res.status(200).send({ message: 'Update successful' })
+    } catch (err) {
         console.log(err)
         if (err.code === 11000) {
             return res.status(409).send({ message: "Email is already in use" })
@@ -81,7 +84,7 @@ router.delete('/:userId', tokenChecker, async (req, res) => {
         await User.findByIdAndDelete((req.params.userId))
         return res.status(200).send({ message: 'User deleted' })
     } catch {
-        return res.status(404).send({ message: 'User not found'})
+        return res.status(404).send({ message: 'User not found' })
     }
 })
 

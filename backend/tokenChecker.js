@@ -7,15 +7,15 @@ const tokenChecker = (req, res, next) => {
     // decode token
     if (!token) {
         // if there is no token
-        res.status(401).send({ auth: false, message: 'No token provided.' })
+        res.status(401).send({ auth: false, message: 'Token missing or invalid' })
     } else {
         // verifies secret and checks exp
         jwt.verify(token, process.env.SUPER_SECRET, (err, decoded) => {
             if (err) {
-                res.status(500).send({ auth: false, message: 'Failed to authenticate token.' })
+                res.status(401).send({ auth: false, message: 'Token missing or invalid' })
             } else {
                 // if everything is good, save to request for use in other routes
-                req.loggedInUser = decoded
+                req.loggedInUser = decoded 
                 next()
             }
         })

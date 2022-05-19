@@ -2,14 +2,20 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import { users } from './users.js'
 import { parkings } from './parkings.js'
+import { insertions } from './insertions.js'
 import authentication from './authentication.js'
 import tokenChecker from './tokenChecker.js'
 import statics from './statics.js'
+import cors from 'cors'
+//tentativo immagini
+
 
 const app = express()
 
 app.use(express.json({limit: '100mb'}))
 app.use(cookieParser())
+app.use(cors())
+
 app.set('view engine', 'ejs');
 // Serve static files
 app.use('/', statics)
@@ -17,12 +23,10 @@ app.use('/', statics)
 // Authentication routing and middleware
 app.use('/api/v1/auth', authentication)
 
-// Protect endpoints with JWT
-// TODO: add something like app.use('/api/v1/', tokenChecker)
-
 // Resource routes
 app.use('/api/v1/users', users)
 app.use('/api/v1/parkings', parkings)
+app.use('/api/v1/parkings', insertions)
 
 // Default route
 app.all('*', (req, res) => {res.redirect('/') })

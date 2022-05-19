@@ -46,7 +46,7 @@ router.get('/myParkings', tokenValid, async (req, res) => {
             return res.status(200).json(user)
         } catch (err) {
             console.log(err)
-            return res.status(404).send({ message: 'Parkings not found' })
+            return res.status(404).send({ message: 'User not found' })
         }
     }
 })
@@ -58,7 +58,7 @@ router.get('/:parkingId', async (req, res) => {
         const parking = await Parking.findById(req.params.parkingId, {__v: 0})
         return res.status(200).json(parking)
     } catch (err) {
-        console.log(err)
+        console.log(err) //wewe
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
@@ -71,16 +71,18 @@ router.get('', async (req, res) => {
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)
-        return res.status(404).send({ message: 'Parkings not found' })
+        return res.status(500).send({ message: 'Unexpected error' })
     }
 })
 
 // Modify a parking
 router.put('/:parkingId', tokenChecker, async (req, res) => {
-    // if user is trying to change the parking's owner, return error
-    if (req.body["owner"]) {
-        return res.status(400).send({ message: "Owner cannot be modified" })
-    }
+    let validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude"]
+    req.body.forEach((field) => {
+        if(!validFields.includes(field)) {
+            return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+        }
+    })
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
@@ -89,7 +91,7 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
         if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
-
+        //TODO basta mettere update senza sta colonna di if orrida
         if (req.body.name) parking.name = req.body.name
         if (req.body.address) parking.address = req.body.address
         if (req.body.city) parking.city = req.body.city

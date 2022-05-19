@@ -23,6 +23,9 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         
         for(const resv of req.body.reservations) {
             let reservation = new Reservation()
+            if( (new Date(resv.datetimeStart)) >= (new Date(resv.datetimeEnd)) || (new Date(resv.datetimeStart)) < Date.now()) {
+                return res.status(400).send({ message: "Date fields are invalid" })
+            } 
             reservation.datetimeStart = resv.datetimeStart
             reservation.datetimeEnd = resv.datetimeEnd
             reservation.insertion = insertion
@@ -43,11 +46,12 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id ).status(201).send()
     } catch(err) {
         console.log(err)
-        return res.status(400).send({ message: "Some fields are empty or undefined" })
+        if (err.name === "ValidationError") {
+            return res.status(400).send({ message: "Some fields are empty or undefined" })
+        }
+        return res.status(404).send({ message: "Parking or owner not found" })
     }
 })
-
-
 
 // Get an insertion of the parking
 router.get('/:parkId/insertions/:insertionId', async (req, res) => {
@@ -125,6 +129,5 @@ router.delete('/:parkId/insertions/:insertionId', tokenChecker, async (req, res)
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
-
 
 export { router as insertions }

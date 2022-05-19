@@ -1,15 +1,48 @@
 import express from 'express'
-
+import path from 'path'
 import Parking from './models/parking.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 import User from './models/user.js'
 
+import multer from 'multer'
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "static/uploads")
+    },
+    filename: (rew, file, cb) => {
+        console.log(file)
+        cb(null, ""+  Date.now() + ".png")
+    }
+})
+const upload = multer({storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
+            cb(null, true);
+        } else {
+            cb(null, false);
+            //return cb('Only .png, .jpg and .jpeg format allowed!');
+        }
+    }
+})
+
 const router = express.Router()
 
+// Create a new parking, pass through token and upload middlewares
+router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
+   //caricare immagine? 
+   //salvataggio il percorso
+    //console.log(await JSON.parse(req.body["json"]))
+    if(!req.file) {
+        return res.status(415).send({ message: 'Wrong file type for images' })
+    }
+    
+    let bodyJSON = await JSON.parse(req.body["json"])
+    bodyJSON.image = "uploads/"+ req.file["filename"]
+    console.log("IMMMAGINE", bodyJSON.image)
 
-// Create a new parking
-router.post('', tokenChecker, async (req, res) => {
-    let parking = new Parking(req.body)
+    let parking = new Parking(bodyJSON)
+    
     // set the owner of the parking to the logged in user
     try {
         let user = await User.findById(req.loggedInUser.userId)
@@ -36,7 +69,7 @@ router.post('', tokenChecker, async (req, res) => {
 // Get all parkings of the requester
 router.get('/myParkings', tokenValid, async (req, res) => {
     if (!isAuthToken(req)) {
-        res.redirect("/login")
+        res.status(401).send({ message: 'Token missing or invalid' })
     } else {
         try {
             const idUser = req.loggedInUser.userId

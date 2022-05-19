@@ -91,7 +91,7 @@ router.get('/:parkingId', async (req, res) => {
         const parking = await Parking.findById(req.params.parkingId, { __v: 0 })
         return res.status(200).json(parking)
     } catch (err) {
-        console.log(err) //wewe
+        console.log(err)
         return res.status(404).send({ message: 'Parking not found' })
     }
 })

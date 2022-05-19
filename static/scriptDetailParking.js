@@ -77,6 +77,9 @@ async function loadDetails() {
             $("#parkingCountry").text(data.country)
             $("#parkingId").text(data._id)
             $("#lblVisible").text(data.visible ? "Sì" : "No")
+            console.log("IMG", data.image)
+            if (data.image != "")
+                $('#parkingImage').attr("src", data.image)
             $("#newInsertion").attr("data-bs-name", `${data.name}`);
             $("#newInsertion").attr("data-bs-id", `${data._id}`);
         }

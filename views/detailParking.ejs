@@ -42,6 +42,13 @@ crossorigin="anonymous"></script>
       //$(footer).load("footer.html")
     });
   </script>
+  <style>
+      .imgDetail {
+            width: 80%;
+            height: 33vw;
+            object-fit: cover;
+      }
+    </style>
 </head>
 <body>
   <%- include("header.ejs", {logged: logged}) %>
@@ -60,12 +67,10 @@ crossorigin="anonymous"></script>
       <div class="row">
         <div class="col-md-7">
           <img
-            class="img-fluid"
+            class="img-fluid imgDetail"
             id="parkingImage"
             src="https://via.placeholder.com/700x500"
             alt="Parking image"
-            width="700"
-            height="500"
           />
         </div>
 
@@ -81,16 +86,21 @@ crossorigin="anonymous"></script>
           Descrizione:
           <h5 id="parkingDesc"></h5>
 
+          
+          <% if (owner) { %>
           <btn class="btn btn-lg btn-success mt-auto mx-auto" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
+          <% } %>
 
         </div>
       </div>
       <!-- /.row -->
       <hr />
-
+      
       <!-- Related Projects Row -->
       <h3 class="my-4">Inserzioni</h3>
+      <% if (owner) { %>
       <btn class="btn btn-lg btn-primary mb-3" id="newInsertion" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-name="" data-bs-id="">Nuova Inserzione</btn>
+      <% } %>
       <div class="row">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 col-md-11" id="insertionContainer">
           <div class="col" id="firstInsertion" hidden>
@@ -110,6 +120,7 @@ crossorigin="anonymous"></script>
       </div>
       <div class="col-md-1"></div>
     </div>
+    
 
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">

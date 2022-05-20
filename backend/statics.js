@@ -1,6 +1,7 @@
 import express from 'express'
 
 import { tokenValid, isAuthToken } from './tokenChecker.js'
+import Parking from './models/parking.js'
 
 const router = express.Router()
 
@@ -41,10 +42,15 @@ router.get('/createParking', tokenValid, function(req, res){
         res.redirect("/login")
 })
 
-router.get('/detailParking', tokenValid, function(req, res){
+router.get('/detailParking', tokenValid, async function(req, res){
     if(isAuthToken(req)){
-        console.log("richiesta pagina dettaglio")
-        res.render('./detailParking.ejs', {logged: true})
+        let parking = await Parking.findById(req.query.id).populate("owner")
+        if(req.loggedInUser.userId !== parking.owner.id) {
+            res.render('./detailParking.ejs', {logged: true, owner: false})
+            
+        } else {
+            res.render('./detailParking.ejs', {logged: true, owner: true})
+        }
     }
         //res.sendFile('./static/register.html', { root: '.'})
     else

@@ -94,7 +94,8 @@ async function loadDetails() {
 }
 
 function goBack() {
-    window.location.href = "/privateArea"
+    //window.location.href = "/privateArea"
+    history.back()
 }
 
 async function getMyInsertions() {

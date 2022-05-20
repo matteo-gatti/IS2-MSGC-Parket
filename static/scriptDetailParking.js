@@ -24,7 +24,9 @@ async function createInsertion() {
                 reservations: [
                     {
                         "datetimeStart": d1,
-                        "datetimeEnd": d2
+                        "datetimeEnd": d2,
+                        "price": $("#insertion-price").val(),
+                        "currency": $("#insertion-currency").val(),
                     }
                 ]
             }),

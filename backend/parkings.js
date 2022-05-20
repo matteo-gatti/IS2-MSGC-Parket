@@ -30,8 +30,8 @@ const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
 router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
-   //caricare immagine? 
-   //salvataggio il percorso
+    //caricare immagine?
+    //salvataggio il percorso
     //console.log(await JSON.parse(req.body["json"]))
     if(!req.file) {
         return res.status(415).send({ message: 'Wrong file type for images' })
@@ -39,7 +39,7 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
     
     let bodyJSON = await JSON.parse(req.body["json"])
     bodyJSON.image = "uploads/"+ req.file["filename"]
-    console.log("IMMMAGINE", bodyJSON.image)
+    console.log("IMMAGINE", bodyJSON.image)
 
     let parking = new Parking(bodyJSON)
     
@@ -110,8 +110,8 @@ router.get('', async (req, res) => {
 
 // Modify a parking
 router.put('/:parkingId', tokenChecker, async (req, res) => {
-    let validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
-    for (let field in req.body) {
+    const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+    for (const field in req.body) {
         if (!validFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
         }

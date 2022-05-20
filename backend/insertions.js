@@ -4,7 +4,6 @@ import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
 import Parking from './models/parking.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
-import async from 'async'
 
 const router = express.Router()
 
@@ -29,6 +28,8 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
             reservation.datetimeStart = resv.datetimeStart
             reservation.datetimeEnd = resv.datetimeEnd
             reservation.insertion = insertion
+            reservation.price = resv.price
+            reservation.currency = resv.currency
             reservation = await reservation.save()
 
             reservation.self = "/api/v1/reservations/" + reservation.id
@@ -81,53 +82,12 @@ router.get('/:parkId/insertions', async (req, res) => {
 
 //TODO Modify a parking 
 router.put('/:parkId/insertions/:insertionId', tokenChecker, async (req, res) => {
-    // if user is trying to change the parking's owner, return error
-    if (req.body["owner"]) {
-        return res.status(400).send({ message: "Owner cannot be updated"} )
-    }
-    try {
-        const parking = await Parking.findById(req.params.parkingId)
-
-        let parkingOwner = parking.owner
-        // if user is not the owner of the parking, return error
-        if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
-            return res.status(403).send({ message: 'User is not authorized to do this action' })
-        }
-
-        if (req.body.name) parking.name = req.body.name
-        if (req.body.address) parking.address = req.body.address
-        if (req.body.city) parking.city = req.body.city
-        if (req.body.country) parking.country = req.body.country
-        if (req.body.description) parking.description = req.body.description
-        if (req.body.image) parking.image = req.body.image
-        if (req.body.latitude) parking.latitude = req.body.latitude
-        if (req.body.longitude) parking.longitude = req.body.longitude
-
-        let updatedParking = await parking.save()
-        return res.status(200).json(updatedParking)
-    } catch (err) {
-        console.log(err)
-        return res.status(404).send({ message: 'Parking not found' })
-    }
+    //TODO  
 })
 
 //TODO Delete a parking
 router.delete('/:parkId/insertions/:insertionId', tokenChecker, async (req, res) => {
-    try {
-        const parking = await Parking.findById(req.params.parkingId)
-
-        let parkingOwner = parking.owner
-        // if user is not the owner of the parking, return error
-        if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
-            return res.status(403).send({ message: 'User is not authorized to do this action' })
-        }
-
-        await parking.remove()
-        return res.status(200).send({ message: 'Parking deleted' })
-    } catch (err) {
-        console.log(err)
-        return res.status(404).send({ message: 'Parking not found' })
-    }
+    //TODO
 })
 
 export { router as insertions }

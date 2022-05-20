@@ -49,7 +49,16 @@ router.get('/detailParking', tokenValid, function(req, res){
         //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/login")
-})
+    })
+    
+    
+router.get('/publicParkings', tokenValid, function(req, res){
+        let loggedBool = false
+        if(isAuthToken(req))
+            loggedBool = true
+        res.render('./PublicParkings.ejs', {logged: loggedBool})
+    
+    })
 
 router.get('/', tokenValid, function(req, res){
     let loggedBool = false
@@ -59,6 +68,7 @@ router.get('/', tokenValid, function(req, res){
         //res.sendFile('./static/index.html', { root: '.'})
         //res.sendFile('./static/loggedIn.html', { root: '.'})
 })
+
 
 //router.all('/*', (req, res) => {res.redirect('/') })
 

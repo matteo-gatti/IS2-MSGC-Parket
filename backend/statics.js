@@ -41,6 +41,15 @@ router.get('/createParking', tokenValid, function(req, res){
         res.redirect("/login")
 })
 
+router.get('/createParkingInsertion', tokenValid, function(req, res){
+    if(isAuthToken(req)){
+        res.render('./newParkFromInsertion.ejs', {logged: true})
+    }
+        //res.sendFile('./static/register.html', { root: '.'})
+    else
+        res.redirect("/login")
+})
+
 router.get('/detailParking', tokenValid, function(req, res){
     if(isAuthToken(req)){
         console.log("richiesta pagina dettaglio")

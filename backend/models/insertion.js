@@ -33,6 +33,10 @@ const insertionSchema = new Schema({
     },
     priceDaily: {
         type: 'Number',
+    },
+    minInterval: {
+        type: 'Number',
+        default: 10
     }
 })
 

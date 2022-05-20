@@ -149,74 +149,89 @@ crossorigin="anonymous"></script>
 
                 <!-- dt picker -->
 
-                  <div class='row mb-3'>
-                    <div class='col-sm-6'>
-                      <label for='linkedPickers1Input' class='form-label'>Da:</label>
-                      <div
-                      class='input-group log-event'
-                      id='linkedPickers1'
-                      data-td-target-input='nearest'
-                      data-td-target-toggle='nearest'
-                      >
-                      <input
-                        id='linkedPickers1Input'
-                        type='text'
-                        class='form-control'
-                        data-td-target='#linkedPickers1'
-                      />
-                      <span
-                        class='input-group-text'
-                        data-td-target='#linkedPickers1'
-                        data-td-toggle='datetimepicker'
-                      >
-                        <span class='fa-solid fa-calendar'></span>
-                      </span>
-                      </div>
-                    </div>
-                    <div class='col-sm-6'>
-                      <label for='linkedPickers2Input' class='form-label'>A:</label>
-                      <div
-                      class='input-group log-event'
-                      id='linkedPickers2'
-                      data-td-target-input='nearest'
-                      data-td-target-toggle='nearest'
-                      >
-                      <input
-                        id='linkedPickers2Input'
-                        type='text'
-                        class='form-control'
-                        data-td-target='#linkedPickers2'
-                      />
-                      <span
-                        class='input-group-text'
-                        data-td-target='#linkedPickers2'
-                        data-td-toggle='datetimepicker'
-                      >
-                        <span class='fa-solid fa-calendar'></span>
-                      </span>
-                      </div>
+                <div class='row mb-3'>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers1'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers1Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers1'
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers1'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
                     </div>
                   </div>
-
-              <!-- Insert price -->
-              <div class="row">
-                <div class="mb-3">
-                  <label for="price" class="form-label">Prezzo:</label>
-                  <input type="number" class="form-control" id="insertion-price">
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers2Input' class='form-label'>A:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers2'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers2Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers2'
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers2'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
                 </div>
-              
-                <!-- Insert currency -->
+                <!-- Insert price -->
+                <div class="row">
+                  <div class='col-sm-6'>
+                    <!-- Insert hourly price -->
+                    <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">€</span>
+                      </div>
+                      <input type="number" min="0" class="form-control" id="insertion-hourlyPrice">
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <!-- Insert daily price -->
+                    <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
+                    <div class="mb-3">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">€</span>
+                        </div>
+                      <input type="number" min="0" class="form-control" id="insertion-dailyPrice">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Insert min interval of reservation -->
+                <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
                 <div class="mb-3">
-                  <label for="currency" class="form-label">Valuta:</label>
-                  <select class="form-control" id="insertion-currency">
-                    <option value="EUR">EUR</option>
-                    <option value="USD">USD</option>
-                  </select>
+                  <div class="mb-3 input-group">
+                  <input type="number" min="0" class="form-control" id="insertion-minInterval">
+                  <div class="input-group-append">
+                    <span class="input-group-text">min</span>
+                  </div>
                 </div>
               </div>
-
-              <!-- end dt picker -->
-                
               </form>
             </div>
             <div class="modal-footer">

@@ -51,7 +51,7 @@ router.get('/createParkingInsertion', tokenValid, function(req, res){
         res.redirect("/login")
 })
 
-router.get('/detailParking', tokenValid, function(req, res){
+router.get('/detailParking', tokenValid, async function(req, res){
     if(isAuthToken(req)){
         let parking = await Parking.findById(req.query.id).populate("owner")
         if(req.loggedInUser.userId !== parking.owner.id) {

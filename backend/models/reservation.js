@@ -25,7 +25,16 @@ const reservationSchema = new Schema({
     datetimeEnd: {
         type: 'Date',
         required: true
-    }
+    },
+    price: {
+        type: 'Number',
+        required: true,
+    },
+    currency: {
+        type: 'String',
+        required: true,
+        trim: true,
+    },
 })
 
 export default mongoose.model('Reservation', reservationSchema)

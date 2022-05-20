@@ -20,12 +20,9 @@ async function createParking() {
     }))
 
     try {
-        
-        //inserisco foto.. stringa di uri,
 
         const res = await fetch("../api/v1/parkings", {
             method: "POST",
-            //headers: { "Content-Type": "application/json" },
             body: formData
         })
 
@@ -36,8 +33,7 @@ async function createParking() {
             window.location.href = "/privateArea"
         }
 
-        //if()
-          //  console.log("ciao mamma")
+
     } catch (err) {
         console.log("ERROR", err)
         let msg

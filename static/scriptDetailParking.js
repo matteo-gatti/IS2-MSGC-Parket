@@ -7,7 +7,26 @@ async function createInsertion() {
         return date + ":00+01:00"
     }
 
-    console.log("Creazione inserzione")
+    console.log("Creazione inserzione") 
+
+    // show error if the min interval is lower than 0
+    if ($("#insertion-minInterval").val() < 0) {
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        return
+    }
+
+    // check price format
+    if (!$("#insertion-hourlyPrice").val().match(/^\d/)) {
+        $("#message").text("Prezzo non valido")
+        return
+    }
+
+    // check price format
+    if (!$("#insertion-dailyPrice").val().match(/^\d/)) {
+        $("#message").text("Prezzo non valido")
+        return
+    }
+
     const id = $("#parkId").text()
     const name = $("#insertion-name").val()
     let d1 = $("#linkedPickers1Input").val()
@@ -21,14 +40,11 @@ async function createInsertion() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 name: name,
-                reservations: [
-                    {
-                        "datetimeStart": d1,
-                        "datetimeEnd": d2,
-                        "price": $("#insertion-price").val(),
-                        "currency": $("#insertion-currency").val(),
-                    }
-                ]
+                datetimeStart: d1,
+                datetimeEnd: d2,
+                priceHourly: $("#insertion-hourlyPrice").val(),
+                priceDaily: $("#insertion-dailyPrice").val(),
+                minInterval: $("#insertion-minInterval").val(),
             }),
         })
         console.log(res)

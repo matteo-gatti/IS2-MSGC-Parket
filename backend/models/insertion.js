@@ -11,6 +11,14 @@ const insertionSchema = new Schema({
         trim: true,
         required: true
     },
+    datetimeStart: {
+        type: 'Date',
+        required: true
+    },
+    datetimeEnd: {
+        type: 'Date',
+        required: true
+    },
     reservations: [{
         type: Schema.Types.ObjectId,
         ref: 'Reservation',
@@ -18,6 +26,17 @@ const insertionSchema = new Schema({
     parking: {
         type: Schema.Types.ObjectId,
         ref: 'Parking'
+    },
+    priceHourly: {
+        type: 'Number',
+        required: true,
+    },
+    priceDaily: {
+        type: 'Number',
+    },
+    minInterval: {
+        type: 'Number',
+        default: 10
     }
 })
 

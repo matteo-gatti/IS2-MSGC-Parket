@@ -47,3 +47,8 @@ function detailParking(id) {
     window.location.href = "/detailParking?id=" + id
     console.log(window.location.href)
 }
+
+function newParkingFromInsertion()
+{
+    window.location.href = "/createParkingInsertion"
+}

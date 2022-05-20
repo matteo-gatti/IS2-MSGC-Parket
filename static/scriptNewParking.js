@@ -1,4 +1,3 @@
-
 async function createParking() {
     var name = $("#nome").val();
     var address = $("#indirizzo").val();

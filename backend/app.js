@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser'
 import { users } from './users.js'
 import { parkings } from './parkings.js'
 import { insertions } from './insertions.js'
+import { reservations } from './reservations.js'
 import authentication from './authentication.js'
 import tokenChecker from './tokenChecker.js'
 import statics from './statics.js'
@@ -27,6 +28,7 @@ app.use('/api/v1/auth', authentication)
 app.use('/api/v1/users', users)
 app.use('/api/v1/parkings', parkings)
 app.use('/api/v1/parkings', insertions)
+app.use('/api/v1/insertions', reservations)
 
 // Default route
 app.all('*', (req, res) => {res.redirect('/') })

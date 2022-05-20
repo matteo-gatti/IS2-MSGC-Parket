@@ -11,31 +11,22 @@ const router = express.Router()
 router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
     try {
         let parking = await Parking.findById(req.params.parkId).populate("owner")
+
+        // check if the user is the owner of the parking
         if(req.loggedInUser.userId !== parking.owner.id) {
             return res.status(403).send({ message: "User is not authorized to perform this action" })
         }
+
+        // create the insertion
         let insertion = new Insertion()
         insertion.name = req.body.name
-        
         insertion.parking = parking
-        insertion = await insertion.save()
+        insertion.datetimeStart = req.body.datetimeStart
+        insertion.datetimeEnd = req.body.datetimeEnd
+        insertion.priceHourly = req.body.priceHourly
+        if(req.body.priceDaily) insertion.priceDaily = req.body.priceDaily
         
-        for(const resv of req.body.reservations) {
-            let reservation = new Reservation()
-            if( (new Date(resv.datetimeStart)) >= (new Date(resv.datetimeEnd)) || (new Date(resv.datetimeStart)) < Date.now()) {
-                return res.status(400).send({ message: "Date fields are invalid" })
-            } 
-            reservation.datetimeStart = resv.datetimeStart
-            reservation.datetimeEnd = resv.datetimeEnd
-            reservation.insertion = insertion
-            reservation.price = resv.price
-            reservation.currency = resv.currency
-            reservation = await reservation.save()
-
-            reservation.self = "/api/v1/reservations/" + reservation.id
-            reservation = await reservation.save()
-            insertion.reservations.push(reservation)
-        }
+        insertion = await insertion.save()
 
         insertion.self = "/api/v1/parkings/" + req.params.parkId + "/insertions/" + insertion.id
         insertion = await insertion.save()
@@ -58,7 +49,6 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
 router.get('/:parkId/insertions/:insertionId', async (req, res) => {
     try {
         let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0, parking: 0}).populate("reservations", {_id: 0, __v:0, insertion: 0}).populate("reservations.client")
-
         console.log(insertion)
         return res.status(200).json(insertion)
     } catch(err) {

@@ -6,10 +6,6 @@ const reservationSchema = new Schema({
         type: 'String',
         trim: 'true'
     },
-    booked: {
-        type: 'Boolean',
-        default: false
-    },
     client: {
         type: Schema.Types.ObjectId,
         ref: 'User'
@@ -29,11 +25,6 @@ const reservationSchema = new Schema({
     price: {
         type: 'Number',
         required: true,
-    },
-    currency: {
-        type: 'String',
-        required: true,
-        trim: true,
     },
 })
 

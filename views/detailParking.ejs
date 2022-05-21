@@ -35,13 +35,6 @@ crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
   rel="stylesheet" crossorigin="anonymous">
   <script src="scriptDetailParking.js" defer></script>
-  <script>
-    //carichiamo header e footer
-    $(function () {
-      //$(header).load("header.html")
-      //$(footer).load("footer.html")
-    });
-  </script>
   <style>
       .imgDetail {
             width: 80%;
@@ -51,7 +44,7 @@ crossorigin="anonymous"></script>
     </style>
 </head>
 <body>
-  <%- include("header.ejs", {logged: logged}) %>
+  <%- include("./header.ejs", {logged: logged}) %>
   <!-- Page Content -->
   <div class="row">
     <div class="col-md-2">
@@ -129,14 +122,21 @@ crossorigin="anonymous"></script>
               <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <!-- Checkbox for recurrence or non recurrence -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
+              <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
+            </div>
+            <div class="modal-body" id="non-recurrent-form">
               <form>
+
                 <div class="mb-3">
                   <label id="message" class="text-danger d-block"></label>
                   <label id="parkId" hidden></label>
                   <label for="recipient-name" class="col-form-label">Nome:</label>
                   <input type="text" class="form-control" id="insertion-name">
                 </div>
+
                 <!-- <div class="mb-3">
                   <label for="message-text" class="col-form-label">Message:</label>
                   <textarea class="form-control" id="message-text"></textarea>
@@ -159,10 +159,105 @@ crossorigin="anonymous"></script>
                 </section> -->
 
                 <!-- dt picker -->
-
                 <div class='row mb-3'>
                   <div class='col-sm-6'>
                     <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers1'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers1Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers1'
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers1'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers2Input' class='form-label'>A:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers2'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers2Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers2'
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers2'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Insert price -->
+                <div class="row">
+                  <div class='col-sm-6'>
+                    <!-- Insert hourly price -->
+                    <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">€</span>
+                      </div>
+                      <input type="number" min="0" class="form-control" id="insertion-hourlyPrice">
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <!-- Insert daily price -->
+                    <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
+                    <div class="mb-3">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">€</span>
+                        </div>
+                      <input type="number" min="0" class="form-control" id="insertion-dailyPrice">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Insert min interval of reservation -->
+                <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
+                <div class="mb-3">
+                  <div class="mb-3 input-group">
+                    <input type="number" min="0" class="form-control" id="insertion-minInterval">
+                    <div class="input-group-append">
+                      <span class="input-group-text">min</span>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="modal-body" id="recurrent-form">
+              <form>
+                <div class="mb-3">
+                  <label id="message" class="text-danger d-block"></label>
+                  <label id="parkId" hidden></label>
+                  <label for="recipient-name" class="col-form-label">Nome:</label>
+                  <input type="text" class="form-control" id="insertion-name">
+                </div>
+                <!-- dt picker -->
+                <div class='row mb-3'>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers1Input' class='form-label'>Valido da:</label>
                     <div
                     class='input-group log-event'
                     id='linkedPickers1'
@@ -232,19 +327,20 @@ crossorigin="anonymous"></script>
                     </div>
                   </div>
                 </div>
-                
                 <!-- Insert min interval of reservation -->
                 <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
                 <div class="mb-3">
                   <div class="mb-3 input-group">
-                  <input type="number" min="0" class="form-control" id="insertion-minInterval">
-                  <div class="input-group-append">
-                    <span class="input-group-text">min</span>
+                    <input type="number" min="0" class="form-control" id="insertion-minInterval">
+                    <div class="input-group-append">
+                      <span class="input-group-text">min</span>
+                    </div>
                   </div>
                 </div>
-              </div>
               </form>
             </div>
+            </div>
+
             <div class="modal-footer">
               <button type="button" id="close-modal" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
               <button type="button" id="create-insertion" onclick="createInsertion()" class="btn btn-primary">Crea inserzione</button>

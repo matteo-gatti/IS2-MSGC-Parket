@@ -34,6 +34,26 @@ async function createInsertion() {
 
     d1 = convertToISO(d1)
     d2 = convertToISO(d2)
+
+    // TODO: da controllare
+    // convert days in array
+    const days = []
+    if ($("#insertion-monday").prop("checked"))
+        days.push("monday")
+    if ($("#insertion-tuesday").prop("checked"))
+        days.push("tuesday")
+    if ($("#insertion-wednesday").prop("checked"))
+        days.push("wednesday")
+    if ($("#insertion-thursday").prop("checked"))
+        days.push("thursday")
+    if ($("#insertion-friday").prop("checked"))
+        days.push("friday")
+    if ($("#insertion-saturday").prop("checked"))
+        days.push("saturday")
+    if ($("#insertion-sunday").prop("checked"))
+        days.push("sunday")
+    // TODO: da controllare
+
     try {
         const res = await fetch(`../api/v1/parkings/${id}/insertions`, {
             method: "POST",
@@ -45,6 +65,12 @@ async function createInsertion() {
                 priceHourly: $("#insertion-hourlyPrice").val(),
                 priceDaily: $("#insertion-dailyPrice").val(),
                 minInterval: $("#insertion-minInterval").val(),
+                // TODO: da controllare
+                recurrent: $("#insertion-recurrent").is(":checked"),
+                daysOfTheWeek: days,
+                datetimeStartRecurrent: convertToISO($("#insertion-datetimeStartRecurrentInput").val()),
+                datetimeEndRecurrent: convertToISO($("#insertion-datetimeEndRecurrentInput").val()),
+                // TODO: da controllare
             }),
         })
         console.log(res)
@@ -258,8 +284,31 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
     });
 });
 
+// TODO: fa schifo, ma va
+let x 
+function toggleRecurrence() {
+    console.log(x)
+    if(x)
+    {
+        $("#non-recurrent-form").css("visibility", "hidden");
+        $("#recurrent-form").css("visibility", "visible");
+        x= false
+    }
+    else
+    {
+        $("#non-recurrent-form").css("visibility", "visible");
+        $("#recurrent-form").css("visibility", "hidden");
+        x= true
+    }
+}
+// TODO: da controllare
+
 async function main() {
+    x=true
     await loadDetails()
     await getMyInsertions()
+    // TODO: da controllare
+    // TODO: da controllare
+    $("#recurrent-form").css("visibility", "hidden");
 }
 main()

@@ -37,7 +37,25 @@ const insertionSchema = new Schema({
     minInterval: {
         type: 'Number',
         default: 10
-    }
+    },
+    // TODO: da controllare
+    recurrent: {
+        type: 'Boolean',
+        default: false,
+    },
+    daysOfTheWeek: [{
+        type: 'String',
+        enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    }],
+    datetimeStartRecurrent: {
+        type: 'Date',
+        default: null
+    },
+    datetimeEndRecurrent: {
+        type: 'Date',
+        default: null
+    },
+    // TODO: da controllare
 })
 
 export default mongoose.model('Insertion', insertionSchema)

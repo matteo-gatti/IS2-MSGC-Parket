@@ -2,6 +2,7 @@ import express from 'express'
 
 import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
+import user from './models/user.js'
 
 const router = express.Router()
 
@@ -29,6 +30,14 @@ router.get('/privateArea', tokenValid, function(req, res){
         res.render('./parkings.ejs', {logged: true})
     }
         //res.sendFile('./static/register.html', { root: '.'})
+    else
+        res.redirect("/login")
+})
+
+router.get('/userArea', tokenValid, function(req, res){
+    if(isAuthToken(req)){
+        res.render('./userArea.ejs', {logged: true, usr: req.loggedInUser.userId})
+    }
     else
         res.redirect("/login")
 })

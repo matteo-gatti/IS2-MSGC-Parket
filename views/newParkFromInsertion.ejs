@@ -39,9 +39,7 @@ crossorigin="anonymous"></script>
 </head>
 
 <body class="text-center">
-    <div id="header">
         <%- include("header.ejs", { logged: logged }) %>
-    </div>
     <div class="row">
         <div class=" row col"> 
         <div class="col-md-2" ></div>
@@ -193,9 +191,7 @@ crossorigin="anonymous"></script>
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
         <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="createNewInsertionAndParking()">Aggiungi Inserzione e Parcheggio</button>
     </div>
-    <div id="footer">
-        <%- include("footer.ejs") %>
-    </div>
+    <%- include("footer.ejs", {logged: logged}) %>
 
 </body>
 </html>

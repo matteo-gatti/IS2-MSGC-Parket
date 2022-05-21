@@ -42,6 +42,14 @@ router.get('/userArea', tokenValid, function (req, res) {
         res.redirect("/login")
 })
 
+router.get('/insertion', tokenValid, function (req, res) {
+    if (isAuthToken(req)) {
+        res.render('./insertion.ejs', { logged: true })
+    }
+    else
+        res.redirect("/login")
+})
+
 router.get('/createParking', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
         res.render('./newPark.ejs', { logged: true })

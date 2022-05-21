@@ -194,7 +194,7 @@ async function getMyInsertions() {
                 tmpInsHTML.removeAttr("hidden")
                 $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion].name)
                 $(tmpInsHTML.find("p")[1]).text(data.insertions[insertion]._id)
-                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${data.insertions[insertion]._id}')`);
+                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${data.insertions[insertion].self.substring(19, )}')`);
                 container.append(tmpInsHTML)
             }
         }
@@ -420,4 +420,10 @@ async function main() {
     await loadDetails()
     await getMyInsertions()
 }
+
+function detailInsertion(id)
+{
+    window.location.href = `/insertion?insertion=${id}`
+}
+
 main()

@@ -105,13 +105,14 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         let parking = new Parking(bodyJSONParking)
         let insertion = new Insertion(bodyJSONInsertion)
 
+
         console.log("USR ID POSY", req.loggedInUser.userId)
         let user = await User.findById(req.loggedInUser.userId)
         parking.owner = user
         parking = await parking.save()
         insertion = await insertion.save()
 
-        insertion.self = "/api/v1/insertions" + insertion.id
+        insertion.self = "/api/v1/insertions/" + insertion.id
         insertion = await insertion.save()
 
         parking.insertions.push(insertion)

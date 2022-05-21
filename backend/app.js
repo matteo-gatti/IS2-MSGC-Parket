@@ -19,8 +19,6 @@ app.use(cookieParser())
 app.use(cors())
 
 app.set('view engine', 'ejs');
-// Serve static files
-app.use('/', statics)
 
 // Authentication routing and middleware
 app.use('/api/v1/auth', authentication)
@@ -32,13 +30,16 @@ app.use('/api/v1/parkings', insertionsNested)
 app.use('/api/v1/insertions', insertions)
 app.use('/api/v1/insertions', reservations)
 
+app.all( '/api/*', (req, res) => {
+    res.status(404)
+    res.json({ message: 'Not found' })
+})
+
+// Serve static files
+app.use('/', statics)
 // Default route
 //app.all('*', (req, res) => {res.redirect('/') }) //TODO cambiare
 
 // 404 error handler
-app.use((req, res) => {
-    res.status(404)
-    res.json({ message: 'Not found' })
-})
 
 export default app

@@ -1,6 +1,24 @@
 import mongoose from 'mongoose'
 var Schema = mongoose.Schema
 
+const recurrenceSchema = new Schema({
+    daysOfTheWeek: [
+        {
+            type: 'String',
+            enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+            required: true
+        }
+    ],
+    timeStart: {
+        type: 'Date',
+        required: true
+    },
+    timeEnd: {
+        type: 'Date',
+        required: true
+    }
+})
+
 const insertionSchema = new Schema({
     self: {
         type: 'String',
@@ -38,16 +56,14 @@ const insertionSchema = new Schema({
         type: 'Number',
         default: 10
     },
-    // TODO: da controllare
     recurrent: {
         type: 'Boolean',
         default: false,
     },
-    daysOfTheWeek: [{
-        type: 'String',
-        enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-    }],
-    // TODO: da controllare
+    recurrenceData: {
+        type: recurrenceSchema,
+        required: function() {return this.recurrent}
+    }
 })
 
 export default mongoose.model('Insertion', insertionSchema)

@@ -13,13 +13,13 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         let parking = await Parking.findById(req.params.parkId).populate("owner")
 
         // check if the user is the owner of the parking
-        if(req.loggedInUser.userId !== parking.owner.id) {
+        if (req.loggedInUser.userId !== parking.owner.id) {
             return res.status(403).send({ message: "User is not authorized to perform this action" })
         }
 
         // check if the insertion's datetimes are valid
-        if((new Date(req.body.datetimeStart)) >= (new Date(req.body.datetimeEnd)) ) {
-            return res.status(400).send({ message: "Timeslot not valid or not available"})
+        if ((new Date(req.body.datetimeStart)) >= (new Date(req.body.datetimeEnd))) {
+            return res.status(400).send({ message: "Timeslot not valid or not available" })
         }
 
         // create the insertion
@@ -29,29 +29,15 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         insertion.datetimeStart = req.body.datetimeStart
         insertion.datetimeEnd = req.body.datetimeEnd
         insertion.priceHourly = req.body.priceHourly
-        if(req.body.minInterval) insertion.minInterval = req.body.minInterval
-        if(req.body.priceDaily) insertion.priceDaily = req.body.priceDaily
+        if (req.body.minInterval) insertion.minInterval = req.body.minInterval
+        if (req.body.priceDaily) insertion.priceDaily = req.body.priceDaily
 
-        // TODO: da controllare
         // check if the user wants a recurring insertion
         if (req.body.recurrent == true) {
             insertion.recurrent = true
-            // check if the daysOfTheWeek are present in the request
-            if (!req.body.daysOfTheWeek) {
-                return res.status(400).send({ message: "Days of the week not present in the request" })
-            }
-            // check if the daysOfTheWeek are correct
-            const validDaysOfTheWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-            for (const day in req.body.daysOfTheWeek) {
-                if (!validDaysOfTheWeek.includes(day)) {
-                    return res.status(400).send({ message: "Incorrect format for days of the week" })
-                }
-            }
-            // set the days of the week of the recurrent insertion
-            insertion.daysOfTheWeek = req.body.daysOfTheWeek
+            insertion.recurrenceData = req.body.recurrenceData
         }
-        // TODO: da controllare
-        
+
         insertion = await insertion.save()
 
         insertion.self = "/api/v1/parkings/" + req.params.parkId + "/insertions/" + insertion.id
@@ -61,8 +47,8 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id ).status(201).send()
-    } catch(err) {
+        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id).status(201).send()
+    } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {
             return res.status(400).send({ message: "Some fields are empty or undefined" })
@@ -74,27 +60,27 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
 // Get all the insertions of a parking
 router.get('/:parkId/insertions', async (req, res) => {
     try {
-        let insertion = await Parking.findById(req.params.parkId,  {insertions: 1}).populate({
-                path: "insertions",
-                model: "Insertion",
-                select: { _id: 0, parking: 0, __v: 0 },
-                populate: [{
-                    path: "reservations",
-                    model: "Reservation",
-                    select: {_id: 0, __v: 0, insertion: 0},
-                    populate: {
-                        path: "client",
-                        model: "User",
-                        select: {self: 1}
-                    }
-                }]
+        let insertion = await Parking.findById(req.params.parkId, { insertions: 1 }).populate({
+            path: "insertions",
+            model: "Insertion",
+            select: { _id: 0, parking: 0, __v: 0 },
+            populate: [{
+                path: "reservations",
+                model: "Reservation",
+                select: { _id: 0, __v: 0, insertion: 0 },
+                populate: {
+                    path: "client",
+                    model: "User",
+                    select: { self: 1 }
+                }
+            }]
 
         })
-            //"insertions").populate("insertions.reservations", {_id: 0, __v:0, insertion: 0}).populate("insertions.reservations.client")
+        //"insertions").populate("insertions.reservations", {_id: 0, __v:0, insertion: 0}).populate("insertions.reservations.client")
 
         console.log(insertion)
         return res.status(200).json(insertion)
-    } catch(err) {
+    } catch (err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }

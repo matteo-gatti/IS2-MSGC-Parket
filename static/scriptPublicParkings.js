@@ -30,6 +30,9 @@ async function getAllParkings() {
                 container.append(tmpParkHTML)
 
             }
+            if (data.length === 0) {
+                $('#noParks').removeAttr("hidden")
+            }
         }
 
     } catch (err) {

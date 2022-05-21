@@ -114,7 +114,6 @@ crossorigin="anonymous"></script>
       <div class="col-md-1"></div>
     </div>
     
-
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -122,40 +121,15 @@ crossorigin="anonymous"></script>
               <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <!-- Checkbox for recurrence or non recurrence -->
             <div id="dummy"></div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
-              <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
-            </div>
-            <div class="modal-body" id="non-recurrent-form">
-              <form>
+            <div class="modal-body" id="form">
+              <form id="insertionForm">
                 <div class="mb-3">
                   <label id="message" class="text-danger d-block"></label>
                   <label id="parkId" hidden></label>
                   <label for="recipient-name" class="col-form-label">Nome:</label>
-                  <input type="text" class="form-control" id="insertion-name">
+                  <input type="text" class="form-control" id="insertion-name" required>
                 </div>
-                <!-- <div class="mb-3">
-                  <label for="message-text" class="col-form-label">Message:</label>
-                  <textarea class="form-control" id="message-text"></textarea>
-                </div> -->
-                <!-- <section class="container">
-                  <h2 class="py-2">Datepicker in Bootstrap 5</h2>
-                  <form class="row">
-                    <label for="date" class="col-1 col-form-label">Date</label>
-                    <div class="col-5">
-                      <div class="input-group date" id="datepicker">
-                        <input type="text" class="form-control" id="date"/>
-                        <span class="input-group-append">
-                          <span class="input-group-text bg-light d-block">
-                            <i class="fa fa-calendar"></i>
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </form>
-                </section> -->
                 <!-- dt picker -->
                 <div class='row mb-3'>
                   <div class='col-sm-6'>
@@ -171,6 +145,7 @@ crossorigin="anonymous"></script>
                       type='text'
                       class='form-control'
                       data-td-target='#linkedPickers1'
+                      required
                     />
                     <span
                       class='input-group-text'
@@ -194,6 +169,7 @@ crossorigin="anonymous"></script>
                       type='text'
                       class='form-control'
                       data-td-target='#linkedPickers2'
+                      required
                     />
                     <span
                       class='input-group-text'
@@ -214,7 +190,7 @@ crossorigin="anonymous"></script>
                       <div class="input-group-prepend">
                         <span class="input-group-text">€</span>
                       </div>
-                      <input type="number" min="0" class="form-control" id="insertion-hourlyPrice">
+                      <input type="number" min="0" class="form-control" id="insertion-hourlyPrice" required>
                     </div>
                   </div>
                   <div class='col-sm-6'>
@@ -233,113 +209,127 @@ crossorigin="anonymous"></script>
                 <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
                 <div class="mb-3">
                   <div class="mb-3 input-group">
-                    <input type="number" min="0" class="form-control" id="insertion-minInterval">
+                    <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
                     <div class="input-group-append">
                       <span class="input-group-text">min</span>
                     </div>
                   </div>
                 </div>
               </form>
+                <!-- Checkbox for recurrence or non recurrence -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
+              <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
             </div>
-
-            <div class="modal-body" id="recurrent-form">
-              <form>
-                <div class="mb-3">
-                  <label id="message" class="text-danger d-block"></label>
-                  <label id="parkId" hidden></label>
-                  <label for="recipient-name" class="col-form-label">Nome:</label>
-                  <input type="text" class="form-control" id="insertion-name">
-                </div>
-                <!-- dt picker -->
-                <div class='row mb-3'>
-                  <div class='col-sm-6'>
-                    <label for='linkedPickers1Input' class='form-label'>Valido da:</label>
-                    <div
-                    class='input-group log-event'
-                    id='linkedPickers1'
-                    data-td-target-input='nearest'
-                    data-td-target-toggle='nearest'
-                    >
-                    <input
-                      id='linkedPickers1Input'
-                      type='text'
-                      class='form-control'
-                      data-td-target='#linkedPickers1'
-                    />
-                    <span
-                      class='input-group-text'
-                      data-td-target='#linkedPickers1'
-                      data-td-toggle='datetimepicker'
-                    >
-                      <span class='fa-solid fa-calendar'></span>
-                    </span>
-                    </div>
-                  </div>
-                  <div class='col-sm-6'>
-                    <label for='linkedPickers2Input' class='form-label'>A:</label>
-                    <div
-                    class='input-group log-event'
-                    id='linkedPickers2'
-                    data-td-target-input='nearest'
-                    data-td-target-toggle='nearest'
-                    >
-                    <input
-                      id='linkedPickers2Input'
-                      type='text'
-                      class='form-control'
-                      data-td-target='#linkedPickers2'
-                    />
-                    <span
-                      class='input-group-text'
-                      data-td-target='#linkedPickers2'
-                      data-td-toggle='datetimepicker'
-                    >
-                      <span class='fa-solid fa-calendar'></span>
-                    </span>
-                    </div>
+            <form>
+            <!-- Select days of the week -->
+            <div class="form-check mb-3" id="recurrenceContainer" hidden>
+              <div class="row mb-3" id="dayCheckboxes" >
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="monday">
+                    <label class="form-check-label" for="monday">Lunedì</label>
                   </div>
                 </div>
-                <!-- Insert price -->
-                <div class="row">
-                  <div class='col-sm-6'>
-                    <!-- Insert hourly price -->
-                    <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">€</span>
-                      </div>
-                      <input type="number" min="0" class="form-control" id="insertion-hourlyPrice">
-                    </div>
-                  </div>
-                  <div class='col-sm-6'>
-                    <!-- Insert daily price -->
-                    <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
-                    <div class="mb-3">
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">€</span>
-                        </div>
-                      <input type="number" min="0" class="form-control" id="insertion-dailyPrice">
-                    </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="tuesday">
+                    <label class="form-check-label" for="tuesday">Martedì</label>
                   </div>
                 </div>
-                <!-- Insert min interval of reservation -->
-                <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
-                <div class="mb-3">
-                  <div class="mb-3 input-group">
-                    <input type="number" min="0" class="form-control" id="insertion-minInterval">
-                    <div class="input-group-append">
-                      <span class="input-group-text">min</span>
-                    </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="wednesday">
+                    <label class="form-check-label" for="wednesday">Mercoledì</label>
                   </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="thursday">
+                    <label class="form-check-label" for="thursday">Giovedì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="friday">
+                    <label class="form-check-label" for="friday">Venerdì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="saturday">
+                    <label class="form-check-label" for="friday">Sabato</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="sunday">
+                    <label class="form-check-label" for="friday">Domenica</label>
+                  </div>
+                </div>
+              </div>
+              <!-- Select time start -->
+              <!-- Time picker -->
+              <div class="row">
+                <div class="col-sm-6">
+                  <label for="recurrenceStart" class="form-label">Ora di inizio:</label>
+                  <div
+                  class='input-group log-event'
+                  id='recurrenceStart'
+                  data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'
+                  >
+                  <input
+                    id='recurrenceStartInput'
+                    type='text'
+                    class='form-control'
+                    data-td-target='#recurrenceStart'
+                    required
+                  />
+                  <span
+                    class='input-group-text'
+                    data-td-target='#recurrenceStart'
+                    data-td-toggle='datetimepicker'
+                  >
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                  </div>
+                </div>
+                <!-- Select time end -->
+                <div class="col-sm-6">
+                  <label for="recurrenceEnd" class="form-label">Ora di fine:</label>
+                  <div
+                  class='input-group log-event'
+                  id='recurrenceEnd'
+                  data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'
+                  >
+                  <input
+                    id='recurrenceEndInput'
+                    type='text'
+                    class='form-control'
+                    data-td-target='#recurrenceEndInput'
+                    required
+                  />
+                  <span
+                    class='input-group-text'
+                    data-td-target='#recurrenceEndInput'
+                    data-td-toggle='datetimepicker'
+                  >
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                  </div>
+                </div>
                 </div>
               </form>
+              
             </div>
+            
             </div>
 
             <div class="modal-footer">
               <button type="button" id="close-modal" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-              <button type="button" id="create-insertion" onclick="createInsertion()" class="btn btn-primary">Crea inserzione</button>
+              <button type="button" id="btnSubmit" onclick="createInsertion()" class="btn btn-primary">Crea inserzione</button>
             </div>
           </div>
         </div>

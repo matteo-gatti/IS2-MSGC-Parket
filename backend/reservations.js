@@ -15,30 +15,57 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         let insertion = await Insertion.findById(req.params.insertionId).populate("reservations parking")
         let user = await User.findById(req.loggedInUser.userId)
 
-        // check if the user is not the owner of the parking
-        /* if(user.id !== insertion.parking.owner.id) {
-            return res.status(403).send({ message: "User is not authorized to perform this action" })
-        } */
         const reqDateStart = new Date(req.body.datetimeStart)
         const reqDateEnd = new Date(req.body.datetimeEnd)
-        
-        // check if the insertion's datetimes are valid
-        if((reqDateStart >= reqDateEnd) || insertion.datetimeStart > reqDateStart || insertion.datetimeEnd < reqDateEnd) {
-            return res.status(400).send({ message: "Timeslot not valid or not available"})
-        }
-        
-        // check if the insertion is not already reserved
-        for(const resv in insertion.reservations) {
 
-            if(reqDateStart >= insertion.reservations[resv].datetimeStart && reqDateStart <= insertion.reservations[resv].datetimeEnd) {
-                console.log("Inizio too early")
-                return res.status(400).send({ message: "Timeslot not valid or not available"})
-            }
-            if(reqDateEnd >= insertion.reservations[resv].datetimeStart && reqDateEnd <= insertion.reservations[resv].datetimeEnd) {
-                console.log("Fine too early")
-                return res.status(400).send({ message: "Timeslot not valid or not available"})
-            }
+        console.log(insertion)
+
+        // check if the insertion's datetimes are valid
+        if ((reqDateStart >= reqDateEnd) || insertion.datetimeStart > reqDateStart || insertion.datetimeEnd < reqDateEnd) {
+            return res.status(400).send({ message: "Timeslot not valid or not available" })
         }
+
+        if (insertion.recurrent) {
+            // can only reserve recurrent insertions on a single day
+            const startDateString = moment(reqDateStart).format("YYYY/MM/DD")
+            const endDateString = moment(reqDateEnd).format("YYYY/MM/DD")
+            if (startDateString !== endDateString) return res.status(400).send({ message: "Timeslot not valid or not available" })
+
+            // check if day is available
+            const dayId = { 0: "sunday", 1: "monday", 2: "tuesday", 3: "wednesday", 4: "thursday", 5: "friday", 6: "saturday" }
+            const startDay = reqDateStart.getDay()
+            if (!insertion.recurrenceData.daysOfTheWeek.includes(dayId[startDay])) {
+                return res.status(400).send({ message: "Timeslot not valid or not available" })
+            }
+
+            // check if the insertion is not already reserved
+            //const startTime = reqDateStart.toLocaleTimeString('it-IT')
+            //const endTime = reqDateEnd.toLocaleTimeString('it-IT')
+
+            /* for (const resv in insertion.reservations) {
+                const resvDateString = moment(insertion.reservations[resv].datetimeStart).format("YYYY/MM/DD")
+                if (resvDateString === startDateString) {
+                    const resvstartTime = insertion.reservations[resv].datetimeStart.toLocaleTimeString('it-IT')
+                    const resvendTime = insertion.reservations[resv].datetimeEnd.toLocaleTimeString('it-IT')
+                    if (startTime >= resvstartTime && startTime <= resvendTime) {
+                        return res.status(400).send({ message: "Timeslot not valid or not available" })
+                    }
+                    if (endTime >= resvstartTime && endTime <= resvendTime) {
+                        return res.status(400).send({ message: "Timeslot not valid or not available" })
+                    }
+                }
+            } */
+        } //else {
+            // check if the insertion is not already reserved
+            for (const resv in insertion.reservations) {
+                if (reqDateStart >= insertion.reservations[resv].datetimeStart && reqDateStart <= insertion.reservations[resv].datetimeEnd) {
+                    return res.status(400).send({ message: "Timeslot not valid or not available" })
+                }
+                if (reqDateEnd >= insertion.reservations[resv].datetimeStart && reqDateEnd <= insertion.reservations[resv].datetimeEnd) {
+                    return res.status(400).send({ message: "Timeslot not valid or not available" })
+                }
+            }
+        //}
 
         // create the reservation
         let reservation = new Reservation(req.body)
@@ -49,11 +76,11 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
 
         reservation.price = 0
         let minutesDiff = moment(reservation.datetimeEnd).diff(moment(reservation.datetimeStart), "minutes")
-        if(minutesDiff < insertion.minInterval) {
-            return res.status(400).send({ message: "Minimum reservation time interval not met"})
+        if (minutesDiff < insertion.minInterval) {
+            return res.status(400).send({ message: "Minimum reservation time interval not met" })
         }
 
-        if(insertion.priceDaily) {
+        if (insertion.priceDaily) {
             const dayDiff = moment(reservation.datetimeEnd).diff(moment(reservation.datetimeStart), "days")
             minutesDiff -= dayDiff * 24 * 60
             reservation.price += dayDiff * insertion.priceDaily
@@ -68,50 +95,50 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         await insertion.save()
 
         res.location(reservation.self).status(201).send()
-    } catch(err) {
+    } catch (err) {
         console.log(err)
-        if(err.name === "ValidationError") {
-            return res.status(400).send({ message: "Some fields are empty or undefined"})
+        if (err.name === "ValidationError") {
+            return res.status(400).send({ message: "Some fields are empty or undefined" })
         }
-        return res.status(404).send({ message: "Insertion not found"})
+        return res.status(404).send({ message: "Insertion not found" })
     }
 })
 
-router.get('/:insertionId/reservations', async (req, res) => { 
+router.get('/:insertionId/reservations', async (req, res) => {
     try {
         //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
-        let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate( 
+        let reservations = await Insertion.findById(req.params.insertionId, { reservations: 1 }).populate(
             {
-                path: "reservations", 
-                model: "Reservation", 
-                select: {_id: 0, __v:0, insertion: 0},
+                path: "reservations",
+                model: "Reservation",
+                select: { _id: 0, __v: 0, insertion: 0 },
                 populate: [
-                {
-                    path: "client", 
-                    model: "User", 
-                    select: {self: 1}
-                }]
+                    {
+                        path: "client",
+                        model: "User",
+                        select: { self: 1 }
+                    }]
             })
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)
-        return res.status(404).send({message: "Insertion not found"})
+        return res.status(404).send({ message: "Insertion not found" })
     }
 })
 
-router.get('/:insertionId/reservations/:reservationId', async (req, res) => { 
+router.get('/:insertionId/reservations/:reservationId', async (req, res) => {
     try {
         //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
-        let reservations = await Reservation.findById(req.params.reservationId, {_id: 0, __v:0}).populate( 
-                {
-                    path: "client", 
-                    model: "User", 
-                    select: {self: 1}
-                })
+        let reservations = await Reservation.findById(req.params.reservationId, { _id: 0, __v: 0 }).populate(
+            {
+                path: "client",
+                model: "User",
+                select: { self: 1 }
+            })
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)
-        return res.status(404).send({message: "Insertion not found"})
+        return res.status(404).send({ message: "Insertion not found" })
     }
 })
 

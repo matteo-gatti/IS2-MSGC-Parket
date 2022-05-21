@@ -48,7 +48,7 @@ crossorigin="anonymous"></script>
             <!--<img class="mb-4" src="img/logo.png" alt="" width="200" height="200">-->
             <h1 class="h3 mb-3 fw-normal">Dati Parcheggio</h1>
 
-            <p class="text-danger" id="message" hidden>Messaggio</p>
+            
             
             <div class="form-floating">
                 <input type="text" class="form-control" id="nome" placeholder="Parcheggio numero 2" required>
@@ -93,10 +93,9 @@ crossorigin="anonymous"></script>
         <form class="col-md-8">
             <h1 class="h3 mb-3 fw-normal">Dati Inserzione</h1>
             <div class="mb-3">
-              <label id="message" class="text-danger d-block"></label>
               <label id="parkId" hidden></label>
               <label for="recipient-name" class="col-form-label">Nome:</label>
-              <input type="text" class="form-control" id="insertion-name">
+              <input type="text" class="form-control" id="insertion-name" required>
             </div>
 
             <!-- dt picker -->
@@ -115,6 +114,7 @@ crossorigin="anonymous"></script>
                     type='text'
                     class='form-control'
                     data-td-target='#linkedPickers1'
+                    required
                   />
                   <span
                     class='input-group-text'
@@ -138,6 +138,7 @@ crossorigin="anonymous"></script>
                     type='text'
                     class='form-control'
                     data-td-target='#linkedPickers2'
+                    required
                   />
                   <span
                     class='input-group-text'
@@ -158,7 +159,7 @@ crossorigin="anonymous"></script>
                     <div class="input-group-prepend">
                       <span class="input-group-text">€</span>
                     </div>
-                    <input type="number" class="form-control" id="insertion-hourlyPrice" min="0" inputmode="numeric" pattern="[0-9]*">
+                    <input type="number" class="form-control" id="insertion-hourlyPrice" min="0" inputmode="numeric" pattern="[0-9]*" required>
                   </div>
                 </div>
                 <div class='col-sm-6'>
@@ -177,7 +178,7 @@ crossorigin="anonymous"></script>
                 <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
                 <div class="mb-3">
                   <div class="mb-3 input-group">
-                  <input type="number" class="form-control" id="insertion-minInterval">
+                  <input type="number" class="form-control" id="insertion-minInterval" required>
                   <div class="input-group-append">
                     <span class="input-group-text">min</span>
                   </div>
@@ -188,8 +189,9 @@ crossorigin="anonymous"></script>
     </div>
 </div>
     <div class="mb-3"></div><div class="mb-3"></div>
+    <p class="text-danger" id="message" hidden>Messaggio</p>
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-        <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="createNewInsertionAndParking()">Aggiungi Inserzione e Parcheggio</button>
+        <button type="button" id="btnSubmit" class="btn btn-primary btn-lg px-4 gap-3" onclick="createNewInsertionAndParking(this)">Aggiungi Inserzione e Parcheggio</button>
     </div>
     <%- include("footer.ejs", {logged: logged}) %>
 

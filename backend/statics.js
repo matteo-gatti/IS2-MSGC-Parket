@@ -64,12 +64,14 @@ router.get('/detailParking', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
             let parking = await Parking.findById(req.query.id).populate("owner")
+            console.log(parking)
             if (req.loggedInUser.userId !== parking.owner.id) {
                 res.render('./detailParking.ejs', { logged: true, owner: false })
             } else {
                 res.render('./detailParking.ejs', { logged: true, owner: true })
             }
         } catch (err) {
+            console.log(err)
             res.render("./404page.ejs", { logged: true })
         }
     }

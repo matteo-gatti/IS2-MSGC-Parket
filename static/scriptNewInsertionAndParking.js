@@ -63,6 +63,21 @@ async function createNewInsertionAndParking() {
     var country = $("#nazione").val();
     var image = $("#image").prop("files")[0];
 
+    const days = []
+
+    $("#dayCheckboxes div div .form-check-input").each((i, checkbox) => {
+        if (checkbox.checked) days.push(checkbox.id)
+    });
+
+    // if days is empty, return error message
+    if ($("#recurrence").is(":checked") && days.length === 0) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("Per favore selezionare almeno un giorno")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
+        return
+    }
+
     const formData = new FormData();
 
     formData.append('image', image)
@@ -82,6 +97,14 @@ async function createNewInsertionAndParking() {
         priceHourly: $("#insertion-hourlyPrice").val(),
         priceDaily: $("#insertion-dailyPrice").val(),
         minInterval: $("#insertion-minInterval").val(),
+        // TODO: da controllare
+        recurrent: $("#recurrence").is(":checked"),
+        recurrenceData: {
+            daysOfTheWeek: days,
+            timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00",
+            timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00",
+        },
+        // TODO: da controllare
     }))
 
     try {
@@ -117,6 +140,94 @@ tempusDominus.locale(tempusDominus.locales.it.name);
 // date time
 const linkedPicker1Element = document.getElementById('linkedPickers1');
 const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
+
+
+const linkedPicker1ElementRecurrence = document.getElementById('recurrenceStartInput');
+const linked1Recurrence = new tempusDominus.TempusDominus(linkedPicker1ElementRecurrence);
+//linked1.locale(localization)
+linked1Recurrence.updateOptions({
+    display: {
+        viewMode: "clock",
+        components: {
+            useTwentyfourHour: true,
+            decades: false,
+            year: false,
+            month: false,
+            date: false,
+            hours: true,
+            minutes: true,
+            seconds: false
+        }
+    },
+    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+})
+
+const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+});
+
+//using event listeners
+linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+    linked2Recurrrence.updateOptions({
+        restrictions: {
+            minDate: e.detail.date//new Date(e.detail.date.getHours() + ":" + e.detail.date.getMinutes())
+        },
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+    });
+
+});
+
+//using subscribe method
+const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
+    linked1Recurrence.updateOptions({
+        restrictions: {
+            maxDate: e.date//new Date(e.date.getHours() + ":" + e.date.getMinutes())
+        },
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+    });
+});
+
+
+
 //linked1.locale(localization)
 linked1.updateOptions({
     restrictions: {
@@ -166,3 +277,10 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
     }
     });
 });
+function toggleRecurrence() {
+    if ($("#recurrence").is(":checked")) {
+        $("#recurrenceContainer").removeAttr("hidden")
+    } else {
+        $("#recurrenceContainer").attr("hidden", "true")
+    }
+}

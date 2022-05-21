@@ -87,7 +87,7 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         
         bodyJSONParking.image = "uploads/"+ req.file["filename"]
 
-        const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval"]
+        const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval", "recurrent", "recurrenceData"]
         const validParkingFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
 
         for (const field in bodyJSONInsertion) {

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 import User from './models/user.js'
+import Reservation from './models/reservation.js'
 import config from '../config.js'
 import tokenChecker from './tokenChecker.js'
 
@@ -55,11 +56,23 @@ router.get('/:userId', tokenChecker, async (req, res) => {
     }
 })
 
+router.get('/:userId/reservations', tokenChecker, async (req, res) => {
+    if (!checkUserAuthorization(req, res)) return
+    try {
+        const reservations = await Reservation.find({ client: { $eq: req.params.userId } }, { __v: 0 })
+        console.log(reservations)
+        return res.status(200).json(reservations)
+    } catch (err) {
+        console.log(err)
+        return res.status(404).send({ message: 'User not found' })
+    }
+})
+
 router.put('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     let validFields = ["name", "surname", "password", "email"]
     for (let field in req.body) {
-        if(!validFields.includes(field)) {
+        if (!validFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
         }
     }

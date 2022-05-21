@@ -34,31 +34,21 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
 
         // TODO: da controllare
         // check if the user wants a recurring insertion
-        if (req.body.recurrent) {
-            // if the insertion is within one day
-            if (req.body.datetimeStart.getDate() === req.body.datetimeEnd.getDate()) {
-                insertion.recurrent = true
-                // check if the recurrence's datetimes are present in the request
-                if (!req.body.datetimeStartRecurrent || !req.body.datetimeEndRecurrent) {
-                    return res.status(400).send({ message: "Recurrence datetimes not present in the request" })
-                }
-                // check if the recurrence's datetimes are valid
-                if ((new Date(req.body.datetimeStartRecurrent)) >= (new Date(req.body.datetimeEndRecurrent)) ) {
-                    return res.status(400).send({ message: "Recurrence timeslot not valid or not available"})
-                }
-                // set the recurrent insertion's datetimeStart and datetimeEnd
-                insertion.datetimeStartRecurrent = req.body.datetimeStart
-                insertion.datetimeEndRecurrent = req.body.datetimeEnd
-                // check if the daysOfTheWeek are present in the request
-                if (!req.body.daysOfTheWeek) {
-                    return res.status(400).send({ message: "Days of the week not present in the request" })
-                }
-                // set the days of the week of the recurrent insertion
-                insertion.daysOfTheWeek = req.body.daysOfTheWeek
+        if (req.body.recurrent == true) {
+            insertion.recurrent = true
+            // check if the daysOfTheWeek are present in the request
+            if (!req.body.daysOfTheWeek) {
+                return res.status(400).send({ message: "Days of the week not present in the request" })
             }
-            else {
-                return res.status(400).send({ message: "Recurrent insertion must be within one day" })
+            // check if the daysOfTheWeek are correct
+            const validDaysOfTheWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            for (const day in req.body.daysOfTheWeek) {
+                if (!validDaysOfTheWeek.includes(day)) {
+                    return res.status(400).send({ message: "Incorrect format for days of the week" })
+                }
             }
+            // set the days of the week of the recurrent insertion
+            insertion.daysOfTheWeek = req.body.daysOfTheWeek
         }
         // TODO: da controllare
         

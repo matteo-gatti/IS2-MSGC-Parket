@@ -47,14 +47,6 @@ const insertionSchema = new Schema({
         type: 'String',
         enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
     }],
-    datetimeStartRecurrent: {
-        type: 'Date',
-        default: null
-    },
-    datetimeEndRecurrent: {
-        type: 'Date',
-        default: null
-    },
     // TODO: da controllare
 })
 

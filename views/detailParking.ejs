@@ -123,20 +123,19 @@ crossorigin="anonymous"></script>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <!-- Checkbox for recurrence or non recurrence -->
+            <div id="dummy"></div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
               <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
             </div>
             <div class="modal-body" id="non-recurrent-form">
               <form>
-
                 <div class="mb-3">
                   <label id="message" class="text-danger d-block"></label>
                   <label id="parkId" hidden></label>
                   <label for="recipient-name" class="col-form-label">Nome:</label>
                   <input type="text" class="form-control" id="insertion-name">
                 </div>
-
                 <!-- <div class="mb-3">
                   <label for="message-text" class="col-form-label">Message:</label>
                   <textarea class="form-control" id="message-text"></textarea>
@@ -157,7 +156,6 @@ crossorigin="anonymous"></script>
                     </div>
                   </form>
                 </section> -->
-
                 <!-- dt picker -->
                 <div class='row mb-3'>
                   <div class='col-sm-6'>
@@ -207,7 +205,6 @@ crossorigin="anonymous"></script>
                     </div>
                   </div>
                 </div>
-
                 <!-- Insert price -->
                 <div class="row">
                   <div class='col-sm-6'>
@@ -232,7 +229,6 @@ crossorigin="anonymous"></script>
                     </div>
                   </div>
                 </div>
-                
                 <!-- Insert min interval of reservation -->
                 <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
                 <div class="mb-3">

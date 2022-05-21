@@ -285,30 +285,29 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
 });
 
 // TODO: fa schifo, ma va
-let x 
+//let x 
 function toggleRecurrence() {
-    console.log(x)
-    if(x)
-    {
-        $("#non-recurrent-form").css("visibility", "hidden");
-        $("#recurrent-form").css("visibility", "visible");
-        x= false
-    }
-    else
-    {
-        $("#non-recurrent-form").css("visibility", "visible");
-        $("#recurrent-form").css("visibility", "hidden");
-        x= true
+    // if recurrence is checked
+    if ($("#recurrence").is(":checked")) {
+        $("#dummy").replaceWith($("#recurrent-form"));
+        // $("#non-recurrent-form").css("visibility", "hidden");
+        // $("#recurrent-form").css("visibility", "visible");
+        //x= false
+    } else {
+        $("#dummy").replaceWith($("#non-recurrent-form"));
+        // $("#non-recurrent-form").css("visibility", "visible");
+        // $("#recurrent-form").css("visibility", "hidden");
+        //x= true
     }
 }
 // TODO: da controllare
 
 async function main() {
-    x=true
+    //x=true
     await loadDetails()
     await getMyInsertions()
     // TODO: da controllare
+    //$("#recurrent-form").css("visibility", "hidden");
     // TODO: da controllare
-    $("#recurrent-form").css("visibility", "hidden");
 }
 main()

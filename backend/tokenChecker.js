@@ -34,7 +34,6 @@ const tokenValid = (req, res, next) => {
             if(!err) {
                 // if everything is good, save to request for use in other routes
                 req.loggedInUser = decoded
-                console.log("token valid")
             }
         })
     }

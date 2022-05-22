@@ -27,18 +27,9 @@ router.get('/register', tokenValid, function (req, res) {
 
 router.get('/privateArea', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
-        console.log("auth and render")
-        res.render('./parkings.ejs', { logged: true })
+        res.render('./privateArea.ejs', { logged: true, usr: req.loggedInUser.userId})
     }
     //res.sendFile('./static/register.html', { root: '.'})
-    else
-        res.redirect("/login")
-})
-
-router.get('/userArea', tokenValid, function (req, res) {
-    if (isAuthToken(req)) {
-        res.render('./userArea.ejs', { logged: true, usr: req.loggedInUser.userId })
-    }
     else
         res.redirect("/login")
 })
@@ -102,11 +93,11 @@ router.get('/detailParking', tokenValid, async function (req, res) {
 })
 
 
-router.get('/publicParkings', tokenValid, function (req, res) {
+router.get('/parkings', tokenValid, function (req, res) {
     let loggedBool = false
     if (isAuthToken(req))
         loggedBool = true
-    res.render('./PublicParkings.ejs', { logged: loggedBool })
+    res.render('./parkings.ejs', { logged: loggedBool })
 
 })
 

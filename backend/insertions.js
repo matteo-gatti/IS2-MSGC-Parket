@@ -56,8 +56,8 @@ router.get('/', async (req, res) => {
 // Get an insertion of the parking
 router.get('/:insertionId', async (req, res) => {
     try {
-        let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0, parking: 0}).populate(
-            {
+        let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0}).populate(
+            [{
                 path: "reservations",
                 model: "Reservation",
                 select: {_id: 0, __v:0, insertion: 0},
@@ -66,7 +66,12 @@ router.get('/:insertionId', async (req, res) => {
                     model: "User",
                     select: {self: 1, username: 1}
                 }]
-            }
+            },
+            {
+                path: "parking",
+                model: "Parking",
+                select: {_id: 0, __v:0, insertions: 0, owner: 0},
+            }]
         )
         console.log(insertion)
         return res.status(200).json(insertion)

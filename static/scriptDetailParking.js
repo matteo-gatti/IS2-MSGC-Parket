@@ -190,8 +190,23 @@ async function getMyInsertions() {
             for (insertion in data.insertions) {
                 tmpInsHTML = insertionHTML.clone()
                 tmpInsHTML.removeAttr("hidden")
-                $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion].name)
-                $(tmpInsHTML.find("p")[1]).text(data.insertions[insertion]._id)
+                $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion]._id)
+                $(tmpInsHTML.find("p")[1]).html("<b>&nbsp;&nbsp;&nbsp;Nome: </b> " +  data.insertions[insertion].name)
+                $(tmpInsHTML.find("p")[2]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Da: </b>" + (new Date(data.insertions[insertion].datetimeStart)).toLocaleString("it-IT").slice(0, -3))
+                $(tmpInsHTML.find("p")[3]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A: </b> " + (new Date(data.insertions[insertion].datetimeEnd)).toLocaleString("it-IT").slice(0, -3))
+                let strPrezzo = "<b>&nbsp;&nbsp;Prezzo: </b> " + data.insertions[insertion].priceHourly.toLocaleString('it-IT', 
+                {
+                    style: 'currency',
+                    currency: 'EUR',
+                  }) + "/ora"
+                if(data.insertions[insertion].priceDaily != null) {
+                    strPrezzo += " - " + data.insertions[insertion].priceDaily.toLocaleString('it-IT', 
+                    {
+                        style: 'currency',
+                        currency: 'EUR',
+                    }) + "/giorno"
+                }
+                $(tmpInsHTML.find("p")[4]).html(strPrezzo)
                 let fullSelf = data.insertions[insertion].self.split("/")
                 console.log(fullSelf)
 

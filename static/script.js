@@ -1,6 +1,7 @@
 // This function is called when register button is clicked
-async function register() {
+async function register(e) {
     // get the values from the form
+    e.preventDefault()
     var name = $("#name").val();
     var surname = $("#surname").val();
     var email = $("#email").val();
@@ -41,7 +42,9 @@ async function register() {
 }
 
 // This function is called when login button is clicked
-async function login() {
+async function login(e) {
+    console.log(e)
+    e.preventDefault()
     // get the values from the form
     const identifier = $("#identifier").val()
     const password = $("#password").val()
@@ -70,6 +73,9 @@ async function login() {
         //alert("Wrong email or password");
     }
 }
+
+$("#login").submit(login)
+$("#register").submit(register)
 
 // This function is called when logout button is clicked
 async function logout() {

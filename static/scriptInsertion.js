@@ -38,49 +38,57 @@ async function loadInfo()
     
             console.log("data", data)
 
-            $("h5:eq(0)").text(data.name)
-            $("h5:eq(1)").text((new Date(data.datetimeStart)).toLocaleString("it-IT"))
-            $("h5:eq(2)").text((new Date(data.datetimeEnd)).toLocaleString("it-IT"))
-            $("h5:eq(3)").text(data.minInterval + " minuti")
-            $("h5:eq(4)").text(data.priceHourly + " EUR/hr.")
-            $("h5:eq(5)").text(data.priceDaily + " EUR/gg")
-            $("h5:eq(6)").text(data.recurrent)
-
-            if(data.recurrent)
+            $("#insertionName").text(data.name)
+            $("#insertionFrom").text(((new Date(data.datetimeStart)).toLocaleString("it-IT")).slice(0, -3))
+            $("#insertionTo").text(((new Date(data.datetimeEnd)).toLocaleString("it-IT")).slice(0, -3))
+            $("#insertionInterval").text(data.minInterval + " minuti")
+            $("#insertionPriceH").text(data.priceHourly.toLocaleString('it-IT', 
             {
-                let htmlRec = $(".recurrencyDiv")
-                $(htmlRec).removeAttr('hidden')
-                let daystxt = ""
-                let days = data.recurrenceData.daysOfTheWeek
-                for (i in days)
+                style: 'currency',
+                currency: 'EUR',
+            }) + "/ora.")
+            let priceD = "Non disponibile"
+            if(data.priceDaily != null) {
+                priceD = data.priceDaily.toLocaleString('it-IT', 
                 {
-                    daystxt += (data.recurrenceData.daysOfTheWeek[i]+", ")
-                }
-                daystxt = daystxt.slice(0,-2)
-
-                $(htmlRec.find("h6")[0]).text(daystxt)
-
-                let isoDate = data.recurrenceData.timeStart
-                let result = isoDate.match(/\d\d:\d\d/);
-               // $(htmlRec.find("h6")[1]).text(result[0])
-                let isoDate2 = data.recurrenceData.timeEnd
-                let result2 = isoDate2.match(/\d\d:\d\d/);
-                $(htmlRec.find("h6")[1]).text(`${result[0]} - ${result2[0]}`)
-
+                    style: 'currency',
+                    currency: 'EUR',
+                }) + "/giorno"
+            }
+            $("#insertionPriceD").text(priceD)
+            if (data.recurrent === true) {
+                const daysDict = { "monday": "Lunedì", "tuesday": "Martedì","wednesday": "Mercoledì","thursday": "Giovedì","friday": "Venerdì","saturday": "Sabato","sunday": "Domenica",}
+                $("#recurrenceContainer").attr("hidden", false)
+                let dayString = ""
+                data.recurrenceData.daysOfTheWeek.forEach((day) => {
+                    dayString += daysDict[day] + ", "
+                })
+                dayString = dayString.slice(0, -2)
+                $("#insertionRecurrentDays").text(dayString)
+                let intervalFrom = (new Date(data.recurrenceData.timeStart)).toLocaleTimeString("it-IT").slice(0, -3)
+                let intervalTo = (new Date(data.recurrenceData.timeEnd)).toLocaleTimeString("it-IT").slice(0, -3)
+                $("#insertionRecurrentHours").text(intervalFrom + " - " + intervalTo)
             }
 
-            let container = $("#prenotazContainer")
+            $("#imgParking").attr("src", data.parking.image)
+            $("#nameParking").text(data.parking.name)
+            $("#addressParking").html(data.parking.address + ", " + data.parking.city + "<br>" + data.parking.country)
+
+            let container = $("#reservList")
+            container.empty()
             for(i in data.reservations)
             {
-                tmpHTML = $(".prenotazList").clone()
+                tmpHTML = $("#reservTemplate").clone()
                 tmpHTML.removeAttr("hidden")
-                tmpHTML.removeClass("prenotazList")
-                data.reservations[i].datetimeStart = (new Date(data.reservations[i].datetimeStart)).toLocaleString("it-IT")
-                data.reservations[i].datetimeEnd = (new Date(data.reservations[i].datetimeEnd)).toLocaleString("it-IT")
-                $(tmpHTML).html("Da: " + data.reservations[i].datetimeStart + "<br>A: " + data.reservations[i].datetimeEnd + "<br>Da parte di: "+data.reservations[i].client.username)
+                data.reservations[i].datetimeStart = (new Date(data.reservations[i].datetimeStart)).toLocaleString("it-IT").slice(0, -3)
+                data.reservations[i].datetimeEnd = (new Date(data.reservations[i].datetimeEnd)).toLocaleString("it-IT").slice(0, -3)
+                
+                $(tmpHTML).find("#reservationClient").text(data.reservations[i].client.username)
+                $(tmpHTML).find("#reservationFrom").text(data.reservations[i].datetimeStart)
+                $(tmpHTML).find("#reservationTo").text(data.reservations[i].datetimeEnd)
+  
                 container.append(tmpHTML)
             }
-            container.append("</ul>")
         }
     }
     catch(err)

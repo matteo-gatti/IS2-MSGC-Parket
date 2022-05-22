@@ -34,7 +34,7 @@ crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
   rel="stylesheet" crossorigin="anonymous">
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </head>
 
 <body class="text-center">
@@ -43,7 +43,7 @@ crossorigin="anonymous"></script>
         <div class="row"> 
         <div class="col-sm" ></div>
         <div class="col-sm form-signin ">
-            <form>
+            <form id="register">
             <img class="mb-4" src="img/logo.png" alt="" width="200" height="200">
             <h1 class="h3 mb-3 fw-normal">Registrazione</h1>
 
@@ -80,7 +80,7 @@ crossorigin="anonymous"></script>
                 <input type="checkbox" value="remember-me"> Remember me
                 </label> -->
             </div> 
-            <button class="w-100 btn btn-lg btn-primary" type="button" onclick="register()">Registrati</button>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Registrati</button>
             <!-- <p class="mt-5 mb-3 text-muted">MSGC© 2022–2023</p> -->
             </form>
         </div>

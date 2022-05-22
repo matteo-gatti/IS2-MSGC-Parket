@@ -110,13 +110,35 @@ async function main()
 
     //--------------------------------- period datepickers ---------------------------------------
     const linkedPicker1Element = document.getElementById('linkedPickers1');
+    const linkedPicker2Element = document.getElementById('linkedPickers2');
     const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
     //linked1.locale(localization)
 
+    let recurrent = false
+    let daysOfWeekDisabled = []
+    let enabledHours = []
+    if(($("#recurrenceContainer")).attr("hidden") == null) {
+        recurrent = true
+        let recDays = $("#insertionRecurrentDays").text().split(", ")
+        const daysToID = {"Lunedì": 1, "Martedì": 2, "Mercoledì": 3, "Giovedì": 4, "Venerdì": 5, "Sabato": 6, "Domenica": 0}
+        recDays = recDays.map((day) => daysToID[day])
+        let days = [0, 1, 2, 3, 4, 5, 6]
+        days = days.filter((day) => {return !recDays.includes(day)})
+        daysOfWeekDisabled = days
+
+        const recHours = $("#insertionRecurrentHours").text().split(" - ").map((time) => {return time.slice(0, -3).replace(/^0/, '')})
+        for(let i = parseInt(recHours[0]); i <= parseInt(recHours[1]); i++) {
+            enabledHours.push(i)
+        }
+    }
+
+    //Global options DA
     linked1.updateOptions({
         restrictions: {
             minDate: new tempusDominus.DateTime().startOf("minutes"),
-            maxDate: new tempusDominus.DateTime(($("h5:eq(2)")).text())
+            maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+            daysOfWeekDisabled: daysOfWeekDisabled,
+            enabledHours: enabledHours
         },
         display: {
             components: {
@@ -125,11 +147,14 @@ async function main()
         }
     })
 
+    //Global options A
     const linked2 = new tempusDominus.TempusDominus(document.getElementById('linkedPickers2'), {
         useCurrent: false,
         restrictions: {
             minDate: new tempusDominus.DateTime().startOf("minutes"),
-            maxDate: new tempusDominus.DateTime(($("h5:eq(2)")).text())
+            maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+            daysOfWeekDisabled: daysOfWeekDisabled,
+            enabledHours: enabledHours
         },
         display: {
             components: {
@@ -138,12 +163,20 @@ async function main()
         }
     });
 
-    //using event listeners
+    //Opzioni di A quando cambia DA
     linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+        console.log("Update TO")
+        let enabledDates = []
+        if(recurrent) {
+            enabledDates.push(e.detail.date.startOf("date"))
+        }
         linked2.updateOptions({
             restrictions: {
                 minDate: e.detail.date,
-                maxDate: new tempusDominus.DateTime(($("h5:eq(2)")).text())
+                maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+                daysOfWeekDisabled: daysOfWeekDisabled,
+                enabledHours: enabledHours,
+                enabledDates: enabledDates
             },
             display: {
                 components: {
@@ -153,18 +186,20 @@ async function main()
         });
     });
 
-    //using subscribe method
-    const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+    //Opzioni di DA quando cambia A
+    linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
         linked1.updateOptions({
             restrictions: {
                 minDate: new tempusDominus.DateTime().startOf("minutes"),
-                maxDate: e.date
+                maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+                daysOfWeekDisabled: daysOfWeekDisabled,
+                enabledHours: enabledHours
             },
             display: {
                 components: {
                     useTwentyfourHour: true
+                }
             }
-        }
         });
     });
     //--------------------------------- end period datepickers ------------------------------------

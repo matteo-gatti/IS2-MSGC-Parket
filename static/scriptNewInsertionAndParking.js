@@ -92,7 +92,7 @@ async function createNewInsertionAndParking() {
 
     let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00"
     let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00"
-
+    
     formData.append('insertion', JSON.stringify({
         name: name,
         datetimeStart: d1,

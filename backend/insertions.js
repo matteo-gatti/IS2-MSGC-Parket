@@ -64,7 +64,7 @@ router.get('/:insertionId', async (req, res) => {
                 populate: [{
                     path: "client",
                     model: "User",
-                    select: {self: 1}
+                    select: {self: 1, username: 1}
                 }]
             }
         )
@@ -104,25 +104,20 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
 
         let parking = new Parking(bodyJSONParking)
 
-        //let insertion = new Insertion(bodyJSONInsertion)
-
-        // TODO: @merlo @eric @gatto aggiunto controllo su campi non richiesti minInterval e priceDaily + controllo su dati recurrent
         let insertion = new Insertion()
         insertion.name = bodyJSONInsertion.name
         insertion.parking = parking
         insertion.datetimeStart = bodyJSONInsertion.datetimeStart
         insertion.datetimeEnd = bodyJSONInsertion.datetimeEnd
         insertion.priceHourly = bodyJSONInsertion.priceHourly
-        if (req.body.minInterval) insertion.minInterval = bodyJSONInsertion.minInterval
-        if (req.body.priceDaily) insertion.priceDaily = bodyJSONInsertion.priceDaily
+        if (bodyJSONInsertion.minInterval != null) insertion.minInterval = bodyJSONInsertion.minInterval
+        if (bodyJSONInsertion.priceDaily != null) insertion.priceDaily = bodyJSONInsertion.priceDaily
 
         // check if the user wants a recurring insertion
-        if (bodyJSONInsertion.recurrent == true) {
+        if (bodyJSONInsertion.recurrent === true) {
             insertion.recurrent = true
             insertion.recurrenceData = bodyJSONInsertion.recurrenceData
         }
-        // TODO
-
 
         console.log("USR ID POSY", req.loggedInUser.userId)
         let user = await User.findById(req.loggedInUser.userId)
@@ -130,7 +125,6 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         parking = await parking.save()
         insertion = await insertion.save()
 
-        // TODO: @merlo @eric @gatto aggiunta parkings nella url
         insertion.self = "/api/v1/insertions/" + insertion.id
         insertion = await insertion.save()
 

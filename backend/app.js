@@ -5,6 +5,7 @@ import { parkings } from './parkings.js'
 import { insertions } from './insertions.js'
 import { insertionsNested } from './insertionsNested.js'
 import { reservations } from './reservations.js'
+import { reservationsNested } from './reservationsNested.js'
 import authentication from './authentication.js'
 import tokenChecker from './tokenChecker.js'
 import statics from './statics.js'
@@ -28,7 +29,8 @@ app.use('/api/v1/users', users)
 app.use('/api/v1/parkings', parkings)
 app.use('/api/v1/parkings', insertionsNested)
 app.use('/api/v1/insertions', insertions)
-app.use('/api/v1/insertions', reservations)
+app.use('/api/v1/insertions', reservationsNested)
+app.use('/api/v1/reservations', reservations)
 
 app.all( '/api/*', (req, res) => {
     res.status(404)

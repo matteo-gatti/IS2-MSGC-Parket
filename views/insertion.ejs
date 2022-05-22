@@ -57,7 +57,7 @@ crossorigin="anonymous"></script>
     
 
     <div class=" row col-md-10" >
-      <h1 style="color: red;">Dati Inserzione</h1>
+      <h1>Dati Inserzione</h1>
       <hr>
       <!--<p id="usrId" hidden></p>-->
       <div class="row">
@@ -87,7 +87,6 @@ crossorigin="anonymous"></script>
     <h1 >Prenotazioni per questa inserzione:</h1>
     <li hidden class="prenotazList">text</li>
     <ul id="prenotazContainer">
-    
 </div>
 <hr>
 <div class="container" <% if (owner) { %> hidden <% } %>> <!--da visualizzare solo se non si è proprietari -->
@@ -147,9 +146,11 @@ crossorigin="anonymous"></script>
 <div class="px-4 py-5  text-center" <% if (owner) { %> hidden <% } %>>
   <div class="col-lg-6 mx-auto">
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-      <button type="button" class=" sbtn btn-primary btn-lg px-4 gap-3" onclick="createReservation()">Prenota</button>
+      <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="createReservation()">Prenota</button>
+      <button class="btn btn-outline-primary" disabled>Pagamento in contanti</button>
     </div>
   </div>
+  <p><br>Altre opzioni di pagamento coming soon™️</p>
 </div>
   <%- include("footer.ejs", {logged: logged}) %>
 </body>

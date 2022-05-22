@@ -56,7 +56,7 @@ crossorigin="anonymous"></script>
     
 
     <div class=" row col-md-10" >
-        <h1 style="color: red;">Dati Utente</h1>
+        <h1>Dati Utente</h1>
         <hr>
         <p id="usrId" hidden><%= usr %></p>
         <div class="col">
@@ -75,6 +75,8 @@ crossorigin="anonymous"></script>
 </div>
 <div class="container">
     <h1>Le mie prenotazioni</h1>
+    <li hidden class="prenotazList">text</li>
+    <ul id="prenotazContainer">
 </div>
 
   <%- include("footer.ejs", {logged: logged}) %>

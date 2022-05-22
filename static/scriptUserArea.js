@@ -23,7 +23,7 @@ async function loadData()
         if (data) {
         $("h5:eq(0)").text(data.username)
         $("h5:eq(1)").text(data.email)
-        $("h5:eq(2)").text(data.parkings.length)
+        $("h5:eq(2)").html(data.parkings.length + " (<a href=privateArea>Mostra</a>)")
         $("h5:eq(3)").text(data.name)
         $("h5:eq(4)").text(data.surname)
 
@@ -36,10 +36,28 @@ async function loadData()
 
 async function loadPrenotazioni()
 {
-    //bisogna trovare il modo di visualizzare le prenotazioni dell'utente, attualmente non credo ci sia un fetch pronto per farlo
-    //le prenotazioni non mi sembrano legate all'utente, forse conviene legarle con un id?
-    //per debug l'utente a - a (62877165b165a66c75ad933e) ha due prenotazioni a suo nome
-    //@eric @merlo
+    const res = await fetch(`/api/v1/reservations/myReservations`, {
+        method: "GET",
+    })
+    data = await res.json()
+
+    if (!res.ok)
+        throw data
+    
+    console.log(data)
+    
+    let container = $("#prenotazContainer")
+    for(i in data)
+    {
+        tmpHTML = $(".prenotazList").clone()
+        tmpHTML.removeAttr("hidden")
+        tmpHTML.removeClass("prenotazList")
+        data[i].datetimeStart = (new Date(data[i].datetimeStart)).toLocaleString("it-IT")
+        data[i].datetimeEnd = (new Date(data[i].datetimeEnd)).toLocaleString("it-IT")
+        $(tmpHTML).html("Da: " + data[i].datetimeStart + "<br> A: " + data[i].datetimeEnd + "<br>Per l'inserzione: <a href=insertion?insertion="+ data[i].insertion._id + ">" + data[i].insertion.name + "</a>")
+        container.append(tmpHTML)
+    }
+    container.append("</ul>")
 }
 
 async function load()

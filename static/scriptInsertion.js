@@ -43,8 +43,31 @@ async function loadInfo()
             $("h5:eq(2)").text(data.datetimeEnd)
             $("h5:eq(3)").text(data.minInterval + " minuti")
             $("h5:eq(4)").text(data.priceHourly + " EUR/hr.")
-            $("h5:eq(5)").text(data.priceDaily+ " EUR/gg")
+            $("h5:eq(5)").text(data.priceDaily + " EUR/gg")
             $("h5:eq(6)").text(data.recurrent)
+
+            if(data.recurrent)
+            {
+                let htmlRec = $(".recurrencyDiv")
+                $(htmlRec).removeAttr('hidden')
+                let daystxt = ""
+                let days = data.recurrenceData.daysOfTheWeek
+                for (i in days)
+                {
+                    daystxt += (data.recurrenceData.daysOfTheWeek[i]+", ")
+                }
+                daystxt = daystxt.slice(0,-2)
+
+                $(htmlRec.find("h6")[0]).text(daystxt)
+
+                let isoDate = data.recurrenceData.timeStart
+                let result = isoDate.match(/\d\d:\d\d/);
+               // $(htmlRec.find("h6")[1]).text(result[0])
+                let isoDate2 = data.recurrenceData.timeEnd
+                let result2 = isoDate2.match(/\d\d:\d\d/);
+                $(htmlRec.find("h6")[1]).text(`${result[0]} - ${result2[0]}`)
+
+            }
 
             let container = $("#prenotazContainer")
             for(i in data.reservations)

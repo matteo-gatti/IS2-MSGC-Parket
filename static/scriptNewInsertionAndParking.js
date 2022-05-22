@@ -93,39 +93,21 @@ async function createNewInsertionAndParking() {
     let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00"
     let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00"
 
-    if (!$("#recurrence").is(":checked"))
-    {
-        formData.append('insertion', JSON.stringify({
-            name: name,
-            datetimeStart: d1,
-            datetimeEnd: d2,
-            priceHourly: $("#insertion-hourlyPrice").val(),
-            priceDaily: $("#insertion-dailyPrice").val(),
-            minInterval: $("#insertion-minInterval").val(),
-            recurrent: false,
-            
-        }))
-    }
-    else
-    {
-        formData.append('insertion', JSON.stringify({
-            name: name,
-            datetimeStart: d1,
-            datetimeEnd: d2,
-            priceHourly: $("#insertion-hourlyPrice").val(),
-            priceDaily: $("#insertion-dailyPrice").val(),
-            minInterval: $("#insertion-minInterval").val(),
+    formData.append('insertion', JSON.stringify({
+        name: name,
+        datetimeStart: d1,
+        datetimeEnd: d2,
+        priceHourly: $("#insertion-hourlyPrice").val(),
+        priceDaily: $("#insertion-dailyPrice").val(),
+        minInterval: $("#insertion-minInterval").val(),
 
-            recurrent: true,
-            recurrenceData: {
-                daysOfTheWeek: days,
-                timeStart: timeS,
-                timeEnd: timeE,
-            },
-        }))
-    }
-
-
+        recurrent: $("#recurrence").is(":checked"),
+        recurrenceData: {
+            daysOfTheWeek: days,
+            timeStart: timeS,
+            timeEnd: timeE,
+        },
+    }))
 
     try {
         const res = await fetch('../api/v1/insertions', {

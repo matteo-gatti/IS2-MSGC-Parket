@@ -35,6 +35,7 @@ crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
   rel="stylesheet" crossorigin="anonymous">
   <script src="scriptInsertion.js" defer></script>
+  
   <style>
       .imgDetail {
             width: 80%;
@@ -43,7 +44,7 @@ crossorigin="anonymous"></script>
       }
     </style>
 </head>
-<body>< 
+<body>
   <%- include("./header.ejs", {logged: logged}) %>
   <!-- Page Content -->
  
@@ -77,9 +78,71 @@ crossorigin="anonymous"></script>
 </div>
 <div class="container">
     <h1 >Prenotazioni per questa inserzione:</h1>
-    <ul id="prenotazContainer">
     <li hidden class="prenotazList">text</li>
+    <ul id="prenotazContainer">
+    
 </div>
-
+<hr>
+<div class="container" <% if (owner) { %> hidden <% } %>> <!--da visualizzare solo se non si è proprietari -->
+  <h1 >Prenota uno slot:</h1>
+  <div class='row mb-3'>
+    <div class='col-sm-6'>
+      <label for='linkedPickers1Input' class='form-label'>Da:</label>
+      <div
+      class='input-group log-event'
+      id='linkedPickers1'
+      data-td-target-input='nearest'
+      data-td-target-toggle='nearest'
+      >
+      <input
+        id='linkedPickers1Input'
+        type='text'
+        class='form-control'
+        data-td-target='#linkedPickers1'
+        required
+      />
+      <span
+        class='input-group-text'
+        data-td-target='#linkedPickers1'
+        data-td-toggle='datetimepicker'
+      >
+        <span class='fa-solid fa-calendar'></span>
+      </span>
+      </div>
+    </div>
+    <div class='col-sm-6'>
+      <label for='linkedPickers2Input' class='form-label'>A:</label>
+      <div
+      class='input-group log-event'
+      id='linkedPickers2'
+      data-td-target-input='nearest'
+      data-td-target-toggle='nearest'
+      >
+      <input
+        id='linkedPickers2Input'
+        type='text'
+        class='form-control'
+        data-td-target='#linkedPickers2'
+        required
+      />
+      <span
+        class='input-group-text'
+        data-td-target='#linkedPickers2'
+        data-td-toggle='datetimepicker'
+      >
+        <span class='fa-solid fa-calendar'></span>
+      </span>
+      </div>
+    </div>
+  </div>
+</div>
+<label id="message" class="text-danger d-block text-center"></label>
+<div class="px-4 py-5  text-center" <% if (owner) { %> hidden <% } %>>
+  <div class="col-lg-6 mx-auto">
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <button type="button" class=" sbtn btn-primary btn-lg px-4 gap-3" onclick="createReservation()">Prenota</button>
+    </div>
+  </div>
+</div>
   <%- include("footer.ejs", {logged: logged}) %>
 </body>

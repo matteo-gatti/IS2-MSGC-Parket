@@ -40,14 +40,16 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
 
         insertion = await insertion.save()
 
-        insertion.self = "/api/v1/parkings/" + req.params.parkId + "/insertions/" + insertion.id
+        
+        insertion.self = "/api/v1/insertions/" + insertion.id
+        //si potrebbe unificare togliendo la parte parkings? per omogeneità della risorsa
         insertion = await insertion.save()
 
         parking.insertions.push(insertion)
         await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + req.params.parkId + "/insertions/" + insertion.id).status(201).send()
+        res.location('/api/v1/insertions/' + insertion.id).status(201).send()
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

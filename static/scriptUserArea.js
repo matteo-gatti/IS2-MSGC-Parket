@@ -1,3 +1,8 @@
+function goBack() {
+    //window.location.href = "/privateArea"
+    history.back()
+}
+
 async function loadData()
 {
     // '/api/v1/users/userId'

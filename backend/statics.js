@@ -2,6 +2,7 @@ import express from 'express'
 
 import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
+import Insertion from './models/insertion.js'
 import user from './models/user.js'
 
 const router = express.Router()
@@ -42,9 +43,21 @@ router.get('/userArea', tokenValid, function (req, res) {
         res.redirect("/login")
 })
 
-router.get('/insertion', tokenValid, function (req, res) {
+router.get('/insertion', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
-        res.render('./insertion.ejs', { logged: true })
+        try {
+            let insertion = await Insertion.findById(req.query.insertion).populate("parking")
+            let parking = await Parking.findById(insertion.parking.id).populate("owner")
+
+            if (req.loggedInUser.userId !== parking.owner.id) {
+                res.render('./insertion.ejs', { logged: true, owner: false })
+            } else {
+                res.render('./insertion.ejs', { logged: true, owner: true })
+            }
+        } catch (err) {
+            console.log(err)
+            res.render("./404page.ejs", { logged: true })
+        }
     }
     else
         res.redirect("/login")

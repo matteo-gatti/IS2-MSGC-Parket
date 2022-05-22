@@ -67,8 +67,6 @@ async function createInsertion() {
         return
     }
 
-    console.log(days)
-
     try {
         const res = await fetch(`../api/v1/parkings/${id}/insertions`, {
             method: "POST",
@@ -194,7 +192,12 @@ async function getMyInsertions() {
                 tmpInsHTML.removeAttr("hidden")
                 $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion].name)
                 $(tmpInsHTML.find("p")[1]).text(data.insertions[insertion]._id)
-                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${data.insertions[insertion].self.substring(19, )}')`);
+                let fullSelf = data.insertions[insertion].self.split("/")
+                console.log(fullSelf)
+
+                let insertionid = fullSelf[4]
+                console.log(insertionid)
+                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${insertionid}')`);
                 container.append(tmpInsHTML)
             }
         }
@@ -421,9 +424,9 @@ async function main() {
     await getMyInsertions()
 }
 
-function detailInsertion(id)
+function detailInsertion(insertionid)
 {
-    window.location.href = `/insertion?insertion=${id}`
+    window.location.href = `/insertion?insertion=${insertionid}`
 }
 
 main()

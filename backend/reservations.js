@@ -15,6 +15,11 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         let insertion = await Insertion.findById(req.params.insertionId).populate("reservations parking")
         let user = await User.findById(req.loggedInUser.userId)
 
+        // check if the user is the owner of the parking
+        if (req.loggedInUser.userId === insertion.parking.owner) {
+            return res.status(403).send({ message: "User is not authorized to perform this action" })
+        }
+
         const reqDateStart = new Date(req.body.datetimeStart)
         const reqDateEnd = new Date(req.body.datetimeEnd)
 

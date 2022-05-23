@@ -444,4 +444,28 @@ function detailInsertion(insertionid)
     window.location.href = `/insertion?insertion=${insertionid}`
 }
 
+$('#insertion-hourlyPrice').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9,]/)) 
+    {
+        return false;
+    }
+})
+
+$('#insertion-dailyPrice').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9,]/)) 
+    {
+        return false;
+    }
+})
+
+$('#insertion-minInterval').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9]/))
+    {
+        return false;
+    }
+})
+
 main()

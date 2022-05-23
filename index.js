@@ -1,12 +1,11 @@
 import app from './backend/app.js'
 import config from './config.js'
-import path from 'path';
 import mongoose from 'mongoose'
 
 const environment = process.env.NODE_ENV 
 const stage = config[environment]
 
-
+// Connect to MongoDB and start the server
 app.locals.db = mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Connected to DB 💪')
@@ -19,14 +18,8 @@ app.locals.db = mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, us
     .catch(err => {
         console.log(err)
     });
-/* process.on('SIGINT', function() {
-    console.log('Quitting and closing DB connection');
-    app.locals.db.close()
-    process.exit()
-}); */
 
 // Close the connection when the application stops
-
 ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(signal => process.on(signal, () => {
     mongoose.connection.close(() => {
         console.log('\nMongoose connection closed through app termination 📕');

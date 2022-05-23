@@ -1,11 +1,11 @@
 import express from 'express'
-import path from 'path'
-import Parking from './models/parking.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
-import User from './models/user.js'
-
 import multer from 'multer'
 
+import Parking from './models/parking.js'
+import User from './models/user.js'
+import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+
+// Storage engine
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "static/uploads")
@@ -21,7 +21,7 @@ const upload = multer({storage: storage,
             cb(null, true);
         } else {
             cb(null, false);
-            //return cb('Only .png, .jpg and .jpeg format allowed!');
+            // return cb('Only .png, .jpg and .jpeg format allowed!');
         }
     }
 })
@@ -30,22 +30,18 @@ const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
 router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
-    //caricare immagine?
-    //salvataggio il percorso
-    //console.log(await JSON.parse(req.body["json"]))
     if(!req.file) {
         return res.status(415).send({ message: 'Wrong file type for images' })
     }
-    
     let bodyJSON = await JSON.parse(req.body["json"])
     bodyJSON.image = "uploads/"+ req.file["filename"]
-    console.log("IMMAGINE", bodyJSON.image)
 
     let parking = new Parking(bodyJSON)
     
-    // set the owner of the parking to the logged in user
     try {
         let user = await User.findById(req.loggedInUser.userId)
+
+        // set the owner of the parking to the logged in user
         parking.owner = user
         console.log("Printing new parking", parking)
         let newParking = await parking.save()
@@ -55,11 +51,11 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         newParking = await newParking.save()
 
         // add reference into the user object
-        user.parkings.push(newParking) //'/api/v1/parkings/' + 
+        user.parkings.push(newParking)
         await user.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + parkingId).status(200).send()
+        res.location('/api/v1/parkings/' + parkingId).status(201).send()
     } catch (err) {
         console.log(err)
         return res.status(400).send({ message: "Some fields are empty or undefined" })
@@ -73,10 +69,10 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            const user = await User.findById(idUser, { username: 0, password: 0, name: 0, surname: 0, email: 0, _id: 0, __v: 0 }).populate("parkings", { __v: 0, owner: 0 })
-            /* console.log(req.params)
-            const parkings = await Parking.find() */
-            return res.status(200).json(user)
+            
+            const parkings = await Parking.find({ owner: idUser })
+            
+            return res.status(200).json(parkings)
         } catch (err) {
             console.log(err)
             return res.status(404).send({ message: 'User not found' })
@@ -125,19 +121,8 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        //TODO basta mettere update senza sta colonna di if orrida
-        if (req.body.name) parking.name = req.body.name
-        if (req.body.address) parking.address = req.body.address
-        if (req.body.city) parking.city = req.body.city
-        if (req.body.country) parking.country = req.body.country
-        if (req.body.description) parking.description = req.body.description
-        if (req.body.image) parking.image = req.body.image
-        if (req.body.latitude) parking.latitude = req.body.latitude
-        if (req.body.longitude) parking.longitude = req.body.longitude
-        if (req.body.visible != null) parking.visible = req.body.visible
-
-        const updatedParking = await parking.save()
-        console.log("upd", updatedParking)
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true })
+        
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)

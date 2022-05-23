@@ -1,4 +1,3 @@
-
 function goBack() {
     //window.location.href = "/privateArea"
     history.back()
@@ -132,11 +131,31 @@ async function main()
         }
     }
 
+    function convertDate(date) {
+        let dateArray = ($("#" + date)).text().split("/")
+        return dateString = dateArray[1] + "/" + dateArray[0] + "/" + dateArray[2]
+    }
+
+    let minDate = new tempusDominus.DateTime().startOf("minutes")
+    if(minDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
+        minDate = new tempusDominus.DateTime(convertDate("insertionFrom"))
+    }
+    if(recurrent === true) {
+        let time = ($("#insertionRecurrentHours").text().split(" - ")[0].split(":"))
+        minDate.setHours(parseInt(time[0]), parseInt(time[1]))
+        while(daysOfWeekDisabled.includes(minDate.getDay()))
+            minDate.setDate(minDate.getDate() + 1)
+    }
+    console.log(minDate)
+
+    let maxDate = new tempusDominus.DateTime(convertDate("insertionTo"))
+
     //Global options DA
     linked1.updateOptions({
+        defaultDate: minDate,
         restrictions: {
-            minDate: new tempusDominus.DateTime().startOf("minutes"),
-            maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+            minDate: minDate,
+            maxDate: maxDate,
             daysOfWeekDisabled: daysOfWeekDisabled,
             enabledHours: enabledHours
         },
@@ -148,11 +167,11 @@ async function main()
     })
 
     //Global options A
-    const linked2 = new tempusDominus.TempusDominus(document.getElementById('linkedPickers2'), {
-        useCurrent: false,
+    const linked2 = new tempusDominus.TempusDominus(linkedPicker2Element, {
+        defaultDate: minDate,
         restrictions: {
-            minDate: new tempusDominus.DateTime().startOf("minutes"),
-            maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+            minDate: minDate,
+            maxDate: maxDate,
             daysOfWeekDisabled: daysOfWeekDisabled,
             enabledHours: enabledHours
         },
@@ -164,34 +183,76 @@ async function main()
     });
 
     //Opzioni di A quando cambia DA
-    linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+    linked1.subscribe(tempusDominus.Namespace.events.change, (e) => {
         console.log("Update TO")
+        let eventDate = new tempusDominus.DateTime(e.date)
         let enabledDates = []
-        if(recurrent) {
-            enabledDates.push(e.detail.date.startOf("date"))
-        }
-        linked2.updateOptions({
-            restrictions: {
-                minDate: e.detail.date,
-                maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
-                daysOfWeekDisabled: daysOfWeekDisabled,
-                enabledHours: enabledHours,
-                enabledDates: enabledDates
-            },
-            display: {
-                components: {
-                    useTwentyfourHour: true
-                }
+        let recmaxDate = maxDate
+        if(recurrent === true) {
+            enabledDates.push(eventDate)
+            const time = ($("#insertionRecurrentHours").text().split(" - ")[1].split(":"))
+            recmaxDate = new tempusDominus.DateTime(eventDate)
+            recmaxDate.setHours(parseInt(time[0]), parseInt(time[1]))
+            if(recmaxDate.isAfter(maxDate)) {
+                recmaxDate = maxDate
             }
-        });
+        }
+
+        //console.log(eventDate, recmaxDate)
+        try {
+            linked2.updateOptions({
+                defaultDate: eventDate,
+                restrictions: {
+                    minDate: eventDate,
+                    maxDate: recmaxDate,
+                    daysOfWeekDisabled: daysOfWeekDisabled,
+                    enabledHours: enabledHours,
+                    enabledDates: enabledDates
+                },
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                }
+            });
+        } catch(err) {
+            linked2.updateOptions({
+                defaultDate: minDate,
+                restrictions: {
+                    minDate: minDate,
+                    maxDate: maxDate,
+                    daysOfWeekDisabled: daysOfWeekDisabled,
+                    enabledHours: enabledHours,
+                    enabledDates: enabledDates
+                },
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                }
+            });
+        }
     });
 
-    //Opzioni di DA quando cambia A
-    linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+    /* linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        console.log("Update FROM");
+        console.log(minDate);
+
+        const spasticMinDate = new tempusDominus.DateTime(minDate);
+        spasticMinDate.setDate(spasticMinDate.getDate()-1);
+
+        console.log(spasticMinDate);
+
+        let newminDate = new tempusDominus.DateTime().startOf("minutes");
+        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
+            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
+        }
+
         linked1.updateOptions({
+            defaultDate: newminDate,
             restrictions: {
-                minDate: new tempusDominus.DateTime().startOf("minutes"),
-                maxDate: new tempusDominus.DateTime(($("#insertionTo")).text()),
+                minDate: newminDate,
+                maxDate: e.date,
                 daysOfWeekDisabled: daysOfWeekDisabled,
                 enabledHours: enabledHours
             },
@@ -201,10 +262,41 @@ async function main()
                 }
             }
         });
-    });
+      }); */
+
+    // !BROKEN
+    /* //Opzioni di DA quando cambia A
+    linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, function (e) {
+        console.log("Update FROM");
+        console.log(minDate);
+
+        const spasticMinDate = new tempusDominus.DateTime(minDate);
+        spasticMinDate.setDate(spasticMinDate.getDate()-1);
+
+        console.log(spasticMinDate);
+
+        let newminDate = new tempusDominus.DateTime().startOf("minutes");
+        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
+            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
+        }
+
+        linked1.updateOptions({
+            defaultDate: newminDate,
+            restrictions: {
+                minDate: newminDate,
+                maxDate: e.detail.date,
+                daysOfWeekDisabled: daysOfWeekDisabled,
+                enabledHours: enabledHours
+            },
+            display: {
+                components: {
+                    useTwentyfourHour: true
+                }
+            }
+        });
+    }); */
     //--------------------------------- end period datepickers ------------------------------------
 }
-
 
 async function createReservation()
 {

@@ -1,20 +1,13 @@
 import express from 'express'
-import moment from 'moment'
 
-import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
-import User from './models/user.js'
-
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
 const router = express.Router()
 
+// Get all the user's reservations
 router.get('/myReservations', tokenChecker, async (req, res) => {
-/*     if (!isAuthToken(req)) {
-        return res.status(401).send({ message: 'Token missing or invalid' })
-    } */
     try {
-        //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
         let reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { _id: 0, __v: 0 }).populate(
             {
                 path: "insertion",
@@ -34,6 +27,7 @@ router.get('/myReservations', tokenChecker, async (req, res) => {
     }
 })
 
+// Get a specific reservation
 router.get('/:reservationId', async (req, res) => {
     try {
         //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
@@ -46,7 +40,7 @@ router.get('/:reservationId', async (req, res) => {
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)
-        return res.status(404).send({ message: "Insertion not found" })
+        return res.status(404).send({ message: "Reservation not found" })
     }
 })
 

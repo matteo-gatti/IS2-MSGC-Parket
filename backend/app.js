@@ -1,5 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
+
 import { users } from './users.js'
 import { parkings } from './parkings.js'
 import { insertions } from './insertions.js'
@@ -7,11 +9,7 @@ import { insertionsNested } from './insertionsNested.js'
 import { reservations } from './reservations.js'
 import { reservationsNested } from './reservationsNested.js'
 import authentication from './authentication.js'
-import tokenChecker from './tokenChecker.js'
 import statics from './statics.js'
-import cors from 'cors'
-//tentativo immagini
-
 
 const app = express()
 
@@ -32,6 +30,7 @@ app.use('/api/v1/insertions', insertions)
 app.use('/api/v1/insertions', reservationsNested)
 app.use('/api/v1/reservations', reservations)
 
+// Error handling
 app.all( '/api/*', (req, res) => {
     res.status(404)
     res.json({ message: 'Not found' })
@@ -39,9 +38,5 @@ app.all( '/api/*', (req, res) => {
 
 // Serve static files
 app.use('/', statics)
-// Default route
-//app.all('*', (req, res) => {res.redirect('/') }) //TODO cambiare
-
-// 404 error handler
 
 export default app

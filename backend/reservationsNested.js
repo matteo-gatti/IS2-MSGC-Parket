@@ -4,12 +4,11 @@ import moment from 'moment'
 import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
 import User from './models/user.js'
-
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
 const router = express.Router()
 
-// Create a new reservation
+// Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
     try {
         let insertion = await Insertion.findById(req.params.insertionId).populate("reservations parking")
@@ -27,29 +26,29 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
 
         // check if the insertion's datetimes are valid
         if ((reqDateStart >= reqDateEnd) || insertion.datetimeStart > reqDateStart || insertion.datetimeEnd < reqDateEnd) {
-            return res.status(400).send({ message: "Timeslot not valid or not available" })
+            return res.status(400).send({ message: "Timeslot not valid" })
         }
 
         if (insertion.recurrent) {
             // can only reserve recurrent insertions on a single day
             const startDateString = moment(reqDateStart).format("YYYY/MM/DD")
             const endDateString = moment(reqDateEnd).format("YYYY/MM/DD")
-            if (startDateString !== endDateString) return res.status(400).send({ message: "Timeslot not valid or not available" })
+            if (startDateString !== endDateString) return res.status(400).send({ message: "Recurrent reservation only possible on single day" })
 
             // check if day is available
             const dayId = { 0: "sunday", 1: "monday", 2: "tuesday", 3: "wednesday", 4: "thursday", 5: "friday", 6: "saturday" }
             const startDay = reqDateStart.getDay()
             if (!insertion.recurrenceData.daysOfTheWeek.includes(dayId[startDay])) {
-                return res.status(400).send({ message: "Timeslot not valid or not available" })
+                return res.status(400).send({ message: "Insertion is not available on this day" })
             }
         } 
         // check if the insertion is not already reserved
         for (const resv in insertion.reservations) {
             if (reqDateStart >= insertion.reservations[resv].datetimeStart && reqDateStart <= insertion.reservations[resv].datetimeEnd) {
-                return res.status(400).send({ message: "Timeslot not valid or not available" })
+                return res.status(400).send({ message: "Insertion is already reserved for this timeslot" })
             }
             if (reqDateEnd >= insertion.reservations[resv].datetimeStart && reqDateEnd <= insertion.reservations[resv].datetimeEnd) {
-                return res.status(400).send({ message: "Timeslot not valid or not available" })
+                return res.status(400).send({ message: "Insertion is already reserved for this timeslot" })
             }
         }
 
@@ -90,6 +89,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
     }
 })
 
+// Get all reservations of an insertion
 router.get('/:insertionId/reservations', async (req, res) => {
     try {
         //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})

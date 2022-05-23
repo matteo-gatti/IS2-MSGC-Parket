@@ -188,14 +188,14 @@
     <div class="row">
       <div class="col-md-2">
         <div class="container mt-5" style="padding-left: 25%">
-          <btn class="btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</btn>
+          <button class="btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</button>
         </div>
       </div>
 
       <div class="col page-content page-container" id="page-content">
         <div class="padding">
-          <div class="row container d-flex justify-content-center align-content-center">
-            <div class="col-md-18">
+          <div class="row d-flex justify-content-center align-content-center">
+            <div class="col-md-12">
               <div class="card user-card-full">
                 <div class="row m-l-0 m-r-0">
                   <div class="col-sm-3 bg-c-lite-green user-profile">
@@ -254,8 +254,7 @@
                         <h6 class='d-inline'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A: </h6>
                         <span class='text-muted' id="reservationTo" style='font-size: 14px;'></span>
                       </div>
-                      <div class="row" id="reservList">
-                      </div>
+                      <div class="row" id="reservList"></div>
                       <ul class="social-link list-unstyled m-t-40 m-b-10">
                         <li><a href="#!" data-toggle="tooltip" data-placement="bottom" title=""
                             data-original-title="facebook" data-abc="true"><i
@@ -276,12 +275,12 @@
           </div>
         </div>
       </div>
-
+        
       <div class="col-md-2">
       </div>
  
     </div>
-    <div class="container mt-3" <% if (owner) { %> hidden <% } %>>
+    <div class="container mt-3" <% if (owner) { %>  hidden <% } %> >
       <hr>
         <!--da visualizzare solo se non si è proprietari -->
         <div class='row mb-3 d-flex justify-content-center'>
@@ -321,5 +320,6 @@
         </div>
         <p><br>Altre opzioni di pagamento coming soon™️</p>
     </div>
+
     <%- include("footer.ejs", {logged: logged}) %>
 </body>

@@ -6,16 +6,15 @@ import User from './models/user.js'
 
 const router = express.Router()
 
-// Route to authenticate a user and get a new token (POST http://localhost:port/api/v1/authentication)
+// Route to authenticate a user and get a new token
 router.post('/login', async (req, res) => {
 
     const user = (req.body.identifier && req.body.identifier.includes("@")) 
         ? await User.findOne({ email: req.body.identifier }) 
         : await User.findOne({ username: req.body.identifier });
 
-
     if (user && await bcrypt.compare(req.body.password, user.password)) {
-        // If user is found and password is right create a token
+        // if user is found and password is right create a token
         var payload = {
             userId: user._id,
             email: user.email
@@ -29,10 +28,10 @@ router.post('/login', async (req, res) => {
     }
 })
 
-// Route to deauthenticate a user (POST http://localhost:port/api/v1/deauth)
+// Route to deauthenticate a user
 router.post('/logout', async(req, res) => {
     console.log("Logging out")
-    const token = jwt.sign({userId: "ciao"}, process.env.SUPER_SECRET, {
+    const token = jwt.sign({userId: "goodbye"}, process.env.SUPER_SECRET, {
         expiresIn: 0 // expires in 0 seconds
     })
     console.log("New token: " + token)

@@ -18,14 +18,14 @@ async function getMyParkings() {
             //console.log(data)
             const container = $('#parkContainer')
             const parkingHTML = $('#firstPark')
-            for (parking in data.parkings) {
+            for (parking in data) {
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
-                $(tmpParkHTML.find("p")[0]).text(data.parkings[parking].name)
-                $(tmpParkHTML.find("p")[2]).text(data.parkings[parking].address + " " + data.parkings[parking].city + " " + data.parkings[parking].country)
-                $(tmpParkHTML.find("p")[3]).text(data.parkings[parking].self)
-                $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data.parkings[parking]._id}')`)
-                $(tmpParkHTML.find("img")[0]).attr("src", data.parkings[parking].image)
+                $(tmpParkHTML.find("p")[0]).text(data[parking].name)
+                $(tmpParkHTML.find("p")[2]).text(data[parking].address + " " + data[parking].city + " " + data[parking].country)
+                $(tmpParkHTML.find("p")[3]).text(data[parking].self)
+                $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
+                $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
                 container.append(tmpParkHTML)
 
             }

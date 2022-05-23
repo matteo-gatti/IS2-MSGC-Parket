@@ -1,7 +1,6 @@
 import express from 'express'
 
 import Insertion from './models/insertion.js'
-import Reservation from './models/reservation.js'
 import Parking from './models/parking.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
@@ -17,9 +16,18 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: "User is not authorized to perform this action" })
         }
 
+        // check that correct data is sent
+        const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval", "recurrent", "recurrenceData"]
+        
+        for (const field in req.body) {
+            if (!validInsertionFields.includes(field)) {
+                return res.status(400).send({ message: "Some fields are invalid" })
+            }
+        }
+
         // check if the insertion's datetimes are valid
         if ((new Date(req.body.datetimeStart)) >= (new Date(req.body.datetimeEnd))) {
-            return res.status(400).send({ message: "Timeslot not valid or not available" })
+            return res.status(400).send({ message: "Timeslot not valid" })
         }
 
         // create the insertion
@@ -39,10 +47,9 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         }
 
         insertion = await insertion.save()
-
         
         insertion.self = "/api/v1/insertions/" + insertion.id
-        //si potrebbe unificare togliendo la parte parkings? per omogeneità della risorsa
+
         insertion = await insertion.save()
 
         parking.insertions.push(insertion)
@@ -55,7 +62,7 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         if (err.name === "ValidationError") {
             return res.status(400).send({ message: "Some fields are empty or undefined" })
         }
-        return res.status(404).send({ message: "Parking or owner not found" })
+        return res.status(404).send({ message: "Parking not found" })
     }
 })
 
@@ -76,15 +83,13 @@ router.get('/:parkId/insertions', async (req, res) => {
                     select: { self: 1 }
                 }
             }]
-
         })
-        //"insertions").populate("insertions.reservations", {_id: 0, __v:0, insertion: 0}).populate("insertions.reservations.client")
 
         console.log(insertion)
         return res.status(200).json(insertion)
     } catch (err) {
         console.log(err)
-        return res.status(400).send({ message: "Some fields are empty or undefined" })
+        return res.status(404).send({ message: "Parking not found" })
     }
 })
 

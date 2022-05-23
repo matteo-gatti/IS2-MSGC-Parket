@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PARKET</title>
+    <link rel="icon" href="img/logo.png" />
+     <!-- JQuery-->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"
+  ></script>
+  
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+  <!-- Popperjs -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+crossorigin="anonymous"></script>
+
+  <!-- Bootstrap-->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+    crossorigin="anonymous"
+  />
+  <!-- ICONS -->
+ 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
+  rel="stylesheet" crossorigin="anonymous">
+    <style>
+      /* GLOBAL STYLES
+-------------------------------------------------- */
+      /* Padding below the footer and lighter body text */
+
+      body {
+        padding-top: 0rem;
+        padding-bottom: 3rem;
+        color: #5a5a5a;
+      }
+
+      /* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+
+      /* Carousel base class */
+      .carousel {
+        margin-bottom: 4rem;
+      }
+      /* Since positioning the image, we need to help out the caption */
+      .carousel-caption {
+        bottom: 3rem;
+        z-index: 10;
+      }
+
+      /* Declare heights because of positioning of img element */
+      .carousel-item {
+        height: 32rem;
+      }
+      .carousel-item > img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        min-width: 100%;
+        height: 32rem;
+      }
+
+      /* MARKETING CONTENT
+-------------------------------------------------- */
+
+      /* Center align the text within the three columns below the carousel */
+      .marketing .col-lg-4 {
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      .marketing h2 {
+        font-weight: 400;
+      }
+      /* rtl:begin:ignore */
+      .marketing .col-lg-4 p {
+        margin-right: 0.75rem;
+        margin-left: 0.75rem;
+      }
+      /* rtl:end:ignore */
+
+      /* Featurettes
+------------------------- */
+
+      .featurette-divider {
+        margin: 5rem 0; /* Space out the Bootstrap <hr> more */
+      }
+
+      /* Thin out the marketing headings */
+      .featurette-heading {
+        font-weight: 300;
+        line-height: 1;
+        /* rtl:remove */
+        letter-spacing: -0.05rem;
+      }
+
+      /* RESPONSIVE CSS
+-------------------------------------------------- */
+
+      @media (min-width: 40em) {
+        /* Bump up size of carousel content */
+        .carousel-caption p {
+          margin-bottom: 1.25rem;
+          font-size: 1.25rem;
+          line-height: 1.4;
+        }
+
+        .featurette-heading {
+          font-size: 50px;
+        }
+      }
+
+      @media (min-width: 62em) {
+        .featurette-heading {
+          margin-top: 7rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <%- include("header.ejs", {logged: logged}) %>
+    <!--<h1 style="text-align:center;"> Parket: The park market</h1>-->
+    <div class="container my-5">
+      <div
+        class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg"
+      >
+        <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+          <h1 class="display-4 fw-bold lh-1">
+            PARKET: Il mercato online di parcheggi privati
+          </h1>
+          <p class="lead">
+            Metti in affitto il tuo parcheggio privato inutilizzato e inizia a
+            guadagnare da oggi! Devi andare da qualche parte e cerchi un
+            parcheggio sicuro ad un prezzo onesto? Utilizza la funzione di
+            ricerca per trovare il parcheggio che fa per te!
+          </p>
+          <div
+            class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3"
+          >
+            <a
+              href="parkings"
+              class="btn btn-primary btn-lg px-4 me-md-2 fw-bold"
+            >
+              Parcheggi
+            </a>
+            <a href="#" class="btn btn-outline-secondary btn-lg px-4">
+              Mappa
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-4 offset-lg-1 p-0 overflow-hidden shadow-lg">
+          <img
+            class="rounded-lg-3"
+            src="img/parcheggio.jpg"
+            alt=""
+            width="720"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="container marketing">
+      <!-- START THE FEATURETTES -->
+
+      <hr class="featurette-divider" />
+
+      <div class="row featurette">
+        <div class="col-md-7">
+          <h2 class="featurette-heading">
+            Affita i tuoi parcheggi.
+            <span class="text-muted">&#201; gratis!</span>
+          </h2>
+          <p class="lead">
+            Carica le informazioni del tuo parcheggio personale inutilizzato,
+            seleziona una data e un orario per l'inserzione e lascia che gli
+            utenti di PARKET prenotino il posto, noi penseremo a mettervi in
+            contatto 😉<br />
+            Nessun costo aggiuntivo per il servizio, scelta della tariffa
+            completamente libera e garanzia di ricevere il denaro sono solo
+            alcune delle nostre offerte. Entra subito in PARKET e inizia a
+            guadagnare adesso!
+          </p>
+        </div>
+        <div class="col-md-5">
+          <div style="display: inline-block; height:120%; vertical-align:middle"></div>
+          <img style="vertical-align:middle; border-radius:5%;"
+            class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto"
+            width="500"
+            height="500"
+            src="img/prova.png"
+          >
+        </img>
+        </div>
+      </div>
+
+      <hr class="featurette-divider" />
+
+      <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+          <h2 class="featurette-heading ">
+            Cerca un parcheggio nella tua zona e prenota ora!
+          </h2>
+          <p class="lead">
+            Utilizzando i filtri della pagina di ricerca potrai visualizzare specifici parcheggi che rispettano
+            le tue esigenze in termini di spazio, costo e molto altro! <br>
+            Se deciderai di considerare la prenotazione, le recensioni del parcheggio ti aiuteranno a capire se fa
+            per te o meno, grazie al feedback degli utenti passati.
+          </p>
+        </div>
+        <div class="col-md-5 order-md-1">
+          <img
+            class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto"
+            width="500"
+            height="500"
+            src="img/map.jpg"
+            style="border-radius: 5%;"
+          >
+
+        </img>
+      </div>
+      </div>
+
+      <hr class="featurette-divider" />
+
+      <div class="row featurette">
+        <div class="col-md-7">
+          <h2 class="featurette-heading">
+            Confronta con i costi dei parcheggi pubblici.
+          </h2>
+          <p class="lead">
+            Gli utenti del servizio PARKET possono informare il sistema dei costi del parcheggio pubblico
+            in una zona, in modo da fornire un termine di paragone per le inserzioni della stessa zona. <br>
+            I prezzi delle nostre inserzioni sono il 60% più basse rispetto ai costi dei parcheggi nella città di Trento
+            e si abbassano ogni volta che un utente entra in PARKET. Unisciti a noi!
+          </p>
+        </div>
+        <div class="col-md-5">
+          <div style="display: inline-block; height:120%; vertical-align:middle"></div>
+          <img style="vertical-align:middle; border-radius:5%;"
+            class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto"
+            width="500"
+            height="500"
+            src="img/pagapark.jpg"
+          >
+
+        </img>
+        </div>
+      </div>
+
+      <hr class="featurette-divider" />
+
+      <!-- /END THE FEATURETTES -->
+    </div>
+
+    <%- include("footer.ejs", {logged: logged}) %>
+  </body>
+</html>

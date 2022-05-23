@@ -1,3 +1,6 @@
+# Folders
+/static/uploads/*
+
 # Logs
 logs
 *.log

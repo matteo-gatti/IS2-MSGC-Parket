@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Inserimento nuovo parcheggio!</title>
+  <link rel="icon" href="img/logo.png">
+  <!-- JQuery-->
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
+
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+    crossorigin="anonymous"></script>
+
+  <!-- Popperjs -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+
+  <!-- Tempus Dominus JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
+    crossorigin="anonymous"></script>
+
+  <!-- Bootstrap-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+  <!-- ICONS -->
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <script src="scriptNewInsertionAndParking.js" defer></script>
+
+</head>
+
+<body class="text-center">
+  <%- include("header.ejs", { logged: logged }) %>
+    <div class="row">
+      <div class=" row col">
+        <div class="col-md-2"></div>
+        <div class="col-md-8 form-signin ">
+          <form>
+            <!--<img class="mb-4" src="img/logo.png" alt="" width="200" height="200">-->
+            <h1 class="h3 mb-3 fw-normal">Dati Parcheggio</h1>
+            <div class="form-floating">
+              <input type="text" class="form-control" id="nome" placeholder="Parcheggio numero 2" required>
+              <label for="nome">Nome</label>
+            </div>
+            <div class="mb-3"></div>
+
+            <div class="form-floating">
+              <input type="text" class="form-control" id="indirizzo" placeholder="via Frutta 11" required>
+              <label for="indirizzo">Indirizzo</label>
+            </div>
+            <div class="mb-3"></div>
+            <div class="form-floating">
+              <input type="text" class="form-control" id="citta" placeholder="Trento" required>
+              <label for="citta">Città</label>
+            </div>
+            <div class="mb-3"></div>
+            <div class="form-floating">
+              <input type="text" class="form-control" id="nazione" placeholder="Italia" required>
+              <label for="nazione">Nazione</label>
+            </div>
+            <div class="mb-3"></div>
+            <div class="form-floating">
+              <input type="text" class="form-control" id="descrizione" placeholder="Breve descrizione del parcheggio"
+                required>
+              <label for="descrizione">Descrizione</label>
+            </div>
+            <div class="mb-3"></div>
+            <div class="">
+              <input type="file" class="form-control" id="image" name="image" onchange="">
+              <label for="image"></label>
+            </div>
+            <div class="checkbox mb-3">
+            </div>
+
+            <!-- <input type="submit" placeholder="ciao"> -->
+          </form>
+        </div>
+        <div class="col-md-2"></div>
+      </div>
+      <div class="row col">
+        <div class="col-md-2"></div>
+        <form id="insertionForm" class="col-md-8">
+          <h1 class="h3 mb-3 fw-normal">Dati Inserzione</h1>
+          <div class="mb-3 text-start">
+            <label id="message" class="text-danger d-block"></label>
+            <label id="parkId" hidden></label>
+            <label for="recipient-name" class="col-form-label">Nome:</label>
+            <input type="text" class="form-control" id="insertion-name" required>
+          </div>
+          <!-- dt picker -->
+          <div class='row mb-3'>
+            <div class='col-sm-6 text-start'>
+              <label for='linkedPickers1Input' class='form-label'>Da:</label>
+              <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
+                data-td-target-toggle='nearest'>
+                <input id='linkedPickers1Input' type='text' class='form-control' data-td-target='#linkedPickers1'
+                  required />
+                <span class='input-group-text' data-td-target='#linkedPickers1' data-td-toggle='datetimepicker'>
+                  <span class='fa-solid fa-calendar'></span>
+                </span>
+              </div>
+            </div>
+            <div class='col-sm-6 text-start'>
+              <label for='linkedPickers2Input' class='form-label'>A:</label>
+              <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
+                data-td-target-toggle='nearest'>
+                <input id='linkedPickers2Input' type='text' class='form-control' data-td-target='#linkedPickers2'
+                  required />
+                <span class='input-group-text' data-td-target='#linkedPickers2' data-td-toggle='datetimepicker'>
+                  <span class='fa-solid fa-calendar'></span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- Insert price -->
+          <div class="row">
+            <div class='col-sm-6 text-start'>
+              <!-- Insert hourly price -->
+              <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">€</span>
+                </div>
+                <input type="number" step=".01" min="0" class="form-control" id="insertion-hourlyPrice" required>
+              </div>
+            </div>
+            <div class='col-sm-6 text-start'>
+              <!-- Insert daily price -->
+              <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
+              <div class="mb-3">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">€</span>
+                  </div>
+                  <input type="number" step=".01" min="0" class="form-control" id="insertion-dailyPrice">
+                </div>
+              </div>
+            </div>
+            <!-- Insert min interval of reservation -->
+            <div class="mb-3 text-start">
+              <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
+              <div class="mb-3 input-group">
+                <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
+                <div class="input-group-append">
+                  <span class="input-group-text">min</span>
+                </div>
+              </div>
+            </div>
+        </form>
+
+
+
+        <!-- Checkbox for recurrence or non recurrence -->
+        <div class="form-check text-start ms-4">
+          <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
+          <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
+        </div>
+        <form class="text-start">
+          <!-- Select days of the week -->
+          <div class="form-check mb-3" id="recurrenceContainer" hidden>
+            <div class="row mb-3" id="dayCheckboxes">
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="monday">
+                  <label class="form-check-label" for="monday">Lunedì</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="tuesday">
+                  <label class="form-check-label" for="tuesday">Martedì</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="wednesday">
+                  <label class="form-check-label" for="wednesday">Mercoledì</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="thursday">
+                  <label class="form-check-label" for="thursday">Giovedì</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="friday">
+                  <label class="form-check-label" for="friday">Venerdì</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="saturday">
+                  <label class="form-check-label" for="friday">Sabato</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="sunday">
+                  <label class="form-check-label" for="friday">Domenica</label>
+                </div>
+              </div>
+            </div>
+            <!-- Select time start -->
+            <!-- Time picker -->
+            <div class="row">
+              <div class="col-sm-6">
+                <label for="recurrenceStart" class="form-label">Ora di inizio:</label>
+                <div class='input-group log-event' id='recurrenceStart' data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'>
+                  <input id='recurrenceStartInput' type='text' class='form-control' data-td-target='#recurrenceStart'
+                    required />
+                  <span class='input-group-text' data-td-target='#recurrenceStart' data-td-toggle='datetimepicker'>
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                </div>
+              </div>
+              <!-- Select time end -->
+              <div class="col-sm-6">
+                <label for="recurrenceEnd" class="form-label">Ora di fine:</label>
+                <div class='input-group log-event' id='recurrenceEnd' data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'>
+                  <input id='recurrenceEndInput' type='text' class='form-control' data-td-target='#recurrenceEndInput'
+                    required />
+                  <span class='input-group-text' data-td-target='#recurrenceEndInput' data-td-toggle='datetimepicker'>
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+        </form>
+        <div class="col-md-2"></div>
+      </div>
+    </div>
+    <div class="mb-3"></div>
+    <div class="mb-3"></div>
+  </div>
+    <p class="text-danger" id="message" hidden>Messaggio</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <button type="button" id="btnSubmit" class="btn btn-primary btn-lg px-4 gap-3"
+        onclick="createNewInsertionAndParking(this)">Aggiungi Inserzione e Parcheggio</button>
+    </div>
+    <%- include("footer.ejs", {logged: logged}) %>
+
+</body>
+
+</html>
+
+<!--
+     const validParkingFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+    const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval"]
+-->

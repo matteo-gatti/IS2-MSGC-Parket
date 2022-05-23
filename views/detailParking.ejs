@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<head>
+  <title>Dettagli parcheggio</title>
+  <link rel="icon" href="img/logo.png" />
+  <!-- JQuery-->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"
+  ></script>
+  
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+  <!-- Popperjs -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+crossorigin="anonymous"></script>
+
+  <!-- Tempus Dominus JavaScript -->
+<script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
+crossorigin="anonymous"></script>
+
+  <!-- Bootstrap-->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+    crossorigin="anonymous"
+  />
+  <!-- ICONS -->
+ 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
+  rel="stylesheet" crossorigin="anonymous">
+  <script src="scriptDetailParking.js" defer></script>
+  <style>
+      .imgDetail {
+            width: 80%;
+            height: 33vw;
+            object-fit: cover;
+      }
+    </style>
+</head>
+<body>
+  <%- include("./header.ejs", {logged: logged}) %>
+  <!-- Page Content -->
+  <div class="row">
+    <div class="col-md-2">
+      <div class="container mt-5" style="padding-left: 25%">
+        <btn class="btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</btn>
+      </div>
+    </div>
+    <div class="col-md-10" style="margin: 0px">
+      <!-- Portfolio Item Heading -->
+      <h1 class="my-4" id="parkingName"></h1>
+
+      <!-- Portfolio Item Row -->
+      <div class="row">
+        <div class="col-md-7">
+          <img
+            class="img-fluid imgDetail"
+            id="parkingImage"
+            src="https://via.placeholder.com/700x500"
+            alt="Parking image"
+          />
+        </div>
+
+        <div class="col-md-4 d-flex flex-column">
+          <!--<h3 class="my-3" id="parkingName"></h3>-->
+          <p id="parkingId" hidden></p>
+          Indirizzo:
+          <h4 class="my-3" id="parkingAddress"></h4>
+          Città:
+          <h4 class="my-3" id="parkingCity"></h4>
+          Nazione:
+          <h4 class="my-3" id="parkingCountry"></h4>
+          Descrizione:
+          <h5 id="parkingDesc"></h5>
+
+          
+          <% if (owner) { %>
+          <btn class="btn btn-lg btn-success mt-auto mx-auto" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
+          <% } %>
+
+        </div>
+      </div>
+      <!-- /.row -->
+      <hr />
+      
+      <!-- Related Projects Row -->
+      <h3 class="my-4">Inserzioni</h3>
+      <% if (owner) { %>
+      <btn class="btn btn-lg btn-primary mb-3" id="newInsertion" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-name="" data-bs-id="">Nuova Inserzione</btn>
+      <% } %>
+      <div class="row">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 col-md-11" id="insertionContainer">
+          <div class="col" id="firstInsertion" hidden>
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <p class="card-text insertionId" hidden></p>
+                  <p class="card-text insertionName"></p>
+                  <p class="card-text insertionStartDate"></p>
+                  <p class="card-text insertionEndDate"></p>
+                  <p class="card-text insertionPriceHourly"></p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                      <button onclick="detailInsertion()" type="button" class="btn btn-sm btn-outline-secondary">Dettagli</button>
+                      <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-1"></div>
+    </div>
+    
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="dummy"></div>
+            <div class="modal-body" id="form">
+              <form id="insertionForm">
+                <div class="mb-3">
+                  <label id="message" class="text-danger d-block"></label>
+                  <label id="parkId" hidden></label>
+                  <label for="recipient-name" class="col-form-label">Nome:</label>
+                  <input type="text" class="form-control" id="insertion-name" required>
+                </div>
+                <!-- dt picker -->
+                <div class='row mb-3'>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers1'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers1Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers1'
+                      required
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers1'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers2Input' class='form-label'>A:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers2'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers2Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers2'
+                      required
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers2'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Insert price -->
+                <div class="row">
+                  <div class='col-sm-6'>
+                    <!-- Insert hourly price -->
+                    <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">€</span>
+                      </div>
+                      <input type="number" step=".01" min="0" class="form-control" id="insertion-hourlyPrice" required>
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <!-- Insert daily price -->
+                    <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
+                    <div class="mb-3">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">€</span>
+                        </div>
+                      <input type="number" step=".01" min="0" class="form-control" id="insertion-dailyPrice">
+                    </div>
+                  </div>
+                </div>
+                <!-- Insert min interval of reservation -->
+                <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
+                <div class="mb-3">
+                  <div class="mb-3 input-group">
+                    <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
+                    <div class="input-group-append">
+                      <span class="input-group-text">min</span>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+              
+                <!-- Checkbox for recurrence or non recurrence -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
+              <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
+            </div>
+            <form>
+            <!-- Select days of the week -->
+            <div class="form-check mb-3" id="recurrenceContainer" hidden>
+              <div class="row mb-3" id="dayCheckboxes" >
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="monday">
+                    <label class="form-check-label" for="monday">Lunedì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="tuesday">
+                    <label class="form-check-label" for="tuesday">Martedì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="wednesday">
+                    <label class="form-check-label" for="wednesday">Mercoledì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="thursday">
+                    <label class="form-check-label" for="thursday">Giovedì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="friday">
+                    <label class="form-check-label" for="friday">Venerdì</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="saturday">
+                    <label class="form-check-label" for="friday">Sabato</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="sunday">
+                    <label class="form-check-label" for="friday">Domenica</label>
+                  </div>
+                </div>
+              </div>
+              <!-- Select time start -->
+              <!-- Time picker -->
+              <div class="row">
+                <div class="col-sm-6">
+                  <label for="recurrenceStart" class="form-label">Ora di inizio:</label>
+                  <div
+                  class='input-group log-event'
+                  id='recurrenceStart'
+                  data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'
+                  >
+                  <input
+                    id='recurrenceStartInput'
+                    type='text'
+                    class='form-control'
+                    data-td-target='#recurrenceStart'
+                    required
+                  />
+                  <span
+                    class='input-group-text'
+                    data-td-target='#recurrenceStart'
+                    data-td-toggle='datetimepicker'
+                  >
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                  </div>
+                </div>
+                <!-- Select time end -->
+                <div class="col-sm-6">
+                  <label for="recurrenceEnd" class="form-label">Ora di fine:</label>
+                  <div
+                  class='input-group log-event'
+                  id='recurrenceEnd'
+                  data-td-target-input='nearest'
+                  data-td-target-toggle='nearest'
+                  >
+                  <input
+                    id='recurrenceEndInput'
+                    type='text'
+                    class='form-control'
+                    data-td-target='#recurrenceEndInput'
+                    required
+                  />
+                  <span
+                    class='input-group-text'
+                    data-td-target='#recurrenceEndInput'
+                    data-td-toggle='datetimepicker'
+                  >
+                    <span class='fa-solid fa-clock'></span>
+                  </span>
+                  </div>
+                </div>
+                </div>
+              </form>
+              
+            </div>
+            
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" id="close-modal" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+              <button type="button" id="btnSubmit" onclick="createInsertion()" class="btn btn-primary">Crea inserzione</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!--       <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4">
+          <a href="#">
+            <img
+              class="img-fluid"
+              src="https://via.placeholder.com/500x300"
+              alt=""
+            />
+          </a>
+        </div>
+    </div> -->
+
+
+    <!-- /.container -->
+  </div>
+</div>
+  <!-- /.row -->
+  <%- include("footer.ejs", {logged: logged}) %>
+</body>

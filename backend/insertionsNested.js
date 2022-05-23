@@ -85,7 +85,6 @@ router.get('/:parkId/insertions', async (req, res) => {
             }]
         })
 
-        console.log(insertion)
         return res.status(200).json(insertion)
     } catch (err) {
         console.log(err)

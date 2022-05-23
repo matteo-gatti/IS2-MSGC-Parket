@@ -25,9 +25,7 @@ const tokenChecker = (req, res, next) => {
 // checks if token is still valid (not expired), but does not send response if no token is provided
 const tokenValid = (req, res, next) => {
     // check header or url parameters or post parameters for token
-    //console.log(req.cookies)
     var token = req.body.token || req.query.token || req.headers['authorization'] || req.cookies.token
-    //console.log("checking token if valid")
     if(token) {
         // verifies secret and checks exp
         jwt.verify(token, process.env.SUPER_SECRET, (err, decoded) => {

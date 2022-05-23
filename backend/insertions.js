@@ -12,17 +12,18 @@ const storage = multer.diskStorage({
         cb(null, "static/uploads")
     },
     filename: (rew, file, cb) => {
-        console.log(file)
         cb(null, ""+  Date.now() + ".png")
     }
 })
+
+// Needed to receive uploaded images from the users
 const upload = multer({storage: storage,
+    // Filter only images files
     fileFilter: (req, file, cb) => {
         if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
             cb(null, true);
         } else {
             cb(null, false);
-            //return cb('Only .png, .jpg and .jpeg format allowed!');
         }
     }
 })
@@ -32,16 +33,18 @@ const router = express.Router()
 // Create an insertion embedding a new parking
 router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
     try {
+        // If no image file provided
         if(!req.file) {
             return res.status(415).send({ message: 'Wrong file type for images' })
         }
 
+        // Separate and parse the two different parts dedicated to the insertion and the other one to the parking
         let bodyJSONInsertion = await JSON.parse(req.body["insertion"])
         let bodyJSONParking = await JSON.parse(req.body["parking"])
         
         bodyJSONParking.image = "uploads/"+ req.file["filename"]
 
-        // check that correct data is sent
+        // check that correct data fields are sent (w.r.t. the DB model)
         const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval", "recurrent", "recurrenceData"]
         const validParkingFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
         for (const field in bodyJSONInsertion) {
@@ -72,21 +75,22 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
             insertion.recurrenceData = bodyJSONInsertion.recurrenceData
         }
 
-        console.log("USR ID POSY", req.loggedInUser.userId)
+        // Get the user and set the FKs of the parking and the insertion
         let user = await User.findById(req.loggedInUser.userId)
         parking.owner = user
         parking = await parking.save()
         insertion = await insertion.save()
 
+        // Set the correct self field and save it
         insertion.self = "/api/v1/insertions/" + insertion.id
         insertion = await insertion.save()
 
+        // Insert the insertion in the parking and save
         parking.insertions.push(insertion)
-
         parking = await parking.save()
 
+        // Insert the parking in the user and save
         user.parkings.push(parking)
-
         await user.save()
 
         res.status(201).location({ parking: parking.self, insertion: insertion.self}).send()
@@ -103,9 +107,10 @@ router.get('/', async (req, res) => {
             {
                 path: "parking",
                 model: "Parking",
-                // match: { visible: { $eq: true } }
             }
         )
+
+        // Get all insertions of visible parkings
         let newInsertions = []
         for (let i = 0; i < insertions.length; i++) {
             if (insertions[i].parking.visible === true) {
@@ -140,7 +145,6 @@ router.get('/:insertionId', async (req, res) => {
                 select: {_id: 0, __v:0, insertions: 0, owner: 0},
             }]
         )
-        console.log(insertion)
         return res.status(200).json(insertion)
     } catch(err) {
         console.log(err)

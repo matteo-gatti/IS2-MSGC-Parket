@@ -32,10 +32,7 @@ async function register(e) {
             window.location.href = "/login"
         }
 
-        //if()
-        //  console.log("ciao mamma")
     } catch (err) {
-        console.log("ERROR", err)
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
     }
@@ -43,7 +40,6 @@ async function register(e) {
 
 // This function is called when login button is clicked
 async function login(e) {
-    console.log(e)
     e.preventDefault()
     // get the values from the form
     const identifier = $("#identifier").val()
@@ -60,17 +56,14 @@ async function login(e) {
         if (!res.ok)
             throw data
 
-        //console.log(data)
         if (data.token) {
             // save jwt token to cookie
             document.cookie = "token=" + data.token
             window.location.href = "/"
         }
-        console.log(data)
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
-        //alert("Wrong email or password");
     }
 }
 
@@ -84,7 +77,6 @@ async function logout() {
         method: "POST"
     })
     data = await res.json()
-    console.log(data)
     if (data.token) {
         // save jwt token to cookie
         document.cookie = "token=" + data.token

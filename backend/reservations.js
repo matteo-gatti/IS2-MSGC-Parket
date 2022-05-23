@@ -30,7 +30,6 @@ router.get('/myReservations', tokenChecker, async (req, res) => {
 // Get a specific reservation
 router.get('/:reservationId', async (req, res) => {
     try {
-        //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
         let reservations = await Reservation.findById(req.params.reservationId, { _id: 0, __v: 0 }).populate(
             {
                 path: "client",

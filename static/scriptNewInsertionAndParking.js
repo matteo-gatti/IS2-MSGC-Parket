@@ -4,8 +4,6 @@ async function createNewInsertionAndParking() {
     $('#btnSubmit').text("Invio ...")
     $("#message").attr('hidden')
 
-
-
     function convertToISO(date) {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
@@ -114,19 +112,15 @@ async function createNewInsertionAndParking() {
             method: "POST",
             body: formData
         })
-        console.log(res)
-        //const data = await res.json()
+
         if (!res.ok) {
             throw await res.json()
         } else {
-            console.log("Fatto")
+            
             window.location.href = "privateArea"
         }
-
-        //if()
-        //  console.log("ciao mamma")
     } catch (err) {
-        console.log("ERROR", err)
+        
         $("#message").text(err.message)
         $("#message").removeAttr('hidden')
         $('#btnSubmit').prop("disabled", false)

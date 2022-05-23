@@ -1,48 +1,51 @@
 <% if (logged) { %>
   <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 px-3 mb-4 border-bottom">
-    <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
-      <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+  <script src="script.js"></script>
+  <div class="d-flex col align-items-center mb-2 mb-md-0 text-dark text-decoration-none" style="flex: 1">
+    <a href="/" >
+      <img src="img/logo.png" class="ms-3"width="64px" height="64px"></img>
     </a>
-    <script src="script.js"></script>
-    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+  </div>
+  
+
+    <ul class="nav justify-content-center mb-md-0" style="flex: 1">
       <li><a href="/" class="nav-link px-2 link-secondary">Home</a></li>
-      <li><a href="publicParkings" class="nav-link px-2 link-dark">Parcheggi</a></li>
+      <li><a href="parkings" class="nav-link px-2 link-dark">Parcheggi</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">Mappa</a></li>
-      <li><a href="privateArea" class="nav-link px-2 link-dark">Area Personale</a></li>
       <li><a href="#" class="nav-link px-2 link-dark">Info</a></li>
     </ul>
 
-    <div class="col-md-3 text-end">
-      <button type="button" id="logOutBtn" class="btn btn-danger" onclick="logout()">Log out</button>
+    <div class="row col-2 col-md-auto align-right align-items-center justify-content-center" style="flex: 1">
+      <div class="text-end">
+        <a href="privateArea" class="btn btn-outline-primary px-2 me-2"><i class="fa-solid fa-user"
+            style="margin-right: 0.4rem"></i><span>Area Personale</span></a>
+        <button type="button" id="logOutBtn" class="btn btn-danger" onclick="logout()">Log out</button>
+      </div>
     </div>
-
-    <script>
-    </script>
   </header>
-<% } else { %>
-  <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 px-3 mb-4 border-bottom">
-    <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
-      <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
-    </a>
+  <% } else { %>
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 px-3 mb-4 border-bottom">
+      <div class="d-flex col-1 align-items-center mb-2 mb-md-0 text-dark text-decoration-none" style="flex: 1">
+        <a href="/" >
+          <img src="img/logo.png" class="ms-3"width="64px" height="64px"></img>
+        </a>
+      </div>
+      
 
-    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-      <li><a href="/" class="nav-link px-2 link-secondary">Home</a></li>
-      <li><a href="/publicParkings" class="nav-link px-2 link-dark">Parcheggi</a></li>
-      <li><a href="#" class="nav-link px-2 link-dark">Mappa</a></li>
-      <li><a href="privateArea" class="nav-link px-2 link-dark">Area Personale</a></li>
-      <li><a href="#" class="nav-link px-2 link-dark">Info</a></li>
-    </ul>
+      <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0" style="flex: 1">
+        <li><a href="/" class="nav-link px-2 link-secondary">Home</a></li>
+        <li><a href="/parkings" class="nav-link px-2 link-dark">Parcheggi</a></li>
+        <li><a href="#" class="nav-link px-2 link-dark">Mappa</a></li>
+        <li><a href="#" class="nav-link px-2 link-dark">Info</a></li>
+      </ul>
 
-    <div class="col-md-3 text-end">
-      <a href="login" class="text-decoration-none">
-        <button type="button" id="logInBtn" class="btn btn-outline-primary me-2">Login</button>
-      </a>
-      <a href="register" class="text-decoration-none">
-        <button type="button" id="signUpBtn" class="btn btn-primary">Sign up</button>
-      </a>
-    </div>
-
-    <script>
-    </script>
-  </header>
-<% } %>
+      <div class="col-md-auto text-end" style="flex: 1">
+        <a href="login" class="text-decoration-none">
+          <button type="button" id="logInBtn" class="btn btn-outline-primary me-2">Login</button>
+        </a>
+        <a href="register" class="text-decoration-none">
+          <button type="button" id="signUpBtn" class="btn btn-primary">Sign up</button>
+        </a>
+      </div>
+    </header>
+    <% } %>

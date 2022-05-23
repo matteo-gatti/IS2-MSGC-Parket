@@ -1,4 +1,7 @@
 async function createInsertion() {
+    $('#btnSubmit').prop("disabled", true)
+    $('#btnSubmit').text("Invio ...")
+    $("#message").attr('hidden')
 
     function convertToISO(date) {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
@@ -7,22 +10,35 @@ async function createInsertion() {
         return date + ":00+01:00"
     }
 
-    console.log("Creazione inserzione") 
+
+    if (!$('form')[0].checkValidity()) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("Per favore inserire tutti i dati")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
+        return
+    }
 
     // show error if the min interval is lower than 0
     if ($("#insertion-minInterval").val() < 0) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         return
     }
 
     // check price format
     if (!$("#insertion-hourlyPrice").val().match(/^\d/)) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         return
     }
 
     // check price format
     if (!$("#insertion-dailyPrice").val().match(/^\d/)) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         return
     }
@@ -34,6 +50,23 @@ async function createInsertion() {
 
     d1 = convertToISO(d1)
     d2 = convertToISO(d2)
+
+    // convert days in array
+    const days = []
+
+    $("#dayCheckboxes div div .form-check-input").each((i, checkbox) => {
+        if (checkbox.checked) days.push(checkbox.id)
+    });
+
+    // if days is empty, return error message
+    if ($("#recurrence").is(":checked") && days.length === 0) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("Per favore selezionare almeno un giorno")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
+        return
+    }
+
     try {
         const res = await fetch(`../api/v1/parkings/${id}/insertions`, {
             method: "POST",
@@ -45,23 +78,37 @@ async function createInsertion() {
                 priceHourly: $("#insertion-hourlyPrice").val(),
                 priceDaily: $("#insertion-dailyPrice").val(),
                 minInterval: $("#insertion-minInterval").val(),
+                // TODO: da controllare
+                recurrent: $("#recurrence").is(":checked"),
+                recurrenceData: {
+                    daysOfTheWeek: days,
+                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00",
+                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00",
+                },
+                // TODO: da controllare
             }),
         })
         console.log(res)
-        //const data = await res.json()
+        // data = await res.json()
         if (!res.ok) {
             throw await res.json()
         } else {
             $('#close-modal').click()
+            $('#btnSubmit').prop("disabled", false)
+            $('#btnSubmit').text("Crea inserzione")
+            $(':input','form')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
             await getMyInsertions()
         }
-
-        //if()
-        //  console.log("ciao mamma")
     } catch (err) {
         console.log("ERROR", err)
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
     }
 
 }
@@ -94,7 +141,9 @@ async function loadDetails() {
             $("#parkingCity").text(data.city)
             $("#parkingCountry").text(data.country)
             $("#parkingId").text(data._id)
-            $("#lblVisible").text(data.visible ? "Sì" : "No")
+            $("#lblVisible").text(data.visible === true ? "Sì" : "No")
+            $("#btnVisible").removeClass(data.visible === true ? "btn-danger" : "btn-success")
+            $("#btnVisible").addClass(data.visible === true ? "btn-success" : "btn-danger")
             console.log("IMG", data.image)
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
@@ -141,9 +190,29 @@ async function getMyInsertions() {
             for (insertion in data.insertions) {
                 tmpInsHTML = insertionHTML.clone()
                 tmpInsHTML.removeAttr("hidden")
-                $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion].name)
-                $(tmpInsHTML.find("p")[1]).text(data.insertions[insertion]._id)
-                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${data.insertions[insertion]._id}')`);
+                $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion]._id)
+                $(tmpInsHTML.find("p")[1]).html("<b>&nbsp;&nbsp;&nbsp;Nome: </b> " +  data.insertions[insertion].name)
+                $(tmpInsHTML.find("p")[2]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Da: </b>" + (new Date(data.insertions[insertion].datetimeStart)).toLocaleString("it-IT").slice(0, -3))
+                $(tmpInsHTML.find("p")[3]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A: </b> " + (new Date(data.insertions[insertion].datetimeEnd)).toLocaleString("it-IT").slice(0, -3))
+                let strPrezzo = "<b>&nbsp;&nbsp;Prezzo: </b> " + data.insertions[insertion].priceHourly.toLocaleString('it-IT', 
+                {
+                    style: 'currency',
+                    currency: 'EUR',
+                  }) + "/ora"
+                if(data.insertions[insertion].priceDaily != null) {
+                    strPrezzo += " - " + data.insertions[insertion].priceDaily.toLocaleString('it-IT', 
+                    {
+                        style: 'currency',
+                        currency: 'EUR',
+                    }) + "/giorno"
+                }
+                $(tmpInsHTML.find("p")[4]).html(strPrezzo)
+                let fullSelf = data.insertions[insertion].self.split("/")
+                console.log(fullSelf)
+
+                let insertionid = fullSelf[4]
+                console.log(insertionid)
+                $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${insertionid}')`);
                 container.append(tmpInsHTML)
             }
         }
@@ -216,6 +285,91 @@ tempusDominus.loadLocale(tempusDominus.locales.it);
 //globally
 tempusDominus.locale(tempusDominus.locales.it.name);
 // date time
+const linkedPicker1ElementRecurrence = document.getElementById('recurrenceStartInput');
+const linked1Recurrence = new tempusDominus.TempusDominus(linkedPicker1ElementRecurrence);
+//linked1.locale(localization)
+linked1Recurrence.updateOptions({
+    display: {
+        viewMode: "clock",
+        components: {
+            useTwentyfourHour: true,
+            decades: false,
+            year: false,
+            month: false,
+            date: false,
+            hours: true,
+            minutes: true,
+            seconds: false
+        }
+    },
+    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+})
+
+const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+});
+
+//using event listeners
+linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+    linked2Recurrrence.updateOptions({
+        restrictions: {
+            minDate: e.detail.date//new Date(e.detail.date.getHours() + ":" + e.detail.date.getMinutes())
+        },
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+    });
+
+});
+
+//using subscribe method
+const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
+    linked1Recurrence.updateOptions({
+        restrictions: {
+            maxDate: e.date//new Date(e.date.getHours() + ":" + e.date.getMinutes())
+        },
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+    });
+});
+
+//--------------------------------- period datepickers ---------------------------------------
 const linkedPicker1Element = document.getElementById('linkedPickers1');
 const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
 //linked1.locale(localization)
@@ -232,7 +386,12 @@ linked1.updateOptions({
 })
 
 const linked2 = new tempusDominus.TempusDominus(document.getElementById('linkedPickers2'), {
-    useCurrent: false
+    useCurrent: false,
+    display: {
+        components: {
+            useTwentyfourHour: true
+        }
+    }
 });
 
 //using event listeners
@@ -254,12 +413,59 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
     linked1.updateOptions({
         restrictions: {
             maxDate: e.date
+        },
+        display: {
+            components: {
+                useTwentyfourHour: true
         }
+    }
     });
 });
+//--------------------------------- end period datepickers ------------------------------------
+
+// TODO: fa schifo, ma va
+function toggleRecurrence() {
+    if ($("#recurrence").is(":checked")) {
+        $("#recurrenceContainer").removeAttr("hidden")
+    } else {
+        $("#recurrenceContainer").attr("hidden", "true")
+    }
+}
+// TODO: da controllare
 
 async function main() {
+    //x=true
     await loadDetails()
     await getMyInsertions()
 }
+
+function detailInsertion(insertionid)
+{
+    window.location.href = `/insertion?insertion=${insertionid}`
+}
+
+$('#insertion-hourlyPrice').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9,]/)) 
+    {
+        return false;
+    }
+})
+
+$('#insertion-dailyPrice').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9,]/)) 
+    {
+        return false;
+    }
+})
+
+$('#insertion-minInterval').keypress(function(e){
+    var txt = String.fromCharCode(e.which);
+    if(!txt.match(/[0-9]/))
+    {
+        return false;
+    }
+})
+
 main()

@@ -1,12 +1,19 @@
 // This function is called when register button is clicked
-async function register() {
+async function register(e) {
     // get the values from the form
+    e.preventDefault()
     var name = $("#name").val();
     var surname = $("#surname").val();
     var email = $("#email").val();
     var username = $("#username").val();
     var password = $("#password").val();
+
     try {
+        let emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+        if (!emailPattern.test(email)) {
+            throw { message: "Email is not valid" }
+        }
+        
         const res = await fetch("../api/v1/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -26,7 +33,7 @@ async function register() {
         }
 
         //if()
-          //  console.log("ciao mamma")
+        //  console.log("ciao mamma")
     } catch (err) {
         console.log("ERROR", err)
         $("#message").text(err.message)
@@ -35,7 +42,9 @@ async function register() {
 }
 
 // This function is called when login button is clicked
-async function login() {
+async function login(e) {
+    console.log(e)
+    e.preventDefault()
     // get the values from the form
     const identifier = $("#identifier").val()
     const password = $("#password").val()
@@ -44,26 +53,29 @@ async function login() {
         const res = await fetch("../api/v1/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({identifier: identifier, password: password}),
+            body: JSON.stringify({ identifier: identifier, password: password }),
         })
         data = await res.json()
 
         if (!res.ok)
             throw data
-    
+
         //console.log(data)
         if (data.token) {
             // save jwt token to cookie
             document.cookie = "token=" + data.token
             window.location.href = "/"
         }
-        console.log(data) 
+        console.log(data)
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         //alert("Wrong email or password");
     }
 }
+
+$("#login").submit(login)
+$("#register").submit(register)
 
 // This function is called when logout button is clicked
 async function logout() {

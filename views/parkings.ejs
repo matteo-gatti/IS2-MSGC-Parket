@@ -3,41 +3,46 @@
   <head>
     <title>PARKET - private Area</title>
     <link rel="icon" href="img/logo.png" />
-    <!-- Bootstrap-->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-      crossorigin="anonymous"
-    />
-    <!-- JQuery-->
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.js"
-      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-      crossorigin="anonymous"
-    ></script>
-    <script src="scriptPersonalArea.js" defer></script>
-    <script>
-      //carichiamo header e footer
-      $(function () {
-          
-          //$(header).load("header.ejs");
-          //$(footer).load("footer.ejs");
-      });
-    </script>
+ <!-- JQuery-->
+ <script
+ src="https://code.jquery.com/jquery-3.3.1.js"
+ integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+ crossorigin="anonymous"
+ ></script>
+ 
+ <!-- JavaScript Bundle with Popper -->
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+ <!-- Popperjs -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+crossorigin="anonymous"></script>
+
+ <!-- Bootstrap-->
+ <link
+   href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+   rel="stylesheet"
+   integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+   crossorigin="anonymous"
+ />
+ <!-- ICONS -->
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+ <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
+ rel="stylesheet" crossorigin="anonymous">
+    <script src="scriptParkings.js" defer></script>
     <style>
       /* GLOBAL STYLES
 -------------------------------------------------- */
       /* Padding below the footer and lighter body text */
       .card-img-top {
     width: 100%;
-    height: 25vw;
+    height: 10vw;
     object-fit: cover;
 }
       
       
       body {
-        padding-top: 3rem;
+        padding-top: 0rem;
         padding-bottom: 3rem;
         color: #5a5a5a;
       }
@@ -126,10 +131,10 @@
 <body>
 <%- include("header.ejs", {logged: logged}) %>
 <main>
-    <section class="py-5 text-center container">
+    <section class="py-2 text-center container">
       <div class="row py-lg-5">
         <div class="col-lg-6 col-md-8 mx-auto">
-          <h1 class="fw-light">I tuoi parcheggi</h1>
+          <h1 class="fw-light">Parcheggi disponibili</h1>
           <!-- <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
           <p>
             <a href="#" class="btn btn-primary my-2">Main call to action</a>
@@ -139,10 +144,11 @@
       </div>
     </section>
   
-    <div class="album py-5 bg-light">
+    <div class="album py-2 bg-light">
       <div class="container">
+        <h3 class="fw-light text-center" id="noParks" hidden>Nessun parcheggio 😭</h3>
   
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="parkContainer">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-4" id="parkContainer">
             <div class="col" id="firstPark" hidden>
                 <div class="card shadow-sm">
                   <img style="vertical-align:middle"
@@ -158,7 +164,7 @@
                     <p class="card-text parkId" hidden></p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
-                        <button onclick="detailParking()" type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                        <button onclick="detailParking()" type="button" class="btn btn-sm btn-outline-secondary">Dettagli</button>
                         <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                       </div>
                     </div>
@@ -174,10 +180,10 @@
       <div class="col-lg-6 mx-auto">
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
           <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParking()">Inserisci nuovo parcheggio</button>
-          <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParkingFromInsertion()">Nuova Inserzione</button>
         </div>
       </div>
     </div>
 
   </main>
   <%- include("footer.ejs", {logged: logged}) %>
+</body>

@@ -1,12 +1,12 @@
 import express from 'express'
+import multer from 'multer'
 
 import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
-import multer from 'multer'
-
+// Storage engine
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "static/uploads")
@@ -29,53 +29,7 @@ const upload = multer({storage: storage,
 
 const router = express.Router()
 
-// Get all insertions
-router.get('/', async (req, res) => {
-    try {
-        let insertions = await Insertion.find({}, {_id: 0, __v: 0}).populate(
-            {
-                path: "parking",
-                model: "Parking",
-                //match: { visible: { $eq: true } }
-            }
-        )
-        let newInsertions = []
-        for (let i = 0; i < insertions.length; i++) {
-            if (insertions[i].parking.visible === true) {
-                newInsertions.push(insertions[i])
-            }
-        }
-
-        return res.status(200).json(newInsertions)
-    } catch(err) {
-        console.log(err)
-        return res.status(500).send({ message: "Server error" })
-    }
-})
-
-// Get an insertion of the parking
-router.get('/:insertionId', async (req, res) => {
-    try {
-        let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0, parking: 0}).populate(
-            {
-                path: "reservations",
-                model: "Reservation",
-                select: {_id: 0, __v:0, insertion: 0},
-                populate: [{
-                    path: "client",
-                    model: "User",
-                    select: {self: 1}
-                }]
-            }
-        )
-        console.log(insertion)
-        return res.status(200).json(insertion)
-    } catch(err) {
-        console.log(err)
-        return res.status(404).send({ message: "Insertion not found" })
-    }
-})
-
+// Create an insertion embedding a new parking
 router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
     try {
         if(!req.file) {
@@ -87,15 +41,14 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         
         bodyJSONParking.image = "uploads/"+ req.file["filename"]
 
-        const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval"]
+        // check that correct data is sent
+        const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval", "recurrent", "recurrenceData"]
         const validParkingFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
-
         for (const field in bodyJSONInsertion) {
             if (!validInsertionFields.includes(field)) {
                 return res.status(400).send({ message: "Some fields are invalid" })
             }
         }
-
         for (const field in bodyJSONParking) {
             if (!validParkingFields.includes(field)) {
                 return res.status(400).send({ message: "Some fields are invalid" })
@@ -103,15 +56,29 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         }
 
         let parking = new Parking(bodyJSONParking)
-        let insertion = new Insertion(bodyJSONInsertion)
+
+        let insertion = new Insertion()
+        insertion.name = bodyJSONInsertion.name
+        insertion.parking = parking
+        insertion.datetimeStart = bodyJSONInsertion.datetimeStart
+        insertion.datetimeEnd = bodyJSONInsertion.datetimeEnd
+        insertion.priceHourly = bodyJSONInsertion.priceHourly
+        if (bodyJSONInsertion.minInterval != null) insertion.minInterval = bodyJSONInsertion.minInterval
+        if (bodyJSONInsertion.priceDaily != null) insertion.priceDaily = bodyJSONInsertion.priceDaily
+
+        // check if the user wants a recurring insertion
+        if (bodyJSONInsertion.recurrent === true) {
+            insertion.recurrent = true
+            insertion.recurrenceData = bodyJSONInsertion.recurrenceData
+        }
 
         console.log("USR ID POSY", req.loggedInUser.userId)
         let user = await User.findById(req.loggedInUser.userId)
-
+        parking.owner = user
         parking = await parking.save()
         insertion = await insertion.save()
 
-        insertion.self = "/api/v1/insertions" + insertion.id
+        insertion.self = "/api/v1/insertions/" + insertion.id
         insertion = await insertion.save()
 
         parking.insertions.push(insertion)
@@ -129,14 +96,66 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
     }
 })
 
-//TODO Modify a parking 
-router.put('/:insertionId', tokenChecker, async (req, res) => {
-    //TODO  
+// Get all insertions
+router.get('/', async (req, res) => {
+    try {
+        let insertions = await Insertion.find({}, {_id: 0, __v: 0}).populate(
+            {
+                path: "parking",
+                model: "Parking",
+                // match: { visible: { $eq: true } }
+            }
+        )
+        let newInsertions = []
+        for (let i = 0; i < insertions.length; i++) {
+            if (insertions[i].parking.visible === true) {
+                newInsertions.push(insertions[i])
+            }
+        }
+
+        return res.status(200).json(newInsertions)
+    } catch(err) {
+        console.log(err)
+        return res.status(500).send({ message: "Server error" })
+    }
 })
 
-//TODO Delete a parking
+// Get an insertion
+router.get('/:insertionId', async (req, res) => {
+    try {
+        let insertion = await Insertion.findById(req.params.insertionId, {_id: 0, __v: 0}).populate(
+            [{
+                path: "reservations",
+                model: "Reservation",
+                select: {_id: 0, __v:0, insertion: 0},
+                populate: [{
+                    path: "client",
+                    model: "User",
+                    select: {self: 1, username: 1}
+                }]
+            },
+            {
+                path: "parking",
+                model: "Parking",
+                select: {_id: 0, __v:0, insertions: 0, owner: 0},
+            }]
+        )
+        console.log(insertion)
+        return res.status(200).json(insertion)
+    } catch(err) {
+        console.log(err)
+        return res.status(404).send({ message: "Insertion not found" })
+    }
+})
+
+// TODO: Modify an insertion 
+router.put('/:insertionId', tokenChecker, async (req, res) => {
+    // TODO  
+})
+
+// TODO: Delete an insertion
 router.delete('/:insertionId', tokenChecker, async (req, res) => {
-    //TODO
+    // TODO
 })
 
 export { router as insertions }

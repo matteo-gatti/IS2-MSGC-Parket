@@ -13,6 +13,7 @@ import app from "./app.js"
 import User from './models/user.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
+import { MongoMemoryServer } from "mongodb-memory-server"
 
 /* describe("POST /api/v1/users", () => {
     let mockUser
@@ -25,21 +26,57 @@ import mongoose from "mongoose"
             .expect("Content-Type", /json/).expect(201).expect("Location", "/api/users/100");
     });
 }) */
+async function cleanDB() {
+    const collections = mongoose.connection.collections
 
-/* describe("POST /api/v1/users",  () => {
+    for (const key in collections) {
+        await collections[key].deleteMany()
+    }
+}
+let mongoServer
+describe("POST /api/v1/users", () => {
+
     beforeAll(async () => {
-        app.locals.db = await mongoose.connect(process.env.DB_URL)
+        mongoServer = await MongoMemoryServer.create()
+        app.locals.db = await mongoose.connect(mongoServer.getUri())
     });
 
-    afterAll(() => {
-        mongoose.connection.close(true)
+    beforeEach(async () => {
+        await cleanDB()
+    });
+
+    afterAll(async () => {
+        await cleanDB()
+        await mongoose.connection.close(true)
+    });
+
+    test("POST /api/v1/users/ without username should respond with an error message", async () => {
+        const res = await request(app).post('/api/v1/users').send({ password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
+        .expect(400).expect("Content-Type", /json/)
+        if (res.body && res.body[0])
+            expect(res.body[0], { message: 'Some fields are empty or undefined' });
+    });
+
+    test("POST /api/v1/users/ without password should respond with an error message", async () => {
+        const res = await request(app).post('/api/v1/users').send({ username: "ciao", name: "ciao", surname: "ciao", email: "ciao" })
+        .expect(400).expect("Content-Type", /json/)
+        if (res.body && res.body[0])
+            expect(res.body[0], { message: 'Some fields are empty or undefined' });
+    });
+
+    test("POST /api/v1/users/ with already used username should respond with a 409 and error message", async () => {
+        await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
+        const res = await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao2", name: "ciao2", surname: "ciao2", email: "ciao2" })
+        .expect(409).expect("Content-Type", /json/)
+        if (res.body && res.body[0])
+            expect(res.body[0], { message: 'Username or email already exists' });
     });
 
     test("POST /api/v1/users/ with correct data should respond with a success message", async () => {
         await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
-            .expect(201).expect("Location", "/api/users/100");
+            .expect(201).expect("location", /\/api\/v1\/users\/(.*)/);
     });
-}) */
+}) 
 
 /* // Create a new user
 router.post('', async (req, res) => {
@@ -73,6 +110,47 @@ router.post('', async (req, res) => {
 }) */
 
 describe("GET /api/v1/users/:userid", () => {
+    beforeAll(async () => {
+        app.locals.db = await mongoose.connect(mongoServer.getUri())
+        await request(app).post('/api/v1/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matte@circa.com'})
+    });
+
+    afterAll(async () => { await mongoose.connection.close(true) });
+
+    var payload = {
+        userId: "pollino22",
+        email: "matteo@circa.com",
+    }
+    const token = jwt.sign(payload, process.env.SUPER_SECRET, {
+        expiresIn: 86400 // expires in 24 hours
+    });
+
+    payload = {
+        userId: "fakepollino",
+        email: "matteo@circa.com",
+    }
+    const faketoken = jwt.sign(payload, process.env.SUPER_SECRET, {
+        expiresIn: 86400 // expires in 24 hours
+    });
+
+    test("GET /api/v1/users/:userid should respond with the user info", async () => {
+        let res = await request(app).get('/api/v1/users/100').set("Authorization", token).expect("Content-Type", /json/)
+        if (res.body && res.body[0]) {
+            expect(res.body[0]).toEqual({ self: /\/api\/v1\/users\/(.*)/, username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matte@circa.com', parkings: [] })
+        }
+
+    });
+
+    test("GET /api/v1/users/:userid should respond with 401 with token missing", async () => {
+        await request(app).get('/api/v1/users/100').expect(401, { auth: false, message: 'Token missing or invalid' });
+    });
+
+    test("GET /api/v1/users/:userid should respond with 403 with wrong token", async () => {
+        await request(app).get('/api/v1/users/100').set("Authorization", faketoken).expect(403, { message: 'User is not authorized to do this action' });
+    });
+})
+
+/* describe("GET /api/v1/users/:userid", () => {
     let mockUser
     beforeAll(() => {
         mockUser = jest.spyOn(User, "findById").mockImplementation((criterias) => {
@@ -113,7 +191,7 @@ describe("GET /api/v1/users/:userid", () => {
     test("GET /api/v1/users/:userid should respond with 403 with wrong token", async () => {
         await request(app).get('/api/v1/users/100').set("Authorization", faketoken).expect(403, { message: 'User is not authorized to do this action' });
     });
-})
+}) */
 /*
 // Get all reservations of a user
 router.get('/:userId/reservations', tokenChecker, async (req, res) => {

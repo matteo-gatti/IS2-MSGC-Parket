@@ -7,33 +7,34 @@ import user from './models/user.js'
 
 const router = express.Router()
 
+// Login page
 router.get('/login', tokenValid, function (req, res) {
     if (!isAuthToken(req)) {
         res.render('./login.ejs', { logged: false })
-        //res.sendFile('./static/login.html', { root: '.'})
     }
     else {
         res.redirect("/")
     }
 })
 
+// Register page
 router.get('/register', tokenValid, function (req, res) {
     if (!isAuthToken(req))
         res.render('./register.ejs', { logged: false })
-    //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/")
 })
 
+// Private area page
 router.get('/privateArea', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
         res.render('./privateArea.ejs', { logged: true, usr: req.loggedInUser.userId})
     }
-    //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/login")
 })
 
+// Insertion page
 router.get('/insertion', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
@@ -54,29 +55,29 @@ router.get('/insertion', tokenValid, async function (req, res) {
         res.redirect("/login")
 })
 
+// Form page for creating a new parking
 router.get('/createParking', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
         res.render('./newPark.ejs', { logged: true })
     }
-    //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/login")
 })
 
+// Form page for creating a new parking and a new insertion together
 router.get('/createParkingInsertion', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
         res.render('./newParkFromInsertion.ejs', { logged: true })
     }
-    //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/login")
 })
 
+// Detail of a parking page
 router.get('/detailParking', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
             let parking = await Parking.findById(req.query.id).populate("owner")
-            console.log(parking)
             if (req.loggedInUser.userId !== parking.owner.id) {
                 res.render('./detailParking.ejs', { logged: true, owner: false })
             } else {
@@ -87,12 +88,11 @@ router.get('/detailParking', tokenValid, async function (req, res) {
             res.render("./404page.ejs", { logged: true })
         }
     }
-    //res.sendFile('./static/register.html', { root: '.'})
     else
         res.redirect("/login")
 })
 
-
+// Public parkings page
 router.get('/parkings', tokenValid, function (req, res) {
     let loggedBool = false
     if (isAuthToken(req))
@@ -101,31 +101,23 @@ router.get('/parkings', tokenValid, function (req, res) {
 
 })
 
+// Index page
 router.get('/', tokenValid, function (req, res) {
     let loggedBool = false
     if (isAuthToken(req))
         loggedBool = true
     res.render('./index.ejs', { logged: loggedBool })
-    //res.sendFile('./static/index.html', { root: '.'})
-    //res.sendFile('./static/loggedIn.html', { root: '.'})
 })
 
+// Static files (e.g. JS scripts, images, logo...)
 router.use('', express.static('static'))
 
-//router.all('/*', (req, res) => {res.redirect('/') })
+// 404 page
 router.all('*', tokenValid, (req, res) => { 
     let loggedBool = false
     if (isAuthToken(req))
         loggedBool = true
     res.render("./404page.ejs", { logged: loggedBool }) 
 })
-
-
-//router.put()
-
-//router.post()
-
-//router.delete()
-
 
 export default router

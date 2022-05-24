@@ -11,17 +11,17 @@ const storage = multer.diskStorage({
         cb(null, "static/uploads")
     },
     filename: (rew, file, cb) => {
-        console.log(file)
         cb(null, ""+  Date.now() + ".png")
     }
 })
+
+// Needed to receive uploaded images from the users
 const upload = multer({storage: storage,
     fileFilter: (req, file, cb) => {
         if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
             cb(null, true);
         } else {
             cb(null, false);
-            // return cb('Only .png, .jpg and .jpeg format allowed!');
         }
     }
 })
@@ -43,7 +43,6 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
 
         // set the owner of the parking to the logged in user
         parking.owner = user
-        console.log("Printing new parking", parking)
         let newParking = await parking.save()
 
         let parkingId = newParking._id
@@ -83,7 +82,6 @@ router.get('/myParkings', tokenValid, async (req, res) => {
 // Get a parking
 router.get('/:parkingId', async (req, res) => {
     try {
-        console.log("Printing parking", req.params.parkingId)
         const parking = await Parking.findById(req.params.parkingId, { __v: 0 })
         return res.status(200).json(parking)
     } catch (err) {
@@ -95,7 +93,6 @@ router.get('/:parkingId', async (req, res) => {
 // Get all parkings
 router.get('', async (req, res) => {
     try {
-        console.log(req.params)
         const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
         return res.status(200).json(parkings)
     } catch (err) {

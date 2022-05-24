@@ -86,7 +86,7 @@
         <div class="col-md-2"></div>
         <form id="insertionForm" class="col-md-8">
           <h1 class="h3 mb-3 fw-normal">Dati Inserzione</h1>
-          <div class="mb-3">
+          <div class="mb-3 text-start">
             <label id="message" class="text-danger d-block"></label>
             <label id="parkId" hidden></label>
             <label for="recipient-name" class="col-form-label">Nome:</label>
@@ -94,7 +94,7 @@
           </div>
           <!-- dt picker -->
           <div class='row mb-3'>
-            <div class='col-sm-6'>
+            <div class='col-sm-6 text-start'>
               <label for='linkedPickers1Input' class='form-label'>Da:</label>
               <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
                 data-td-target-toggle='nearest'>
@@ -105,7 +105,7 @@
                 </span>
               </div>
             </div>
-            <div class='col-sm-6'>
+            <div class='col-sm-6 text-start'>
               <label for='linkedPickers2Input' class='form-label'>A:</label>
               <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
                 data-td-target-toggle='nearest'>
@@ -119,7 +119,7 @@
           </div>
           <!-- Insert price -->
           <div class="row">
-            <div class='col-sm-6'>
+            <div class='col-sm-6 text-start'>
               <!-- Insert hourly price -->
               <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
               <div class="input-group">
@@ -129,7 +129,7 @@
                 <input type="number" step=".01" min="0" class="form-control" id="insertion-hourlyPrice" required>
               </div>
             </div>
-            <div class='col-sm-6'>
+            <div class='col-sm-6 text-start'>
               <!-- Insert daily price -->
               <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
               <div class="mb-3">
@@ -142,8 +142,8 @@
               </div>
             </div>
             <!-- Insert min interval of reservation -->
-            <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
-            <div class="mb-3">
+            <div class="mb-3 text-start">
+              <label for="minInterval" class="form-label">Intervallo minimo di prenotazione (minuti):</label>
               <div class="mb-3 input-group">
                 <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
                 <div class="input-group-append">
@@ -156,11 +156,11 @@
 
 
         <!-- Checkbox for recurrence or non recurrence -->
-        <div class="form-check">
+        <div class="form-check text-start ms-4">
           <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
           <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
         </div>
-        <form>
+        <form class="text-start">
           <!-- Select days of the week -->
           <div class="form-check mb-3" id="recurrenceContainer" hidden>
             <div class="row mb-3" id="dayCheckboxes">

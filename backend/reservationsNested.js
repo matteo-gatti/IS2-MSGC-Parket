@@ -22,8 +22,6 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         const reqDateStart = new Date(req.body.datetimeStart)
         const reqDateEnd = new Date(req.body.datetimeEnd)
 
-        console.log(insertion)
-
         // check if the insertion's datetimes are valid
         if ((reqDateStart >= reqDateEnd) || insertion.datetimeStart > reqDateStart || insertion.datetimeEnd < reqDateEnd) {
             return res.status(400).send({ message: "Timeslot not valid" })
@@ -92,7 +90,6 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
 // Get all reservations of an insertion
 router.get('/:insertionId/reservations', async (req, res) => {
     try {
-        //let reservations = await Insertion.findById(req.params.insertionId, {reservations: 1}).populate("reservations", {_id: 0, __v:0, insertion: 0})
         let reservations = await Insertion.findById(req.params.insertionId, { reservations: 1 }).populate(
             {
                 path: "reservations",

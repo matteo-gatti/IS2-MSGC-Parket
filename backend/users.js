@@ -22,15 +22,14 @@ function checkUserAuthorization(req, res) {
 
 // Create a new user
 router.post('', async (req, res) => {
-    console.log("Creating new user", req.body)
-
     const user = new User(req.body)
 
-    // if password is not provided, return error
+    // If password is not provided, return error
     if (!req.body.password) {
         return res.status(400).send({ message: 'Some fields are empty or undefined' })
     }
-
+    
+    // Hash the password
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
 
     try {
@@ -54,12 +53,9 @@ router.post('', async (req, res) => {
 
 // Get a user
 router.get('/:userId', tokenChecker, async (req, res) => {
-    if (!checkUserAuthorization(req, res))
-        return
+    if (!checkUserAuthorization(req, res)) return
     try {
-        console.log("Getting user", req.params.userId)
         const user = await User.findById(req.params.userId, {_id: 0, __v: 0}).populate("parkings")
-        console.log(user)
         return res.status(200).send({ self: user.self, name: user.name, surname: user.surname, email: user.email, username: user.username, parkings: user.parkings })
     } catch (err) {
         console.log(err)
@@ -67,7 +63,7 @@ router.get('/:userId', tokenChecker, async (req, res) => {
     }
 })
 
-// Get all users' reservations
+// Get all reservations of a user
 router.get('/:userId/reservations', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {

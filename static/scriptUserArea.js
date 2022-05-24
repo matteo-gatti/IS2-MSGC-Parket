@@ -1,16 +1,12 @@
 function goBack() {
-    //window.location.href = "/privateArea"
     history.back()
 }
 
 async function loadData()
 {
-    // '/api/v1/users/userId'
-    console.log("getting user info")
     try {
-        // fetch the user from the database
         var id  = $('#usrId').text()
-        console.log(`/api/v1/users/${id}`)
+        
         const res = await fetch(`/api/v1/users/${id}`, {
             method: "GET",
         })
@@ -19,7 +15,7 @@ async function loadData()
         if (!res.ok)
             throw data
 
-        console.log("data", data)
+        
         if (data) {
             $("#username").text(data.username)
             $("#userEmail").text(data.email)
@@ -27,7 +23,7 @@ async function loadData()
         }
     }
     catch (err) {
-        console.log(err)
+        
     }
 }
 
@@ -40,8 +36,6 @@ async function loadPrenotazioni()
 
     if (!res.ok)
         throw data
-    
-    console.log(data)
     
     let container = $("#reservList")
     for(i in data)

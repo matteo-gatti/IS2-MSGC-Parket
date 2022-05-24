@@ -8,6 +8,7 @@ async function createParking() {
 
     const formData = new FormData();
 
+    //create payload with image and json
     formData.append('image', image)
     formData.append('json', JSON.stringify({
         name: name,
@@ -17,9 +18,7 @@ async function createParking() {
         country: country,
         image: ""
     }))
-
     try {
-
         const res = await fetch("../api/v1/parkings", {
             method: "POST",
             body: formData
@@ -32,9 +31,7 @@ async function createParking() {
             window.location.href = "/privateArea"
         }
 
-
     } catch (err) {
-        console.log("ERROR", err)
         let msg
         if(err.message == "Unexpected token < in JSON at position 0") {msg = "file non valido per immagine" }else  {msg = err.message}
         $("#message").text(msg)

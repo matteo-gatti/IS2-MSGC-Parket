@@ -1,8 +1,10 @@
+// Create a new insertion
 async function createInsertion() {
     $('#btnSubmit').prop("disabled", true)
     $('#btnSubmit').text("Invio ...")
     $("#message").attr('hidden')
 
+    // convert the date to the right format
     function convertToISO(date) {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
@@ -10,7 +12,7 @@ async function createInsertion() {
         return date + ":00+01:00"
     }
 
-
+    // check if the form is valid
     if (!$('form')[0].checkValidity()) {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore inserire tutti i dati")
@@ -54,6 +56,7 @@ async function createInsertion() {
     // convert days in array
     const days = []
 
+    // push the days in the array
     $("#dayCheckboxes div div .form-check-input").each((i, checkbox) => {
         if (checkbox.checked) days.push(checkbox.id)
     });
@@ -68,6 +71,7 @@ async function createInsertion() {
     }
 
     try {
+        // fetch the insertion from the database
         const res = await fetch(`../api/v1/parkings/${id}/insertions`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -78,21 +82,20 @@ async function createInsertion() {
                 priceHourly: $("#insertion-hourlyPrice").val(),
                 priceDaily: $("#insertion-dailyPrice").val(),
                 minInterval: $("#insertion-minInterval").val(),
-                // TODO: da controllare
                 recurrent: $("#recurrence").is(":checked"),
                 recurrenceData: {
                     daysOfTheWeek: days,
                     timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00",
                     timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00",
                 },
-                // TODO: da controllare
             }),
         })
-        console.log(res)
-        // data = await res.json()
+
+        // if the response is not ok, throw data
         if (!res.ok) {
             throw await res.json()
         } else {
+            // if the insertion is created, close the modal
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
             $('#btnSubmit').text("Crea inserzione")
@@ -101,10 +104,11 @@ async function createInsertion() {
             .val('')
             .prop('checked', false)
             .prop('selected', false);
+            // and reload the insertions
             await getMyInsertions()
         }
     } catch (err) {
-        console.log("ERROR", err)
+        // if the insertion is not created, show the error message
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#btnSubmit').prop("disabled", false)
@@ -113,11 +117,8 @@ async function createInsertion() {
 
 }
 
+// load the details of the parking
 async function loadDetails() {
-    // get the values from the form
-    //const identifier = $("#identifier").val()
-    //const password = $("#password").val()
-    console.log("getting details")
     try {
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.has("id")) {
@@ -132,47 +133,39 @@ async function loadDetails() {
         if (!res.ok)
             throw data
 
-        console.log("data", data)
+        // load the data in the page
         if (data) {
-
             $("#parkingName").text(data.name)
             $("#parkingDesc").text(data.description)
-            $("#parkingAddress").text(data.address)// + " " + data.city + " " + data.country)
+            $("#parkingAddress").text(data.address)
             $("#parkingCity").text(data.city)
             $("#parkingCountry").text(data.country)
             $("#parkingId").text(data._id)
             $("#lblVisible").text(data.visible === true ? "Sì" : "No")
             $("#btnVisible").removeClass(data.visible === true ? "btn-danger" : "btn-success")
             $("#btnVisible").addClass(data.visible === true ? "btn-success" : "btn-danger")
-            console.log("IMG", data.image)
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
             $("#newInsertion").attr("data-bs-name", `${data.name}`);
             $("#newInsertion").attr("data-bs-id", `${data._id}`);
         }
-
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
-        //alert("Wrong email or password");
     }
 }
 
+// go back to the parkings page
 function goBack() {
-    //window.location.href = "/privateArea"
     history.back()
 }
 
+// load the insertions of the parking
 async function getMyInsertions() {
-    // get the values from the form
-    //const identifier = $("#identifier").val()
-    //const password = $("#password").val()
-    console.log("getting insertions")
     try {
         // fetch the user from the database
         const id = $('#parkingId').html()
-        console.log(id)
-        console.log("req" + `/api/v1/parkings/${id}/insertions`)
+        
         const res = await fetch(`/api/v1/parkings/${id}/insertions`, {
             method: "GET",
         })
@@ -181,9 +174,8 @@ async function getMyInsertions() {
         if (!res.ok)
             throw data
 
-        console.log("data", data)
+        // load the data in the page
         if (data) {
-            //console.log(data)
             const container = $('#insertionContainer')
             container.children().not(":first").remove()
             const insertionHTML = $('#firstInsertion')
@@ -208,10 +200,9 @@ async function getMyInsertions() {
                 }
                 $(tmpInsHTML.find("p")[4]).html(strPrezzo)
                 let fullSelf = data.insertions[insertion].self.split("/")
-                console.log(fullSelf)
 
                 let insertionid = fullSelf[4]
-                console.log(insertionid)
+                
                 $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${insertionid}')`);
                 container.append(tmpInsHTML)
             }
@@ -220,21 +211,19 @@ async function getMyInsertions() {
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
-        //alert("Wrong email or password");
     }
 }
 
+// toggle the visibility of the parking
 async function toggleVisible() {
-    // get the values from the form
-    //const identifier = $("#identifier").val()
-    //const password = $("#password").val()
-    console.log("toggling visible")
     try {
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.has("id")) {
             throw { message: "id not in URL" }
         }
+
         const lblVisible = $("#lblVisible").text()
+
         // fetch the user from the database
         const res = await fetch(`/api/v1/parkings/${urlParams.get('id')}`, {
             method: "PUT",
@@ -248,7 +237,7 @@ async function toggleVisible() {
         if (!res.ok)
             throw data
 
-        console.log("data", data)
+        // update the visibility button in the page
         if (data) {
             $("#lblVisible").text(data.visible ? "Sì" : "No")
             $("#btnVisible").removeClass(data.visible ? "btn-danger" : "btn-success")
@@ -256,25 +245,19 @@ async function toggleVisible() {
         }
 
     } catch (err) {
-        console.log(err.message)
-        //alert("Wrong email or password");
+        $("#message").removeAttr('hidden')
+        $("#message").text(err.message)
     }
 }
 
+// datetimepicker logic
 var exampleModal = document.getElementById('exampleModal')
 exampleModal.addEventListener('show.bs.modal', function (event) {
-    // Button that triggered the modal
-    console.log("click inser")
     var button = event.relatedTarget
-    // Extract info from data-bs-* attributes
     var recipient = button.getAttribute('data-bs-name')
     var id = button.getAttribute('data-bs-id')
-    console.log(id)
+    
     $('#parkId').text(id)
-    // If necessary, you could initiate an AJAX request here
-    // and then do the updating in a callback.
-    //
-    // Update the modal's content.
     var modalTitle = exampleModal.querySelector('.modal-title')
     var modalBodyInput = exampleModal.querySelector('.modal-body input')
 
@@ -282,12 +265,12 @@ exampleModal.addEventListener('show.bs.modal', function (event) {
 })
 tempusDominus.loadLocale(tempusDominus.locales.it);
 
-//globally
+// globally
 tempusDominus.locale(tempusDominus.locales.it.name);
 // date time
 const linkedPicker1ElementRecurrence = document.getElementById('recurrenceStartInput');
 const linked1Recurrence = new tempusDominus.TempusDominus(linkedPicker1ElementRecurrence);
-//linked1.locale(localization)
+// linked1.locale(localization)
 linked1Recurrence.updateOptions({
     display: {
         viewMode: "clock",
@@ -322,11 +305,11 @@ const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementBy
         defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
 });
 
-//using event listeners
+// using event listeners
 linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
     linked2Recurrrence.updateOptions({
         restrictions: {
-            minDate: e.detail.date//new Date(e.detail.date.getHours() + ":" + e.detail.date.getMinutes())
+            minDate: e.detail.date
         },
         display: {
             viewMode: "clock",
@@ -346,11 +329,11 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
 
 });
 
-//using subscribe method
+// using subscribe method
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1Recurrence.updateOptions({
         restrictions: {
-            maxDate: e.date//new Date(e.date.getHours() + ":" + e.date.getMinutes())
+            maxDate: e.date
         },
         display: {
             viewMode: "clock",
@@ -372,11 +355,10 @@ const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.event
 //--------------------------------- period datepickers ---------------------------------------
 const linkedPicker1Element = document.getElementById('linkedPickers1');
 const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
-//linked1.locale(localization)
+
 linked1.updateOptions({
     restrictions: {
         minDate: new tempusDominus.DateTime().startOf("minutes")
-        //minDate: tempusDominus.DateTime.format()
     },
     display: {
         components: {
@@ -394,7 +376,7 @@ const linked2 = new tempusDominus.TempusDominus(document.getElementById('linkedP
     }
 });
 
-//using event listeners
+// using event listeners
 linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
     linked2.updateOptions({
         restrictions: {
@@ -408,7 +390,7 @@ linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e)
     });
 });
 
-//using subscribe method
+// using subscribe method
 const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1.updateOptions({
         restrictions: {
@@ -421,9 +403,8 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
     }
     });
 });
-//--------------------------------- end period datepickers ------------------------------------
 
-// TODO: fa schifo, ma va
+//--------------------------------- end period datepickers ------------------------------------
 function toggleRecurrence() {
     if ($("#recurrence").is(":checked")) {
         $("#recurrenceContainer").removeAttr("hidden")
@@ -431,19 +412,19 @@ function toggleRecurrence() {
         $("#recurrenceContainer").attr("hidden", "true")
     }
 }
-// TODO: da controllare
 
+// launch main function and initialize the page
 async function main() {
-    //x=true
     await loadDetails()
     await getMyInsertions()
 }
 
-function detailInsertion(insertionid)
-{
+// navigate to the insertion page
+function detailInsertion(insertionid) {
     window.location.href = `/insertion?insertion=${insertionid}`
 }
 
+// avoid possible input errors from keyboard
 $('#insertion-hourlyPrice').keypress(function(e){
     var txt = String.fromCharCode(e.which);
     if(!txt.match(/[0-9,]/)) 
@@ -452,6 +433,7 @@ $('#insertion-hourlyPrice').keypress(function(e){
     }
 })
 
+// avoid possible input errors from keyboard
 $('#insertion-dailyPrice').keypress(function(e){
     var txt = String.fromCharCode(e.which);
     if(!txt.match(/[0-9,]/)) 
@@ -460,6 +442,7 @@ $('#insertion-dailyPrice').keypress(function(e){
     }
 })
 
+// avoid possible input errors from keyboard
 $('#insertion-minInterval').keypress(function(e){
     var txt = String.fromCharCode(e.which);
     if(!txt.match(/[0-9]/))

@@ -1,7 +1,5 @@
 
 async function getAllParkings() {
-    
-    console.log("getting parkings")
     try {
         // fetch the user from the database
         const res = await fetch("/api/v1/parkings", {
@@ -12,14 +10,10 @@ async function getAllParkings() {
         if (!res.ok)
             throw data
 
-       
-        console.log("data", data)
         if (data) {
-            //console.log(data)
             const container = $('#parkContainer')
             const parkingHTML = $('#firstPark')
             for (parking in data) {
-                console.log(data[parking])
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
@@ -34,7 +28,6 @@ async function getAllParkings() {
                 $('#noParks').removeAttr("hidden")
             }
         }
-
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
@@ -44,9 +37,10 @@ async function getAllParkings() {
 function newParking() {
     window.location.href = "/createParking"
 }
-getAllParkings()
 
 function detailParking(id) {
     window.location.href = "/detailParking?id=" + id
-    console.log(window.location.href)
+    
 }
+
+getAllParkings()

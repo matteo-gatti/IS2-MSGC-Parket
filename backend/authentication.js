@@ -22,9 +22,9 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(payload, process.env.SUPER_SECRET, {
             expiresIn: 86400 // expires in 24 hours
         })
-        res.status(200).send({ auth: true, token: token, self: "/api/v1/users/" + user._id })
+        res.status(200).json({ auth: true, token: token, self: "/api/v1/users/" + user._id })
     } else {
-        res.status(401).send({message: 'Wrong identifier or password'})
+        res.status(401).json({message: 'Wrong identifier or password'})
     }
 })
 

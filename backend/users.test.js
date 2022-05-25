@@ -11,6 +11,7 @@ import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
 import User from './models/user.js'
+import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
@@ -47,7 +48,7 @@ describe("POST /api/v1/users", () => {
 
     afterAll(async () => {
         await cleanDB()
-        await mongoose.connection.close(true)
+        await mongoose.connection.close()
     });
 
     test("POST /api/v1/users/ without username should respond with an error message", async () => {
@@ -115,7 +116,10 @@ describe("GET /api/v1/users/:userid", () => {
         await request(app).post('/api/v1/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matte@circa.com'})
     });
 
-    afterAll(async () => { await mongoose.connection.close(true) });
+    afterAll(async () => { 
+        await cleanDB() 
+        await mongoose.connection.close() 
+    });
 
     var payload = {
         userId: "pollino22",
@@ -148,6 +152,59 @@ describe("GET /api/v1/users/:userid", () => {
     test("GET /api/v1/users/:userid should respond with 403 with wrong token", async () => {
         await request(app).get('/api/v1/users/100').set("Authorization", faketoken).expect(403, { message: 'User is not authorized to do this action' });
     });
+})
+
+describe("GET /api/v1/users/:userid/reservations", () => {
+    let mockUser
+    let mockReserv 
+    let payload
+    let token
+    beforeAll(async () => {
+        app.locals.db = await mongoose.connect(mongoServer.getUri())
+        await cleanDB()
+        mockUser = await request(app).post('/api/v1/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matteo@circa.com'})
+
+        mockUser =  mockUser.header.location.split("users/")[1]
+        mockReserv = jest.spyOn(Reservation, "find").mockImplementation((criterias) => {
+            let ret = [{
+                datetimeStart: "2022-05-31T11:34:00.000+00:00",
+                datetimeEnd: "2022-05-31T14:34:00.000+00:00",
+                insertion: "ObjID",
+                price: 3,
+                self: "/api/v1/reservations/sjdlkasdjsd"
+
+            },
+            {
+                datetimeStart: "2022-06-31T11:34:00.000+00:00",
+                datetimeEnd: "2022-06-31T14:34:00.000+00:00",
+                insertion: "ObjID",
+                price: 7,
+                self: "/api/v1/reservations/asdasdad"
+            }
+            ];
+           
+            return ret
+                
+                
+        })
+        payload = {
+            userId: ''+mockUser,
+            email: "matteo@circa.com",
+        }
+        token = jwt.sign(payload, process.env.SUPER_SECRET, {
+            expiresIn: 86400 // expires in 24 hours
+        });
+    });
+
+    afterAll(async () => { 
+        mockReserv.mockRestore()
+        await cleanDB()
+        await mongoose.connection.close() 
+    });
+
+    test("GET /api/v1/users/:userid/reservations should respond with 200 and a list of reservations", async () => {
+        const res = await request(app).get('/api/v1/users/'+mockUser+'/reservations').set("Authorization", token).expect(200)//, { message: 'User is not authorized to do this action' });
+    })
 })
 
 /* describe("GET /api/v1/users/:userid", () => {

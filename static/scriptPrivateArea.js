@@ -88,6 +88,7 @@ async function loadPrenotazioni() {
         data[i].datetimeEnd = new Date(data[i].datetimeEnd)
             .toLocaleString("it-IT")
             .slice(0, -3);
+            let id = data[i].self.split("/")[4]
         tmpHTML =
             '<div class="col-sm-4 mb-3">' +
             '<p class="m-b-10 f-w-600">' +
@@ -112,9 +113,36 @@ async function loadPrenotazioni() {
                 style: "currency",
                 currency: "EUR",
             }) +
-            "</span>" +
+            "</span><br>" +
+            `<button type="button" class="btn btn-danger" onclick="removeReserv('${id}')" > Elimina </button>` +
             "</div>";
+
+
         container.append(tmpHTML);
+
+        console.log(data[i])
+    }
+}
+
+
+
+async function removeReserv(param) {
+    //chiamata per eliminare la reservation
+     if(confirm('Are you sure you want to delete this reservation?'))
+     {
+        try {
+            const res = await fetch(`/api/v1/reservations/${param}`, {
+                method: "DELETE",
+            });
+            data = await res.json();
+
+            if (!res.ok) throw data;
+            //refresh
+            $("#reservList").empty()
+            await loadPrenotazioni()
+        } catch (err) {
+            console.log(err)
+        }
     }
 }
 

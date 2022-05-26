@@ -48,7 +48,7 @@ router.get('/:reservationId', async (req, res) => {
 router.delete('/:reservationId', tokenChecker, async (req, res) => {
     try {
         let test = await Reservation.findById(req.params.reservationId, { _id: 0, __v: 0 })
-        if(test.client !== req.loggedInUser.userId) {
+        if(String(test.client) !== req.loggedInUser.userId) {
             return res.status(403).send({message: "User doesn't have the permission to delete this Reservation"})
         }
 

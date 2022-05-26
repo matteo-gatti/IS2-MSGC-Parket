@@ -79,7 +79,7 @@ async function loadPrenotazioni() {
     data = await res.json();
 
     if (!res.ok) throw data;
-
+    console.log(data)
     let container = $("#reservList");
     for (i in data) {
         data[i].datetimeStart = new Date(data[i].datetimeStart)

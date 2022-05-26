@@ -144,6 +144,8 @@ async function loadDetails() {
             $("#lblVisible").text(data.visible === true ? "Sì" : "No")
             $("#btnVisible").removeClass(data.visible === true ? "btn-danger" : "btn-success")
             $("#btnVisible").addClass(data.visible === true ? "btn-success" : "btn-danger")
+            $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
+
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
             $("#newInsertion").attr("data-bs-name", `${data.name}`);
@@ -204,6 +206,8 @@ async function getMyInsertions() {
                 let insertionid = fullSelf[4]
                 
                 $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${insertionid}')`);
+                $(tmpInsHTML.find("button")[1]).attr("onclick", `modifyInsertion('${insertionid}')`);
+                $(tmpInsHTML.find("button")[2]).attr("onclick", `deleteInsertion('${insertionid}')`);
                 container.append(tmpInsHTML)
             }
         }
@@ -422,6 +426,51 @@ async function main() {
 // navigate to the insertion page
 function detailInsertion(insertionid) {
     window.location.href = `/insertion?insertion=${insertionid}`
+}
+
+function modifyInsertion(insertionid) {
+    alert(`TODO edit ${insertionid}`)
+}
+
+async function deleteInsertion(insertionid) {
+    //chiamata per eliminare la reservation
+    if(confirm('Are you sure you want to delete this insertion?'))
+    {
+       try {
+           const res = await fetch(`/api/v1/insertions/${insertionid}`, {
+               method: "DELETE",
+           });
+           data = await res.json();
+
+           if (!res.ok) throw data;
+           //refresh
+           await getMyInsertions()
+       } catch (err) {
+           console.log(err)
+           alert(err.message)
+       }
+   }
+}
+
+async function deleteParking(parkingid)
+{
+    console.log(parkingid)
+    if(confirm('Are you sure you want to delete this parking?'))
+    {
+       try {
+           const res = await fetch(`/api/v1/parkings/${parkingid}`, {
+               method: "DELETE",
+           });
+           data = await res.json();
+
+           if (!res.ok) throw data;
+           //refresh
+           window.location.href = "/privateArea"
+       } catch (err) {
+           console.log(err)
+           alert(err.message)
+       }
+   }
 }
 
 // avoid possible input errors from keyboard

@@ -49,7 +49,8 @@ crossorigin="anonymous"></script>
   <div class="row">
     <div class="col-md-2">
       <div class="container mt-5" style="padding-left: 25%">
-        <btn class="btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</btn>
+        <btn class=" btn btn-default btn-secondary mx-auto" onclick="goBack()">Torna indietro</btn>
+       
       </div>
     </div>
     <div class="col-md-10" style="margin: 0px">
@@ -81,7 +82,9 @@ crossorigin="anonymous"></script>
 
           
           <% if (owner) { %>
-          <btn class="btn btn-lg btn-success mt-auto mx-auto" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
+          <btn class="row btn btn-lg btn-success mt-auto mx-auto" style="margin-bottom:20px;" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
+          <btn class="row btn btn-lg btn-danger mt-auto mx-auto" onclick="deleteParking()" id="btnElimina">Elimina Parcheggio</btn>
+    
           <% } %>
 
         </div>
@@ -105,9 +108,10 @@ crossorigin="anonymous"></script>
                   <p class="card-text insertionEndDate"></p>
                   <p class="card-text insertionPriceHourly"></p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <div class="btn-group">
-                      <button onclick="detailInsertion()" type="button" class="btn btn-sm btn-outline-secondary">Dettagli</button>
-                      <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
+                    <div class="">
+                      <button onclick="detailInsertion()" type="button" class="btn  btn-outline-dark btn-light">Dettagli</button>
+                      <button onclick="modifyInsertion()" type="button" class="btn  btn-outline-dark btn-warning">Edit</button>
+                      <button onclick="deleteInsertion()" type="button" class="btn  btn-outline-dark btn-danger">Elimina</button>
                     </div>
                   </div>
                 </div>

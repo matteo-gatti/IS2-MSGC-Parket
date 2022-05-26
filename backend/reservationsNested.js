@@ -10,13 +10,28 @@ const router = express.Router()
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
-    try {
+    try { 
+
         let insertion = await Insertion.findById(req.params.insertionId).populate("reservations parking")
         let user = await User.findById(req.loggedInUser.userId)
 
         // check if the user is the owner of the parking
-        if (req.loggedInUser.userId === insertion.parking.owner) {
+        if (req.loggedInUser.userId === insertion.parking.owner.toString()) {
             return res.status(403).send({ message: "User is not authorized to perform this action" })
+        }
+
+        // check that correct data fields are sent (w.r.t. the DB model)
+        const validFields = ["datetimeStart", "datetimeEnd"]
+        for (const field in req.body) {
+            if (!validFields.includes(field)) {
+                return res.status(400).send({ message: "Some fields are empty or undefined" })
+            }
+        }
+
+        for (const field of validFields) {
+            if (!req.body.hasOwnProperty(field)) {
+                return res.status(400).send({ message: "Some fields are empty or undefined" })
+            }
         }
 
         const reqDateStart = new Date(req.body.datetimeStart)

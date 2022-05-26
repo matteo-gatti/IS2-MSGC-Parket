@@ -92,8 +92,69 @@ router.get('/:parkingId', async (req, res) => {
 
 // Get all parkings
 router.get('', async (req, res) => {
-    try {
-        const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
+    try {      
+        const query = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        const insertionMatch = {}
+        const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        if(Object.keys(req.query).length >= 0) {
+            const validParams = ["name", "city", "priceMin", "priceMax", "dateMin", "dateMax"]
+            const queryDict = {}
+            for (let field in req.query) {
+                if(validParams.includes(field)) {
+                    queryDict[field] = req.query[field]
+                }
+            }
+            console.log(queryDict)
+            //
+            if("name" in queryDict) {
+                query.$and.push({name: queryDict["name"]}) //TODO FUZZY
+            }
+            if("city" in queryDict) {
+                query.$and.push({city: queryDict["city"]}) //TODO FUZZY
+            }
+            if("priceMin" in queryDict) {
+                insertionMatch.priceHourly = {}
+                insertionMatch.priceHourly.$gte = queryDict["priceMin"]
+            } 
+            if("priceMax" in queryDict) {
+                if(insertionMatch.priceHourly == null) {
+                    insertionMatch.priceHourly = {}
+                }
+                insertionMatch.priceHourly.$lte = queryDict["priceMax"] 
+            } 
+            if("dateMin" in queryDict) {
+                console.log(queryDict["dateMin"])
+                insertionMatch.datetimeStart = {}
+                insertionMatch.datetimeEnd = {}
+                insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMin"])
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
+            }
+            if("dateMax" in queryDict) {
+                if (insertionMatch.datetimeStart == null) {
+                    insertionMatch.datetimeStart = {}
+                }
+                if (insertionMatch.datetimeEnd == null) {
+                    insertionMatch.datetimeEnd = {}
+                }
+                
+                if(insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMax"])
+                }
+                if(insertionMatch.datetimeEnd.$gte != null && insertionMatch.datetimeEnd.$gte < new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+                }
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+            }
+        }
+        let parkings = await Parking.find(query, { visible: 0, __v: 0 }).populate(
+            {
+                path: "insertions",
+                model: "Insertion",
+                select: {_id: 0, __v:0,},
+                match: insertionMatch
+            })
+
+        parkings = parkings.filter(parking => parking.insertions.length > 0)
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)

@@ -79,7 +79,7 @@ async function loadPrenotazioni() {
     data = await res.json();
 
     if (!res.ok) throw data;
-
+    console.log(data)
     let container = $("#reservList");
     for (i in data) {
         data[i].datetimeStart = new Date(data[i].datetimeStart)
@@ -88,6 +88,7 @@ async function loadPrenotazioni() {
         data[i].datetimeEnd = new Date(data[i].datetimeEnd)
             .toLocaleString("it-IT")
             .slice(0, -3);
+            let id = data[i].self.split("/")[4]
         tmpHTML =
             '<div class="col-sm-4 mb-3">' +
             '<p class="m-b-10 f-w-600">' +
@@ -101,6 +102,9 @@ async function loadPrenotazioni() {
             ">" +
             data[i].insertion.parking.name +
             "</a></p>" +
+            "<h6 class='d-inline'>Contatto: </h6><span class='text-muted' style='font-size: 14px;'>" +
+            data[i].insertion.parking.owner.email +
+            "</span><br>" +
             "<h6 class=\"d-inline\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Da: </h6><span class='text-muted' style='font-size: 14px;'>" +
             data[i].datetimeStart +
             "</span>" +
@@ -112,9 +116,34 @@ async function loadPrenotazioni() {
                 style: "currency",
                 currency: "EUR",
             }) +
-            "</span>" +
+            "</span><br>" +
+            `<button type="button" class="btn btn-danger" onclick="removeReserv('${id}')" > Elimina </button>` +
             "</div>";
+
+
         container.append(tmpHTML);
+    }
+}
+
+
+
+async function removeReserv(param) {
+    //chiamata per eliminare la reservation
+     if(confirm('Are you sure you want to delete this reservation?'))
+     {
+        try {
+            const res = await fetch(`/api/v1/reservations/${param}`, {
+                method: "DELETE",
+            });
+            data = await res.json();
+
+            if (!res.ok) throw data;
+            //refresh
+            $("#reservList").empty()
+            await loadPrenotazioni()
+        } catch (err) {
+            console.log(err)
+        }
     }
 }
 

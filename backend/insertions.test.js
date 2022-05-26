@@ -17,6 +17,31 @@ async function cleanDB() {
 
 let mongoServer
 
+/* const mockMulter = jest.mock('multer', () => {
+    const multer = () => ({
+        any: () => {
+            return (req, res, next) => {
+                req.body = { json: {
+                    name: "parking",
+                    address: "address",
+                    city: "city",
+                    country: "country",
+                    description: "description",
+                } }
+                req.file = {
+                        originalname: 'sample.name',
+                        mimetype: 'image/png',
+                        path: 'sample.url',
+                        buffer: Buffer.from(["whatever"]), // this is required since `formData` needs access to the buffer
+                }
+                return next()
+            }
+        },
+    })
+    multer.memoryStorage = () => jest.fn()
+    return multer
+}) */
+
 describe("POST /api/v1/parkings", () => {
     let userId
     let payload 

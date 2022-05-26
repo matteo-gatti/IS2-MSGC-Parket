@@ -102,13 +102,28 @@ router.get('', async (req, res) => {
 })
 
 // Modify a parking
-router.put('/:parkingId', tokenChecker, async (req, res) => {
+router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, res) => {
+    let bodyJSON = await JSON.parse(req.body["json"])
+    if(!req.file) {
+        // if no image is uploaded, the old one is kept
+        const oldParking = await Parking.findById(req.params.parkingId)
+        bodyJSON.image = oldParking.image
+        //return res.status(415).send({ message: 'Wrong file type for images' })
+    } else {
+        bodyJSON.image = "uploads/"+ req.file["filename"]
+    }
+
     const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
-    for (const field in req.body) {
+    for (const field in bodyJSON) {
         if (!validFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
         }
     }
+
+    if(!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
+        return res.status(400).send({ message: "Some fields are empty or undefined" })
+    }
+
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
@@ -118,7 +133,7 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true })
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true })
         
         return res.status(200).json(updatedParking)
     } catch (err) {

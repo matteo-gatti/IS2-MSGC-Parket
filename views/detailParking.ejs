@@ -84,7 +84,7 @@ crossorigin="anonymous"></script>
           <% if (owner) { %>
           <btn class="row btn btn-lg btn-success mt-auto mx-auto" style="margin-bottom:20px;" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
           <btn class="row btn btn-lg btn-danger mt-auto mx-auto" onclick="deleteParking()" id="btnElimina">Elimina Parcheggio</btn>
-    
+          <btn class="row btn btn-lg btn-warning mt-auto mx-auto" id="btnModifica" onclick="modifyParking()">Modifica Parcheggio</btn>
           <% } %>
 
         </div>
@@ -128,7 +128,6 @@ crossorigin="anonymous"></script>
               <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div id="dummy"></div>
             <div class="modal-body" id="form">
               <form id="insertionForm">
                 <div class="mb-3">

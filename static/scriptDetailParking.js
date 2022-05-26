@@ -145,6 +145,7 @@ async function loadDetails() {
             $("#btnVisible").removeClass(data.visible === true ? "btn-danger" : "btn-success")
             $("#btnVisible").addClass(data.visible === true ? "btn-success" : "btn-danger")
             $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
+            $("#btnModifica").attr("onclick", `modifyParking('${data._id}')`);
 
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
@@ -450,6 +451,11 @@ async function deleteInsertion(insertionid) {
            alert(err.message)
        }
    }
+}
+
+async function modifyParking(parkId) {
+    // call newPark page and pass the park id
+    window.location.href = `/modifyParking?park=${parkId}`
 }
 
 async function deleteParking(parkingid)

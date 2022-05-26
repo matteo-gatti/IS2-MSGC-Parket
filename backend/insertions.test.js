@@ -5,7 +5,8 @@ import User from './models/user.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import multer from "multer"
+import fs from 'fs'
+import path from 'path'
 
 async function cleanDB() {
     const collections = mongoose.connection.collections
@@ -22,6 +23,7 @@ describe("GET /api/v1/parkings", () => {
     let token
 
     beforeAll(async () => {
+        jest.setTimeout(5000);
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
@@ -45,10 +47,25 @@ describe("GET /api/v1/parkings", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
+        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
+        console.log("MONGO CONN", mongoServer.state)
+
+        const directory = './static/uploads';
+
+        const fileNames = await fs.promises.readdir(directory)
+
+        for (const file of fileNames) {
+            if(file !== ".gitkeep") {
+                fs.unlink(path.join(directory, file), err => {
+                    if (err) throw err;
+                });
+            }
+        }
     })
 
     test("GET /api/v1/insertions with invalid request, should respond with 400", async () => {
+        expect.assertions(0);
         const jsonstr = JSON.stringify({
             name: "parking",
             address: "address",
@@ -60,9 +77,9 @@ describe("GET /api/v1/parkings", () => {
 
         const jsonInsertion = JSON.stringify({
             //name: "insertion name", 
-            datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-            datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-            priceHourly: 10, 
+            datetimeStart: "2022-06-06T08:00:00.000+00:00",
+            datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+            priceHourly: 10,
             priceDaily: 100,
         })
 
@@ -73,12 +90,12 @@ describe("GET /api/v1/parkings", () => {
             .field("insertion", jsonInsertion)
             .attach("image", "./static/img/logo.png")
             .expect(400, { message: "Bad request" })
-    
+
     })
 
     test("GET /api/v1/insertions with valid request, should respond with 200 and a list of parkings", async () => {
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
-        
+        expect.assertions(2);
 
         const jsonstr = JSON.stringify({
             name: "parking",
@@ -90,10 +107,10 @@ describe("GET /api/v1/parkings", () => {
         })
 
         const jsonInsertion = JSON.stringify({
-            name: "insertion name", 
-            datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-            datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-            priceHourly: 10, 
+            name: "insertion name",
+            datetimeStart: "2022-06-06T08:00:00.000+00:00",
+            datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+            priceHourly: 10,
             priceDaily: 100,
         })
 

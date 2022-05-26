@@ -157,9 +157,51 @@ router.put('/:insertionId', tokenChecker, async (req, res) => {
     // TODO  
 })
 
-// TODO: Delete an insertion
+//Delete an insertion
 router.delete('/:insertionId', tokenChecker, async (req, res) => {
-    // TODO
+    try {
+        let test = await Insertion.findById(req.params.insertionId, { _id: 0, __v: 0 }).populate(
+            [{
+                path: "reservations",
+                model: "Reservation",
+                select: {_id: 0, __v:0, insertion: 0},
+                populate: [{
+                    path: "client",
+                    model: "User",
+                    select: {self: 1, username: 1}
+                }]
+            },
+            {
+                path: "parking",
+                model: "Parking",
+                select: { __v:0, insertions: 0},
+            }]
+        )
+        var owner = String(test.parking.owner)
+        if(owner !== req.loggedInUser.userId) {
+            return res.status(403).send({message: "User doesn't have the permission to delete this Insertion"})
+        }
+        if(test.reservations.length != 0)
+        {
+            return res.status(405).send({message: "Can't delete insertion with active reservations"})
+        }
+        
+       //cancello inserzione dalla lista nell'oggetto parcheggio
+        let maerda = await Parking.findById(test.parking.id)
+        console.log(maerda)
+        let park = await Parking.findByIdAndUpdate(test.parking.id,{
+            $pull:{
+                insertions: req.params.insertionId
+            }
+        })
+
+        await Insertion.findOneAndDelete({_id: req.params.insertionId})
+        return res.status(200).send({message: "Insertion deleted"})
+    } catch(err) {
+        console.log(err)
+        return res.status(404).send({message: "Insertion not found" })
+    }
 })
+
 
 export { router as insertions }

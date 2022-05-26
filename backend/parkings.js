@@ -131,11 +131,13 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
 router.delete('/:parkingId', tokenChecker, async (req, res) => {
     try {
         const parking = await Parking.findById(req.params.parkingId)
-
-        let parkingOwner = parking.owner
+        let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
-        if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
+        if (parkingOwner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
+        }if(parking.insertions.length != 0)
+        {
+            return res.status(405).send({ message: 'Cannot delete parking with active insertions' })
         }
 
         await parking.remove()

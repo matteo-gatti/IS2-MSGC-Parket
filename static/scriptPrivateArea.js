@@ -102,6 +102,9 @@ async function loadPrenotazioni() {
             ">" +
             data[i].insertion.parking.name +
             "</a></p>" +
+            "<h6 class='d-inline'>Contatto: </h6><span class='text-muted' style='font-size: 14px;'>" +
+            data[i].insertion.parking.owner.email +
+            "</span><br>" +
             "<h6 class=\"d-inline\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Da: </h6><span class='text-muted' style='font-size: 14px;'>" +
             data[i].datetimeStart +
             "</span>" +
@@ -119,8 +122,6 @@ async function loadPrenotazioni() {
 
 
         container.append(tmpHTML);
-
-        console.log(data[i])
     }
 }
 

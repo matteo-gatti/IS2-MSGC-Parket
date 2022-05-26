@@ -1,7 +1,7 @@
 import express from 'express'
-import reservation from './models/reservation.js'
 
 import Reservation from './models/reservation.js'
+import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
 const router = express.Router()
@@ -9,7 +9,7 @@ const router = express.Router()
 // Get all the user's reservations
 router.get('/myReservations', tokenChecker, async (req, res) => {
     try {
-        let reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { _id: 0, __v: 0 }).populate(
+        var reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { _id: 0, __v: 0 }).populate(
             {
                 path: "insertion",
                 model: "Insertion",
@@ -17,10 +17,16 @@ router.get('/myReservations', tokenChecker, async (req, res) => {
                 populate: [{
                     path: "parking",
                     model: "Parking",
-                    select: {self: 1, name: 1}
+                    select: {self: 1, name: 1, owner:1},
+                        populate: [{
+                            path: "owner",
+                            model: "User",
+                            select: {email: 1}
+                        }]
                 }]
             }
         )
+
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)

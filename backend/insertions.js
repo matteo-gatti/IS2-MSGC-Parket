@@ -82,8 +82,10 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         insertion = await insertion.save()
 
         // Set the correct self field and save it
+        parking.self = "/api/v1/parkings/" + parking.id
         insertion.self = "/api/v1/insertions/" + insertion.id
         insertion = await insertion.save()
+        parking = await parking.save()
 
         // Insert the insertion in the parking and save
         parking.insertions.push(insertion)
@@ -93,7 +95,7 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         user.parkings.push(parking)
         await user.save()
 
-        res.status(201).location({ parking: parking.self, insertion: insertion.self}).send()
+        res.status(201).location(`parking:${parking.self},insertion:${insertion.self}`).send()
     } catch (err) {
         console.log(err)
         res.status(400).json({ message: "Bad request" })

@@ -20,15 +20,20 @@ async function searchParkings() {
     const searchKey = $('#search').val()
     const minPrice = $('#minPrice').val()
     const maxPrice = $('#maxPrice').val()
+
+    
     
     let minDate = $("#linkedPickers1Input").val()
-    if(minDate != null) {
+    if(minDate != "") {
         minDate = convertToISO(minDate).replace("+", "%2B")
     }
     let maxDate = $("#linkedPickers2Input").val()
-    if(maxDate != null) {
+    if(maxDate != "") {
         maxDate = convertToISO(maxDate).replace("+", "%2B")
     }
+
+    if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "") 
+        return
     
     let query = `/api/v1/parkings?`
     try {   
@@ -37,7 +42,7 @@ async function searchParkings() {
             query += `search=${searchKey}&`
         }
         //check if dates are not null
-        if (minDate != null && maxDate != null) {
+        if (minDate != "" && maxDate != "") {
             query += `dateMin=${minDate}&dateMax=${maxDate}&`
         }
         //check if prices are not null
@@ -52,10 +57,10 @@ async function searchParkings() {
 
         if (!res.ok)
             throw data
-
-        if (data) {
-            const container = $('#parkContainer')
-            container.empty()
+        const container = $('#parkContainer')
+        container.empty()
+        if (data && data.length > 0) {
+            $('#noParks').attr("hidden", true)
             const parkingHTML = $('#firstPark')
             for (parking in data) {
                 tmpParkHTML = parkingHTML.clone()
@@ -67,13 +72,13 @@ async function searchParkings() {
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
                 container.append(tmpParkHTML)
             }
-            if (data.length === 0) {
-                $('#noParks').removeAttr("hidden")
-            }
+        } else {
+            $('#noParks').removeAttr("hidden")
         }
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
+        $('#noParks').removeAttr("hidden")
     }   
 }
 
@@ -91,8 +96,8 @@ async function getAllParkings() {
 
         if (!res.ok)
             throw data
-
-        if (data) {
+        if (data && data.length > 0) {
+            $('#noParks').attr("hidden", true)
             const container = $('#parkContainer')
             const parkingHTML = $('#firstPark')
             for (parking in data) {
@@ -106,13 +111,14 @@ async function getAllParkings() {
                 container.append(tmpParkHTML)
 
             }
-            if (data.length === 0) {
-                $('#noParks').removeAttr("hidden")
-            }
+        }
+        else {
+            $('#noParks').removeAttr("hidden")
         }
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
+        $('#noParks').removeAttr("hidden")
         //alert("Wrong email or password");
     }
 }
@@ -190,6 +196,20 @@ linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, (e)
             }
         }
     });
+});
+
+$('#search').keypress(function (e) {
+    var key = e.which;
+    if(key == 13)  // the enter key code
+       $('#btnSearch').click();
+});   
+
+$('form').on('reset', function (event) {
+    setTimeout(function() {
+        // executes after the form has been reset
+        $('#advanced-toggle').prop("checked", true)
+      }, 1);
+    
 });
 
 

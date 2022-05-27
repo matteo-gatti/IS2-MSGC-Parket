@@ -38,6 +38,8 @@ async function loadInfo() {
 
             if (!res.ok) throw data;
 
+            
+
             $("#insertionName").text(data.name);
             $("#insertionFrom").text(
                 new Date(data.datetimeStart)
@@ -100,6 +102,12 @@ async function loadInfo() {
                     "<br>" +
                     data.parking.country
             );
+            console.log(data.reservations.length)
+            if (data.reservations.length === 0) {
+                console.log("no reservations")
+                $('#noReservations').removeAttr('hidden');
+                
+            }
 
             let container = $("#reservList");
             container.empty();

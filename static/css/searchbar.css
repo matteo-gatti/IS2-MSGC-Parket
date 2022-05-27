@@ -823,25 +823,25 @@ legend {
   padding: 10px 32px 10px 70px;
   font-size: 18px;
   height: 70px;
-  color: #fff;
-  background: #0d6dfd;
+  color: #000;
+  background: #fff;
   font-family: 'Lato', sans-serif;
 }
 
 .s010 form .inner-form .input-field input.placeholder {
-  color: #fff;
+  color: #5a5a5a;
   font-size: 18px;
   font-weight: 400;
 }
 
 .s010 form .inner-form .input-field input:-moz-placeholder {
-  color: #fff;
+  color: #5a5a5a;
   font-size: 18px;
   font-weight: 400;
 }
 
 .s010 form .inner-form .input-field input::-webkit-input-placeholder {
-  color: #fff;
+  color: #5a5a5a;
   font-size: 18px;
   font-weight: 400;
 }
@@ -921,6 +921,9 @@ legend {
   overflow: hidden;
   border-radius: 34px;
   margin-bottom: 5px;
+  border-style: solid;
+  border-color: #0d6dfd;
+  border-width: 2px;
 }
 
 .s010 form .inner-form .basic-search .input-field {
@@ -941,20 +944,23 @@ legend {
   align-items: center;
   width: 60px;
   height: 100%;
+  box-sizing: unset;
+  border-color: #0d6dfd;
+  border-left-style: solid; 
+  border-left-width: 2px;
 }
 
 .s010 form .inner-form .basic-search .input-field .icon-wrap {
-  background-color: #0d6dfd;
 }
 
 .s010 form .inner-form .basic-search .input-field .icon-wrap:hover {
-  background-color: #257afa;
+  background-color: rgba(37, 122, 250, 0.2);
 }
 
 .s010 form .inner-form .basic-search .input-field .icon-wrap svg {
   width: 34px;
   height: 34px;
-  fill: #fff;
+  fill: #0d6dfd;
 }
 
 .s010 form .inner-form .advance-search {

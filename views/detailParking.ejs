@@ -82,9 +82,11 @@ crossorigin="anonymous"></script>
 
           
           <% if (owner) { %>
-          <btn class="row btn btn-lg btn-success mt-auto mx-auto" style="margin-bottom:20px;" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></btn>
-          <btn class="row btn btn-lg btn-danger mt-auto mx-auto" onclick="deleteParking()" id="btnElimina">Elimina Parcheggio</btn>
-    
+            <div class="d-flex w-100 gap-2 flex-end mt-auto">
+              <button class=" btn  btn-outline-success" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></button>
+              <button class=" btn  btn-outline-secondary " onclick="modifyParking()" id="btnEdit">Modifica Parcheggio</button>
+              <button class=" btn  btn-outline-danger ms-auto" onclick="deleteParking()" id="btnElimina">Elimina Parcheggio</button>
+            </div>
           <% } %>
 
         </div>
@@ -108,11 +110,11 @@ crossorigin="anonymous"></script>
                   <p class="card-text insertionEndDate"></p>
                   <p class="card-text insertionPriceHourly"></p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <div class="">
+                    <div class="d-flex w-100 gap-2">
                       <button onclick="detailInsertion()" type="button" class="btn  btn-outline-primary">Dettagli</button>
                       <% if (owner) { %>
-                      <button onclick="modifyInsertion()" type="button" class="btn  btn-outline-secondary">Edit</button>
-                      <button onclick="deleteInsertion()" type="button" class="btn  btn-outline-danger">Elimina</button>
+                      <button onclick="modifyInsertion()" type="button" class="btn  btn-outline-secondary">Modifica</button>
+                      <button onclick="deleteInsertion()" type="button" class="btn  btn-outline-danger ms-auto">Elimina</button>
                       <% } %>
                     </div>
                   </div>

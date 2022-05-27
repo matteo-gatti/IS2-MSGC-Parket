@@ -151,9 +151,9 @@
           <div class="inner-form">
             <div class="basic-search">
               <div class="input-field">
-                <input id="search" type="text" placeholder="Cerca un parcheggio" />
-                <div class="icon-wrap d-flex justify-content-center border-white"
-                  style="border-left-style: solid !important; border-left-width: 1px !important" id="btnSearch">
+                <input id="search" type="text" placeholder="Cerca un parcheggio" autocomplete="off"/>
+                <div class="icon-wrap d-flex justify-content-center"
+                  style="" id="btnSearch">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path
                       d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
@@ -162,10 +162,10 @@
                 </div>
               </div>
             </div>
-            <div class="" style="margin: auto; text-align: center;">
+            <div class="my-3" style="text-align: center;">
               <!-- fermo N-word man, così è carino-->
               <input class="form-check-input" type="checkbox" value="" id="advanced-toggle" onclick="toggleAdvanced()">
-              <label class="form-check-label" for="recurrence">Opzioni avanzate</label>
+              <label class="form-check-label" for="recurrence">Ricerca avanzata</label>
             </div>
             <div class="advance-search" style="display: none;">
               <div class="row">
@@ -175,7 +175,7 @@
                     <div class="input-group-prepend">
                       <span class="input-group-text">€</span>
                     </div>
-                    <input type="number" step=".01" min="0" class="form-control" id="minPrice" required>
+                    <input type="number" step=".01" min="0" class="form-control" id="minPrice">
                   </div>
                 </div>
                 <div class='col-sm-6 text-start'>
@@ -184,7 +184,7 @@
                     <div class="input-group-prepend">
                       <span class="input-group-text">€</span>
                     </div>
-                    <input type="number" step=".01" min="0" class="form-control" id="maxPrice" required>
+                    <input type="number" step=".01" min="0" class="form-control" id="maxPrice">
                   </div>
                 </div>
               </div>
@@ -194,7 +194,7 @@
                   <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
                     data-td-target-toggle='nearest'>
                     <input id='linkedPickers1Input' type='text' class='form-control' data-td-target='#linkedPickers1'
-                      required />
+                       />
                     <span class='input-group-text' data-td-target='#linkedPickers1' data-td-toggle='datetimepicker'>
                       <span class='fa-solid fa-calendar'></span>
                     </span>
@@ -205,7 +205,7 @@
                   <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
                     data-td-target-toggle='nearest'>
                     <input id='linkedPickers2Input' type='text' class='form-control' data-td-target='#linkedPickers2'
-                      required />
+                       />
                     <span class='input-group-text' data-td-target='#linkedPickers2' data-td-toggle='datetimepicker'>
                       <span class='fa-solid fa-calendar'></span>
                     </span>
@@ -218,7 +218,7 @@
                     <!--                 <span>108 </span>results -->
                   </div>
                   <div class="group-btn">
-                    <button class="btn-delete" id="delete">RESET</button>
+                    <button type="reset" class="btn-delete" id="delete">RESET</button>
                   </div>
                 </div>
               </div>
@@ -242,7 +242,7 @@
 
       <div class="album py-2 bg-light">
         <div class="container">
-          <h3 class="fw-light text-center" id="noParks" hidden>Nessun parcheggio 😭</h3>
+          <h3 class="fw-light px-4 py-5 text-center" id="noParks" hidden>Nessun parcheggio 😭</h3>
           <div class="col" id="firstPark" hidden>
             <div class="card shadow-sm">
               <img style="vertical-align:middle" class="card-img-top img-fluid imgPark" width="500" height="500"

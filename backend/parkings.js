@@ -129,6 +129,7 @@ router.get('', async (req, res) => {
                 insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
             }
             if("dateMax" in queryDict) {
+                console.log(queryDict["dateMax"])
                 if (insertionMatch.datetimeStart == null) {
                     insertionMatch.datetimeStart = {}
                 }
@@ -147,7 +148,7 @@ router.get('', async (req, res) => {
         
         let parkings = []
         if(fuzzySearchQuery !== "") {
-            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({ visible: 0, __v: 0, confidenceScore: 0 }).populate(
+            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({__v: 0, confidenceScore: 0 }).populate(
                 {
                     path: "insertions",
                     model: "Insertion",
@@ -155,7 +156,7 @@ router.get('', async (req, res) => {
                     match: insertionMatch
                 })
         } else {   
-            parkings = await Parking.find(query, { visible: 0, __v: 0 }).populate(
+            parkings = await Parking.find(query, { __v: 0 }).populate(
                 {
                     path: "insertions",
                     model: "Insertion",
@@ -163,7 +164,11 @@ router.get('', async (req, res) => {
                     match: insertionMatch
                 })
         }
-        parkings = parkings.filter(parking => parking.insertions.length > 0)
+        parkings = parkings.filter(parking => parking.visible === true && parking.insertions.length > 0)
+        // remove property visible from the parkings
+        for (let parking of parkings) {
+            parking.visible = undefined
+        }
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)
@@ -188,8 +193,8 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true })
-        
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true, new: true })
+
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)

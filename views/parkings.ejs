@@ -1,189 +1,283 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PARKET - private Area</title>
-    <link rel="icon" href="img/logo.png" />
- <!-- JQuery-->
- <script
- src="https://code.jquery.com/jquery-3.3.1.js"
- integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
- crossorigin="anonymous"
- ></script>
- 
- <!-- JavaScript Bundle with Popper -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 
- <!-- Popperjs -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
-crossorigin="anonymous"></script>
+<head>
+  <title>PARKET - private Area</title>
+  <link rel="icon" href="img/logo.png" />
+  <!-- JQuery-->
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
 
- <!-- Bootstrap-->
- <link
-   href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-   rel="stylesheet"
-   integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-   crossorigin="anonymous"
- />
- <!-- ICONS -->
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+    crossorigin="anonymous"></script>
 
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
- <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
- rel="stylesheet" crossorigin="anonymous">
-    <script src="scriptParkings.js" defer></script>
-    <style>
-      /* GLOBAL STYLES
+  <!-- Popperjs -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+
+  <!-- Bootstrap-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+  <!-- Tempus Dominus JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
+    crossorigin="anonymous"></script>
+  <!-- ICONS -->
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="css/searchbar.css" crossorigin="anonymous">
+  <script src="scriptParkings.js" defer></script>
+  <style>
+    /* GLOBAL STYLES
 -------------------------------------------------- */
-      /* Padding below the footer and lighter body text */
-      .card-img-top {
-    width: 100%;
-    height: 10vw;
-    object-fit: cover;
-}
-      
-      
-      body {
-        padding-top: 0rem;
-        padding-bottom: 3rem;
-        color: #5a5a5a;
-      }
+    /* Padding below the footer and lighter body text */
+    .card-img-top {
+      width: 100%;
+      height: 10vw;
+      object-fit: cover;
+    }
 
-      /* CUSTOMIZE THE CAROUSEL
--------------------------------------------------- */
 
-      /* Carousel base class */
-      .carousel {
-        margin-bottom: 4rem;
-      }
-      /* Since positioning the image, we need to help out the caption */
-      .carousel-caption {
-        bottom: 3rem;
-        z-index: 10;
-      }
+    body {
+      padding-top: 0rem;
+      padding-bottom: 3rem;
+      color: #5a5a5a;
+    }
 
-      /* Declare heights because of positioning of img element */
-      .carousel-item {
-        height: 32rem;
-      }
-      .carousel-item > img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        min-width: 100%;
-        height: 32rem;
-      }
-
-      /* MARKETING CONTENT
+    /* CUSTOMIZE THE CAROUSEL
 -------------------------------------------------- */
 
-      /* Center align the text within the three columns below the carousel */
-      .marketing .col-lg-4 {
-        margin-bottom: 1.5rem;
-        text-align: center;
-      }
-      .marketing h2 {
-        font-weight: 400;
-      }
-      /* rtl:begin:ignore */
-      .marketing .col-lg-4 p {
-        margin-right: 0.75rem;
-        margin-left: 0.75rem;
-      }
-      /* rtl:end:ignore */
+    /* Carousel base class */
+    .carousel {
+      margin-bottom: 4rem;
+    }
 
-      /* Featurettes
+    /* Since positioning the image, we need to help out the caption */
+    .carousel-caption {
+      bottom: 3rem;
+      z-index: 10;
+    }
+
+    /* Declare heights because of positioning of img element */
+    .carousel-item {
+      height: 32rem;
+    }
+
+    .carousel-item>img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      height: 32rem;
+    }
+
+    /* MARKETING CONTENT
+-------------------------------------------------- */
+
+    /* Center align the text within the three columns below the carousel */
+    .marketing .col-lg-4 {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .marketing h2 {
+      font-weight: 400;
+    }
+
+    /* rtl:begin:ignore */
+    .marketing .col-lg-4 p {
+      margin-right: 0.75rem;
+      margin-left: 0.75rem;
+    }
+
+    /* rtl:end:ignore */
+
+    /* Featurettes
 ------------------------- */
 
-      .featurette-divider {
-        margin: 5rem 0; /* Space out the Bootstrap <hr> more */
-      }
+    .featurette-divider {
+      margin: 5rem 0;
+      /* Space out the Bootstrap <hr> more */
+    }
 
-      /* Thin out the marketing headings */
-      .featurette-heading {
-        font-weight: 300;
-        line-height: 1;
-        /* rtl:remove */
-        letter-spacing: -0.05rem;
-      }
+    /* Thin out the marketing headings */
+    .featurette-heading {
+      font-weight: 300;
+      line-height: 1;
+      /* rtl:remove */
+      letter-spacing: -0.05rem;
+    }
 
-      /* RESPONSIVE CSS
+    /* RESPONSIVE CSS
 -------------------------------------------------- */
 
-      @media (min-width: 40em) {
-        /* Bump up size of carousel content */
-        .carousel-caption p {
-          margin-bottom: 1.25rem;
-          font-size: 1.25rem;
-          line-height: 1.4;
-        }
+    @media (min-width: 40em) {
 
-        .featurette-heading {
-          font-size: 50px;
-        }
+      /* Bump up size of carousel content */
+      .carousel-caption p {
+        margin-bottom: 1.25rem;
+        font-size: 1.25rem;
+        line-height: 1.4;
       }
 
-      @media (min-width: 62em) {
-        .featurette-heading {
-          margin-top: 7rem;
-        }
+      .featurette-heading {
+        font-size: 50px;
       }
-    </style>
-  </head>
+    }
+
+    @media (min-width: 62em) {
+      .featurette-heading {
+        margin-top: 7rem;
+      }
+    }
+  </style>
+</head>
+
 <body>
-<%- include("header.ejs", {logged: logged}) %>
-<main>
-    <section class="py-2 text-center container">
-      <div class="row py-lg-5">
-        <div class="col-lg-6 col-md-8 mx-auto">
-          <h1 class="fw-light">Parcheggi disponibili</h1>
-          <!-- <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
+  <%- include("header.ejs", {logged: logged}) %>
+    <main>
+
+      <!--- search form -->
+      <div class="s010">
+        <form>
+          <div class="inner-form">
+            <div class="basic-search">
+              <div class="input-field">
+                <input id="search" type="text" placeholder="Cerca un parcheggio" />
+                <div class="icon-wrap d-flex justify-content-center border-white"
+                  style="border-left-style: solid !important; border-left-width: 1px !important" id="btnSearch">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path
+                      d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
+                    </path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="" style="margin: auto; text-align: center;">
+              <!-- fermo N-word man, così è carino-->
+              <input class="form-check-input" type="checkbox" value="" id="advanced-toggle" onclick="toggleAdvanced()">
+              <label class="form-check-label" for="recurrence">Opzioni avanzate</label>
+            </div>
+            <div class="advance-search" style="display: none;">
+              <div class="row">
+                <div class='col-sm-6 text-start'>
+                  <label for="minPrice" class="form-label">Prezzo minimo:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">€</span>
+                    </div>
+                    <input type="number" step=".01" min="0" class="form-control" id="minPrice" required>
+                  </div>
+                </div>
+                <div class='col-sm-6 text-start'>
+                  <label for="minPrice" class="form-label">Prezzo massimo:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">€</span>
+                    </div>
+                    <input type="number" step=".01" min="0" class="form-control" id="maxPrice" required>
+                  </div>
+                </div>
+              </div>
+              <div class='row mb-3'>
+                <div class='col-sm-6 text-start'>
+                  <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                  <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'>
+                    <input id='linkedPickers1Input' type='text' class='form-control' data-td-target='#linkedPickers1'
+                      required />
+                    <span class='input-group-text' data-td-target='#linkedPickers1' data-td-toggle='datetimepicker'>
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                  </div>
+                </div>
+                <div class='col-sm-6 text-start'>
+                  <label for='linkedPickers2Input' class='form-label'>A:</label>
+                  <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'>
+                    <input id='linkedPickers2Input' type='text' class='form-control' data-td-target='#linkedPickers2'
+                      required />
+                    <span class='input-group-text' data-td-target='#linkedPickers2' data-td-toggle='datetimepicker'>
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="row third">
+                <div class="input-field">
+                  <div class="result-count">
+                    <!--                 <span>108 </span>results -->
+                  </div>
+                  <div class="group-btn">
+                    <button class="btn-delete" id="delete">RESET</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!--- end search form -->
+      <section class="py-2 text-center container">
+        <div class="row py-lg-5">
+          <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Risultati della ricerca</h1>
+            <!-- <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
           <p>
             <a href="#" class="btn btn-primary my-2">Main call to action</a>
             <a href="#" class="btn btn-secondary my-2">Secondary action</a>
           </p> -->
+          </div>
         </div>
-      </div>
-    </section>
-  
-    <div class="album py-2 bg-light">
-      <div class="container">
-        <h3 class="fw-light text-center" id="noParks" hidden>Nessun parcheggio 😭</h3>
-  
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-4" id="parkContainer">
-            <div class="col" id="firstPark" hidden>
-                <div class="card shadow-sm">
-                  <img style="vertical-align:middle"
-                  class="card-img-top img-fluid imgPark"
-                  width="500"
-                  height="500"
-                  src="https://via.placeholder.com/500x500"
-                >
-                  <div class="card-body">
-                    <p class="card-text parkName"></p>
-                    <p class="card-text parkDesc"></p>
-                    <p class="card-text parkAddress"></p>
-                    <p class="card-text parkId" hidden></p>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="btn-group">
-                        <button onclick="detailParking()" type="button" class="btn btn-sm btn-outline-secondary">Dettagli</button>
-                        <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
-                      </div>
-                    </div>
+      </section>
+
+      <div class="album py-2 bg-light">
+        <div class="container">
+          <h3 class="fw-light text-center" id="noParks" hidden>Nessun parcheggio 😭</h3>
+          <div class="col" id="firstPark" hidden>
+            <div class="card shadow-sm">
+              <img style="vertical-align:middle" class="card-img-top img-fluid imgPark" width="500" height="500"
+                src="https://via.placeholder.com/500x500">
+              <div class="card-body">
+                <p class="card-text parkName"></p>
+                <p class="card-text parkDesc"></p>
+                <p class="card-text parkAddress"></p>
+                <p class="card-text parkId" hidden></p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button onclick="detailParking()" type="button"
+                      class="btn btn-sm btn-outline-secondary">Dettagli</button>
+                    <!-- <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> -->
                   </div>
                 </div>
+              </div>
             </div>
+          </div>
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-4" id="parkContainer">
+
+          </div>
         </div>
       </div>
-    </div>
-    <!-- inserimento -->
+      <!-- inserimento -->
 
-    <div class="px-4 py-5 my-5 text-center">
-      <div class="col-lg-6 mx-auto">
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-          <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParking()">Inserisci nuovo parcheggio</button>
+      <div class="px-4 py-5 my-5 text-center">
+        <div class="col-lg-6 mx-auto">
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParking()">Inserisci nuovo
+              parcheggio</button>
+          </div>
         </div>
       </div>
-    </div>
 
-  </main>
-  <%- include("footer.ejs", {logged: logged}) %>
+    </main>
+    <%- include("footer.ejs", {logged: logged}) %>
 </body>

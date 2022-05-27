@@ -109,9 +109,11 @@ crossorigin="anonymous"></script>
                   <p class="card-text insertionPriceHourly"></p>
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="">
-                      <button onclick="detailInsertion()" type="button" class="btn  btn-outline-dark btn-light">Dettagli</button>
-                      <button onclick="modifyInsertion()" type="button" class="btn  btn-outline-dark btn-warning">Edit</button>
-                      <button onclick="deleteInsertion()" type="button" class="btn  btn-outline-dark btn-danger">Elimina</button>
+                      <button onclick="detailInsertion()" type="button" class="btn  btn-outline-primary">Dettagli</button>
+                      <% if (owner) { %>
+                      <button onclick="modifyInsertion()" type="button" class="btn  btn-outline-secondary">Edit</button>
+                      <button onclick="deleteInsertion()" type="button" class="btn  btn-outline-danger">Elimina</button>
+                      <% } %>
                     </div>
                   </div>
                 </div>

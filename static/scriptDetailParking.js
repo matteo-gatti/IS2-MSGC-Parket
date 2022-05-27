@@ -159,7 +159,8 @@ async function loadDetails() {
 
 // go back to the parkings page
 function goBack() {
-    history.back()
+    //go back to previous page
+    window.location = document.referrer
 }
 
 // load the insertions of the parking
@@ -276,6 +277,10 @@ const linkedPicker1ElementRecurrence = document.getElementById('recurrenceStartI
 const linked1Recurrence = new tempusDominus.TempusDominus(linkedPicker1ElementRecurrence);
 // linked1.locale(localization)
 linked1Recurrence.updateOptions({
+    restrictions: {
+        minDate: (new Date((new Date()).setHours(0,0,0,0))),
+        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
+    },
     display: {
         viewMode: "clock",
         components: {
@@ -293,6 +298,10 @@ linked1Recurrence.updateOptions({
 })
 
 const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
+    restrictions: {
+        minDate: (new Date((new Date()).setHours(0,0,0,0))),
+        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
+    },
         display: {
             viewMode: "clock",
             components: {
@@ -313,7 +322,8 @@ const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementBy
 linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
     linked2Recurrrence.updateOptions({
         restrictions: {
-            minDate: e.detail.date
+            minDate: e.detail.date,
+            maxDate: (new Date((new Date()).setHours(23,59,0,0)))
         },
         display: {
             viewMode: "clock",
@@ -337,7 +347,8 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1Recurrence.updateOptions({
         restrictions: {
-            maxDate: e.date
+            minDate: (new Date((new Date()).setHours(0,0,0,0))),
+            maxDate: e.detail.date
         },
         display: {
             viewMode: "clock",
@@ -398,6 +409,7 @@ linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e)
 const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1.updateOptions({
         restrictions: {
+            minDate: new tempusDominus.DateTime().startOf("minutes"),
             maxDate: e.date
         },
         display: {

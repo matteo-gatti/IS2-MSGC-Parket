@@ -1,5 +1,6 @@
 import express from 'express'
 import multer from 'multer'
+import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
 
 import Parking from './models/parking.js'
 import User from './models/user.js'
@@ -96,21 +97,19 @@ router.get('', async (req, res) => {
         const query = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
         const insertionMatch = {}
         const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        let fuzzySearchQuery = ""
         if(Object.keys(req.query).length >= 0) {
-            const validParams = ["name", "city", "priceMin", "priceMax", "dateMin", "dateMax"]
+            const validParams = ["search", "priceMin", "priceMax", "dateMin", "dateMax"]
             const queryDict = {}
             for (let field in req.query) {
                 if(validParams.includes(field)) {
                     queryDict[field] = req.query[field]
+                } else {
+                    return res.status(400).send({ message: 'Invalid query parameter' })
                 }
             }
-            console.log(queryDict)
-            //
-            if("name" in queryDict) {
-                query.$and.push({name: queryDict["name"]}) //TODO FUZZY
-            }
-            if("city" in queryDict) {
-                query.$and.push({city: queryDict["city"]}) //TODO FUZZY
+            if("search" in queryDict) {
+                fuzzySearchQuery = queryDict["search"]
             }
             if("priceMin" in queryDict) {
                 insertionMatch.priceHourly = {}
@@ -136,7 +135,6 @@ router.get('', async (req, res) => {
                 if (insertionMatch.datetimeEnd == null) {
                     insertionMatch.datetimeEnd = {}
                 }
-                
                 if(insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
                     insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMax"])
                 }
@@ -146,14 +144,25 @@ router.get('', async (req, res) => {
                 insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
             }
         }
-        let parkings = await Parking.find(query, { visible: 0, __v: 0 }).populate(
-            {
-                path: "insertions",
-                model: "Insertion",
-                select: {_id: 0, __v:0,},
-                match: insertionMatch
-            })
-
+        
+        let parkings = []
+        if(fuzzySearchQuery !== "") {
+            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({ visible: 0, __v: 0, confidenceScore: 0 }).populate(
+                {
+                    path: "insertions",
+                    model: "Insertion",
+                    select: {_id: 0, __v:0,},
+                    match: insertionMatch
+                })
+        } else {   
+            parkings = await Parking.find(query, { visible: 0, __v: 0 }).populate(
+                {
+                    path: "insertions",
+                    model: "Insertion",
+                    select: {_id: 0, __v:0,},
+                    match: insertionMatch
+                })
+        }
         parkings = parkings.filter(parking => parking.insertions.length > 0)
         return res.status(200).json(parkings)
     } catch (err) {

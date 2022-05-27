@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
 var Schema = mongoose.Schema
 
 const parkingSchema = new Schema({
@@ -57,5 +58,16 @@ const parkingSchema = new Schema({
         ref: 'Insertion',
     }],
 })
+
+parkingSchema.plugin(mongoose_fuzzy_searching.default, {
+    fields: [{
+          name: 'name',
+          weight: 3,
+        },
+        {
+          name: 'city',
+          weight: 1,
+        }]
+  });
 
 export default mongoose.model('Parking', parkingSchema)

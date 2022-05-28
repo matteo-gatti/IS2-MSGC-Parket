@@ -21,7 +21,8 @@ async function searchParkings() {
     const minPrice = $('#minPrice').val()
     const maxPrice = $('#maxPrice').val()
 
-    
+    console.log("min", minPrice)
+    console.log("max", maxPrice)
     
     let minDate = $("#linkedPickers1Input").val()
     if(minDate != "") {
@@ -42,12 +43,18 @@ async function searchParkings() {
             query += `search=${searchKey}&`
         }
         //check if dates are not null
-        if (minDate != "" && maxDate != "") {
-            query += `dateMin=${minDate}&dateMax=${maxDate}&`
+        if (minDate != "") {
+            query += `dateMin=${minDate}&`
+        }
+        if (maxDate != "") {
+            query += `dateMax=${maxDate}&`
         }
         //check if prices are not null
-        if (minPrice != "" && maxPrice != "") {
-            query += `priceMin=${minPrice}&priceMax=${maxPrice}&`
+        if (minPrice != "") {
+            query += `priceMin=${minPrice}&`
+        }
+        if (maxPrice != "") {
+            query += `priceMax=${maxPrice}&`
         }
         // fetch the user from the database
         const res = await fetch(query, {
@@ -100,6 +107,7 @@ async function getAllParkings() {
             $('#noParks').attr("hidden", true)
             const container = $('#parkContainer')
             const parkingHTML = $('#firstPark')
+            container.empty()
             for (parking in data) {
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
@@ -198,20 +206,22 @@ linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, (e)
     });
 });
 
-$('#search').keypress(function (e) {
+$('form input').keypress(function (e) {
     var key = e.which;
     if(key == 13)  // the enter key code
        $('#btnSearch').click();
 });   
 
 $('form').on('reset', function (event) {
-    setTimeout(function() {
+    const state = $('#advanced-toggle').prop("checked")
+    setTimeout(async function() {
         // executes after the form has been reset
-        $('#advanced-toggle').prop("checked", true)
+        $('#advanced-toggle').prop("checked", state)
+        await getAllParkings()
       }, 1);
     
 });
 
 
 getAllParkings()
-$('#advance-search'). hide();
+$('#advanced-toggle').prop("checked", false)

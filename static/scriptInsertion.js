@@ -108,6 +108,9 @@ async function loadInfo() {
                 $('#noReservations').removeAttr('hidden');
                 
             }
+            else {
+                $('#noReservations').attr('hidden', true);
+            }
 
             let container = $("#reservList");
             container.empty();

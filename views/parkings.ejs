@@ -162,10 +162,17 @@
                 </div>
               </div>
             </div>
-            <div class="my-3" style="text-align: center;">
+            <div class="my-3 d-flex justify-content-end align-items-center">
               <!-- fermo N-word man, così è carino-->
-              <input class="form-check-input" type="checkbox" value="" id="advanced-toggle" onclick="toggleAdvanced()">
-              <label class="form-check-label" for="recurrence">Ricerca avanzata</label>
+              <div class="flex-grow-1 text-center" style="flex:1">
+              </div>
+              <div class="flex-grow-1 text-center my-auto">
+                <input class="form-check-input" type="checkbox" value="" id="advanced-toggle" onclick="toggleAdvanced()">
+                <label class="form-check-label" for="recurrence">Ricerca avanzata</label>
+              </div>
+              <div class="group-btn" style="flex:1">
+                <button type="reset" class="btn btn-sm btn-outline-danger d-block ms-auto me-2" id="delete">RESET</button>
+              </div>
             </div>
             <div class="advance-search" style="display: none;">
               <div class="row">
@@ -216,9 +223,6 @@
                 <div class="input-field">
                   <div class="result-count">
                     <!--                 <span>108 </span>results -->
-                  </div>
-                  <div class="group-btn">
-                    <button type="reset" class="btn-delete" id="delete">RESET</button>
                   </div>
                 </div>
               </div>

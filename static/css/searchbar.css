@@ -822,7 +822,7 @@ legend {
   width: 100%;
   padding: 10px 32px 10px 70px;
   font-size: 18px;
-  height: 70px;
+  height: 50px;
   color: #000;
   background: #fff;
   font-family: 'Lato', sans-serif;
@@ -894,36 +894,38 @@ legend {
   box-shadow: none;
 }
 
-.s010 form .inner-form .input-field .btn-delete {
-  min-width: 100px;
-  height: 40px;
-  padding: 0 15px;
+.btn-delete {
+  min-width: 50px;
+  height: 20px;
   background: transparent;
   white-space: nowrap;
-  border-radius: 0;
+  border-radius: 10%;
   font-size: 14px;
   color: #666;
   transition: all .2s ease-out, color .2s ease-out;
   border: 0;
   cursor: pointer;
   font-weight: 400;
+  border-style: solid;
+  border-width: 1px;
 }
 
-.s010 form .inner-form .input-field .btn-delete:hover,
-.s010 form .inner-form .input-field .btn-delete:focus {
+.btn-delete:hover,
+.btn-delete:focus {
   color: #000;
   outline: 0;
   box-shadow: none;
+  border-color: #000;
 }
 
 .s010 form .inner-form .basic-search {
-  box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 8px 30px 0px rgba(13, 109, 253, 0.15);
   overflow: hidden;
   border-radius: 34px;
   margin-bottom: 5px;
   border-style: solid;
   border-color: #0d6dfd;
-  border-width: 2px;
+  border-width: 1px;
 }
 
 .s010 form .inner-form .basic-search .input-field {
@@ -947,7 +949,7 @@ legend {
   box-sizing: unset;
   border-color: #0d6dfd;
   border-left-style: solid; 
-  border-left-width: 2px;
+  border-left-width: 1px;
 }
 
 .s010 form .inner-form .basic-search .input-field .icon-wrap {

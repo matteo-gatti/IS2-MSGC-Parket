@@ -103,25 +103,30 @@ router.get('', async (req, res) => {
 
 // Modify a parking
 router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, res) => {
-    let bodyJSON = await JSON.parse(req.body["json"])
-    if(!req.file) {
-        // if no image is uploaded, the old one is kept
-        const oldParking = await Parking.findById(req.params.parkingId)
-        bodyJSON.image = oldParking.image
-        //return res.status(415).send({ message: 'Wrong file type for images' })
-    } else {
-        bodyJSON.image = "uploads/"+ req.file["filename"]
-    }
-
-    const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
-    for (const field in bodyJSON) {
-        if (!validFields.includes(field)) {
-            return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+    let bodyJSON
+    if(req.body["json"] !== undefined) {
+        bodyJSON = await JSON.parse(req.body["json"])
+        if(!req.file) {
+            // if no image is uploaded, the old one is kept
+            const oldParking = await Parking.findById(req.params.parkingId)
+            bodyJSON.image = oldParking.image
+            //return res.status(415).send({ message: 'Wrong file type for images' })
+        } else {
+            bodyJSON.image = "uploads/"+ req.file["filename"]
         }
-    }
 
-    if(!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
-        return res.status(400).send({ message: "Some fields are empty or undefined" })
+        const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+        for (const field in bodyJSON) {
+            if (!validFields.includes(field)) {
+                return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+            }
+        }
+
+        if(!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
+            return res.status(400).send({ message: "Some fields are empty or undefined" })
+        }
+    } else {
+        bodyJSON = req.body
     }
 
     try {
@@ -133,7 +138,7 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true })
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true , new: true })
         
         return res.status(200).json(updatedParking)
     } catch (err) {

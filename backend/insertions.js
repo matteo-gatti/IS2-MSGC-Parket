@@ -1,9 +1,11 @@
 import express from 'express'
 import multer from 'multer'
+import moment from 'moment'
 
 import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
+import Reservation from './models/reservation.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
 // Storage engine
@@ -152,15 +154,129 @@ router.get('/:insertionId', async (req, res) => {
     }
 })
 
-// TODO: Modify an insertion 
+// Modify an insertion 
 router.put('/:insertionId', tokenChecker, async (req, res) => {
-    // TODO  
+    // check that correct data fields are sent
+    const validInsertionFields = ["id", "name", "priceHourly", "priceDaily", "minInterval", "datetimeStart", "datetimeEnd", "recurrent", "recurrenceData"]
+    for (const field in req.body) {
+        if (!validInsertionFields.includes(field)) {
+            return res.status(400).send({ message: "Some fields cannot be modified" })
+        }
+    }
+
+    if(!req.body.name || !req.body.priceHourly || !req.body.priceDaily || !req.body.minInterval || !req.body.datetimeStart || !req.body.datetimeEnd) {
+        return res.status(400).send({ message: "Some fields are empty or undefined" })
+    }
+
+    // check that the new insertion is not in the past
+    if (new Date(req.body.datetimeStart) < new Date()) {
+        return res.status(400).send({ message: "The new insertion is in the past" })
+    }
+
+    // if datetimeStart is after datetimeEnd, return error
+    if (new Date(req.body.datetimeStart) > new Date(req.body.datetimeEnd)) {
+        return res.status(400).send({ message: "Datetime start cannot be after datetime end" })
+    }
+
+    // if recurrent
+    if(req.body.recurrent) {
+        // check that the time interval is correct
+        if (new Date(req.body.recurrenceData.timeStart) > new Date(req.body.recurrenceData.timeEnd)) {
+            return res.status(400).send({ message: "Time slot not valid, time start is greater than time end" })
+        }
+    }
+
+    req.body.datetimeStart = new Date(req.body.datetimeStart)
+    req.body.datetimeEnd = new Date(req.body.datetimeEnd)
+
+    try {
+        // let the user modify the datetime start and end, if there is no reservation for that days
+        let insertion = await Insertion.findById(req.body.id).populate("parking")
+
+        // if the user is not the owner of the parking, return 403
+        var owner = String(insertion.parking.owner)
+        if(owner !== req.loggedInUser.userId) {
+            return res.status(403).send({ message: "You are not the owner of this parking" })
+        }
+
+        // prevent from modifying the insertion from non recurrent to recurrent
+        if(insertion.recurrent === false && req.body.recurrent) {
+            return res.status(400).send({ message: "Non recurrent insertion cannot be changed in recurrent" })
+        }
+        // prevent from modifying the insertion from recurrent to non recurrent
+        if(insertion.recurrent === true && !req.body.recurrent) {
+            return res.status(400).send({ message: "Recurrent insertion cannot be changed in non recurrent" })
+        }
+        
+        let reservations = await Reservation.find({insertion: insertion.id})
+
+        if (reservations.length !== 0) {
+            // get the earliest and latest datetime of the reservations
+            let earliestReservation = new Date(reservations[0].datetimeStart)
+            let latestReservation = new Date(reservations[0].datetimeEnd)
+            for (let i = 1; i < reservations.length; i++) {
+                if (earliestReservation > new Date(reservations[i].datetimeStart)) earliestReservation = new Date(reservations[i].datetimeStart)
+                if (latestReservation < new Date(reservations[i].datetimeEnd)) latestReservation = new Date(reservations[i].datetimeEnd)
+            }
+            
+            // check no reservations are left away
+            if (req.body.datetimeStart != null) {
+                let startDate = new Date(req.body.datetimeStart)
+                if (startDate > earliestReservation) {
+                    return res.status(400).send({ message: "The datetime start of the insertion cannot be after the datetime start of the reservations" })
+                }
+            }
+            if (req.body.datetimeEnd != null) {
+                let endDate = new Date(req.body.datetimeEnd)
+                if (endDate < latestReservation) {
+                    return res.status(400).send({ message: "The datetime end of the insertion cannot be before the datetime end of the reservations" })
+                }
+            }
+
+            // ---------------------------------- advantageous price for the user ----------------------------------
+            // if the priceHourly or priceDaily is lower than before, we need to update the reservations' price
+            // retrieve all reservations of the insertion
+            // for each reservation, update the price
+            if(req.body.priceHourly < insertion.priceHourly || req.body.priceDaily < insertion.priceDaily) {
+                //for each reservation of reservations
+                for (let i = 0; i < reservations.length; i++) {
+                    var oldPrice = reservations[i].price
+
+                    reservations[i].price = 0
+                    let minutesDiff = moment(reservations[i].datetimeEnd).diff(moment(reservations[i].datetimeStart), "minutes")
+
+                    if (req.body.priceDaily) {
+                        const dayDiff = moment(reservations[i].datetimeEnd).diff(moment(reservations[i].datetimeStart), "days")
+                        minutesDiff -= dayDiff * 24 * 60
+                        reservations[i].price += dayDiff * req.body.priceDaily
+                    }
+                    reservations[i].price += minutesDiff / 60 * req.body.priceHourly
+
+                    // update the price of the reservation if it is convenient
+                    if(reservations[i].price < oldPrice) {
+                        await Reservation.findByIdAndUpdate(reservations[i].id, {price: reservations[i].price})
+                    }
+                }
+            }
+        }
+
+        // if the insertion is recurrent, modifications do not regard the reservations already done
+        // therefore modifications only apply to the future reservations
+
+        // finally update the insertion
+        insertion = await Insertion.findByIdAndUpdate(req.body.id, req.body)
+
+        return res.status(200).json(insertion)
+    } catch(err) {
+        console.log(err)
+        return res.status(404).send({ message: "Insertion not found" })
+    }
 })
 
-//Delete an insertion
+// Delete an insertion
 router.delete('/:insertionId', tokenChecker, async (req, res) => {
     try {
-        let test = await Insertion.findById(req.params.insertionId, { _id: 0, __v: 0 }).populate(
+        let insertion = await Insertion.findById(req.params.insertionId, { _id: 0, __v: 0 }).populate(
             [{
                 path: "reservations",
                 model: "Reservation",
@@ -177,19 +293,16 @@ router.delete('/:insertionId', tokenChecker, async (req, res) => {
                 select: { __v:0, insertions: 0},
             }]
         )
-        var owner = String(test.parking.owner)
+        var owner = String(insertion.parking.owner)
         if(owner !== req.loggedInUser.userId) {
             return res.status(403).send({message: "User doesn't have the permission to delete this Insertion"})
         }
-        if(test.reservations.length != 0)
-        {
+        if(insertion.reservations.length != 0) {
             return res.status(405).send({message: "Can't delete insertion with active reservations"})
         }
         
-       //cancello inserzione dalla lista nell'oggetto parcheggio
-        let maerda = await Parking.findById(test.parking.id)
-        console.log(maerda)
-        let park = await Parking.findByIdAndUpdate(test.parking.id,{
+       // cancello inserzione dalla lista nell'oggetto parcheggio
+        await Parking.findByIdAndUpdate(insertion.parking.id, {
             $pull:{
                 insertions: req.params.insertionId
             }

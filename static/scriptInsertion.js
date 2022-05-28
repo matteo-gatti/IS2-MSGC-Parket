@@ -13,7 +13,7 @@ function convertToISO(date) {
         splitDate[0][0] +
         "T" +
         splitDate[1];
-    return date + ":00+01:00";
+    return date + ":00+02:00";
 }
 
 function cleanseList() {
@@ -37,6 +37,8 @@ async function loadInfo() {
             data = await res.json();
 
             if (!res.ok) throw data;
+
+            
 
             $("#insertionName").text(data.name);
             $("#insertionFrom").text(
@@ -100,6 +102,15 @@ async function loadInfo() {
                     "<br>" +
                     data.parking.country
             );
+            console.log(data.reservations.length)
+            if (data.reservations.length === 0) {
+                console.log("no reservations")
+                $('#noReservations').removeAttr('hidden');
+                
+            }
+            else {
+                $('#noReservations').attr('hidden', true);
+            }
 
             let container = $("#reservList");
             container.empty();

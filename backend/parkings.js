@@ -1,5 +1,6 @@
 import express from 'express'
 import multer from 'multer'
+import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
 
 import Parking from './models/parking.js'
 import User from './models/user.js'
@@ -92,8 +93,82 @@ router.get('/:parkingId', async (req, res) => {
 
 // Get all parkings
 router.get('', async (req, res) => {
-    try {
-        const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
+    try {      
+        const query = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        const insertionMatch = {}
+        const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        let fuzzySearchQuery = ""
+        if(Object.keys(req.query).length >= 0) {
+            const validParams = ["search", "priceMin", "priceMax", "dateMin", "dateMax"]
+            const queryDict = {}
+            for (let field in req.query) {
+                if(validParams.includes(field)) {
+                    queryDict[field] = req.query[field]
+                } else {
+                    return res.status(400).send({ message: 'Invalid query parameter' })
+                }
+            }
+            if("search" in queryDict) {
+                fuzzySearchQuery = queryDict["search"]
+            }
+            if("priceMin" in queryDict) {
+                insertionMatch.priceHourly = {}
+                insertionMatch.priceHourly.$gte = queryDict["priceMin"]
+            } 
+            if("priceMax" in queryDict) {
+                if(insertionMatch.priceHourly == null) {
+                    insertionMatch.priceHourly = {}
+                }
+                insertionMatch.priceHourly.$lte = queryDict["priceMax"] 
+            } 
+            if("dateMin" in queryDict) {
+                console.log(queryDict["dateMin"])
+                insertionMatch.datetimeStart = {}
+                insertionMatch.datetimeEnd = {}
+                insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMin"])
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
+            }
+            if("dateMax" in queryDict) {
+                console.log(queryDict["dateMax"])
+                if (insertionMatch.datetimeStart == null) {
+                    insertionMatch.datetimeStart = {}
+                }
+                if (insertionMatch.datetimeEnd == null) {
+                    insertionMatch.datetimeEnd = {}
+                }
+                if(insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMax"])
+                }
+                if(insertionMatch.datetimeEnd.$gte != null && insertionMatch.datetimeEnd.$gte < new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+                }
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+            }
+        }
+        
+        let parkings = []
+        if(fuzzySearchQuery !== "") {
+            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({__v: 0, confidenceScore: 0 }).populate(
+                {
+                    path: "insertions",
+                    model: "Insertion",
+                    select: {_id: 0, __v:0,},
+                    match: insertionMatch
+                })
+        } else {   
+            parkings = await Parking.find(query, { __v: 0 }).populate(
+                {
+                    path: "insertions",
+                    model: "Insertion",
+                    select: {_id: 0, __v:0,},
+                    match: insertionMatch
+                })
+        }
+        parkings = parkings.filter(parking => parking.visible === true && parking.insertions.length > 0)
+        // remove property visible from the parkings
+        for (let parking of parkings) {
+            parking.visible = undefined
+        }
         return res.status(200).json(parkings)
     } catch (err) {
         console.log(err)
@@ -118,8 +193,8 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true })
-        
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true, new: true })
+
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)

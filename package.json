@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/matteo-gatti/IS2-MSGC-Parket#readme",
   "dependencies": {
+    "@imranbarbhuiya/mongoose-fuzzy-searching": "^3.0.5",
     "async": "^3.2.3",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",

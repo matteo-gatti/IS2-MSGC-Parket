@@ -9,7 +9,7 @@ async function createInsertion() {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     // check if the form is valid
@@ -26,6 +26,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -34,6 +36,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -42,6 +46,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -85,8 +91,8 @@ async function createInsertion() {
                 recurrent: $("#recurrence").is(":checked"),
                 recurrenceData: {
                     daysOfTheWeek: days,
-                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00",
-                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00",
+                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00",
+                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00",
                 },
             }),
         })
@@ -99,11 +105,11 @@ async function createInsertion() {
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
             $('#btnSubmit').text("Crea inserzione")
-            $(':input','form')
-            .not(':button, :submit, :reset, :hidden')
-            .val('')
-            .prop('checked', false)
-            .prop('selected', false);
+            $(':input', 'form')
+                .not(':button, :submit, :reset, :hidden')
+                .val('')
+                .prop('checked', false)
+                .prop('selected', false);
             // and reload the insertions
             await getMyInsertions()
         }
@@ -134,6 +140,7 @@ async function loadDetails() {
             throw data
 
         // load the data in the page
+        console.log(data)
         if (data) {
             $("#parkingName").text(data.name)
             $("#parkingDesc").text(data.description)
@@ -142,8 +149,8 @@ async function loadDetails() {
             $("#parkingCountry").text(data.country)
             $("#parkingId").text(data._id)
             $("#lblVisible").text(data.visible === true ? "Sì" : "No")
-            $("#btnVisible").removeClass(data.visible === true ? "btn-danger" : "btn-success")
-            $("#btnVisible").addClass(data.visible === true ? "btn-success" : "btn-danger")
+            $("#btnVisible").removeClass(data.visible ? "btn-outline-dark" : "btn-outline-success")
+            $("#btnVisible").addClass(data.visible ? "btn-outline-success" : "btn-outline-dark")
             $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
 
             if (data.image != "")
@@ -159,7 +166,8 @@ async function loadDetails() {
 
 // go back to the parkings page
 function goBack() {
-    history.back()
+    //go back to previous page
+    window.location = document.referrer
 }
 
 // load the insertions of the parking
@@ -167,7 +175,7 @@ async function getMyInsertions() {
     try {
         // fetch the user from the database
         const id = $('#parkingId').html()
-        
+
         const res = await fetch(`/api/v1/parkings/${id}/insertions`, {
             method: "GET",
         })
@@ -185,26 +193,26 @@ async function getMyInsertions() {
                 tmpInsHTML = insertionHTML.clone()
                 tmpInsHTML.removeAttr("hidden")
                 $(tmpInsHTML.find("p")[0]).text(data.insertions[insertion]._id)
-                $(tmpInsHTML.find("p")[1]).html("<b>&nbsp;&nbsp;&nbsp;Nome: </b> " +  data.insertions[insertion].name)
+                $(tmpInsHTML.find("p")[1]).html("<b>&nbsp;&nbsp;&nbsp;Nome: </b> " + data.insertions[insertion].name)
                 $(tmpInsHTML.find("p")[2]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Da: </b>" + (new Date(data.insertions[insertion].datetimeStart)).toLocaleString("it-IT").slice(0, -3))
                 $(tmpInsHTML.find("p")[3]).html("<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A: </b> " + (new Date(data.insertions[insertion].datetimeEnd)).toLocaleString("it-IT").slice(0, -3))
-                let strPrezzo = "<b>&nbsp;&nbsp;Prezzo: </b> " + data.insertions[insertion].priceHourly.toLocaleString('it-IT', 
-                {
-                    style: 'currency',
-                    currency: 'EUR',
-                  }) + "/ora"
-                if(data.insertions[insertion].priceDaily != null) {
-                    strPrezzo += " - " + data.insertions[insertion].priceDaily.toLocaleString('it-IT', 
+                let strPrezzo = "<b>&nbsp;&nbsp;Prezzo: </b> " + data.insertions[insertion].priceHourly.toLocaleString('it-IT',
                     {
                         style: 'currency',
                         currency: 'EUR',
-                    }) + "/giorno"
+                    }) + "/ora"
+                if (data.insertions[insertion].priceDaily != null) {
+                    strPrezzo += " - " + data.insertions[insertion].priceDaily.toLocaleString('it-IT',
+                        {
+                            style: 'currency',
+                            currency: 'EUR',
+                        }) + "/giorno"
                 }
                 $(tmpInsHTML.find("p")[4]).html(strPrezzo)
                 let fullSelf = data.insertions[insertion].self.split("/")
 
                 let insertionid = fullSelf[4]
-                
+
                 $(tmpInsHTML.find("button")[0]).attr("onclick", `detailInsertion('${insertionid}')`);
                 $(tmpInsHTML.find("button")[1]).attr("onclick", `modifyInsertion('${insertionid}')`);
                 $(tmpInsHTML.find("button")[2]).attr("onclick", `deleteInsertion('${insertionid}')`);
@@ -241,17 +249,19 @@ async function toggleVisible() {
         if (!res.ok)
             throw data
 
+        console.log(data)
         // update the visibility button in the page
         if (data) {
             $("#lblVisible").text(data.visible ? "Sì" : "No")
-            $("#btnVisible").removeClass(data.visible ? "btn-danger" : "btn-success")
-            $("#btnVisible").addClass(data.visible ? "btn-success" : "btn-danger")
+            $("#btnVisible").removeClass(data.visible ? "btn-outline-dark" : "btn-outline-success")
+            $("#btnVisible").addClass(data.visible ? "btn-outline-success" : "btn-outline-dark")
         }
 
     } catch (err) {
         $("#message").removeAttr('hidden')
         $("#message").text(err.message)
     }
+    //loadDetails()
 }
 
 // datetimepicker logic
@@ -260,7 +270,7 @@ exampleModal.addEventListener('show.bs.modal', function (event) {
     var button = event.relatedTarget
     var recipient = button.getAttribute('data-bs-name')
     var id = button.getAttribute('data-bs-id')
-    
+
     $('#parkId').text(id)
     var modalTitle = exampleModal.querySelector('.modal-title')
     var modalBodyInput = exampleModal.querySelector('.modal-body input')
@@ -276,6 +286,10 @@ const linkedPicker1ElementRecurrence = document.getElementById('recurrenceStartI
 const linked1Recurrence = new tempusDominus.TempusDominus(linkedPicker1ElementRecurrence);
 // linked1.locale(localization)
 linked1Recurrence.updateOptions({
+    restrictions: {
+        minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+        maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
+    },
     display: {
         viewMode: "clock",
         components: {
@@ -289,31 +303,36 @@ linked1Recurrence.updateOptions({
             seconds: false
         }
     },
-    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+    defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
 })
 
 const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
-        display: {
-            viewMode: "clock",
-            components: {
-                useTwentyfourHour: true,
-                decades: false,
-                year: false,
-                month: false,
-                date: false,
-                hours: true,
-                minutes: true,
-                seconds: false
-            }
-        },
-        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+    restrictions: {
+        minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+        maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
+    },
+    display: {
+        viewMode: "clock",
+        components: {
+            useTwentyfourHour: true,
+            decades: false,
+            year: false,
+            month: false,
+            date: false,
+            hours: true,
+            minutes: true,
+            seconds: false
+        }
+    },
+    defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
 });
 
 // using event listeners
 linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
     linked2Recurrrence.updateOptions({
         restrictions: {
-            minDate: e.detail.date
+            minDate: e.detail.date,
+            maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
         },
         display: {
             viewMode: "clock",
@@ -328,7 +347,7 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+        defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
     });
 
 });
@@ -337,7 +356,8 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1Recurrence.updateOptions({
         restrictions: {
-            maxDate: e.date
+            minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+            maxDate: e.detail.date
         },
         display: {
             viewMode: "clock",
@@ -352,7 +372,7 @@ const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.event
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+        defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
     });
 });
 
@@ -398,13 +418,14 @@ linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e)
 const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
     linked1.updateOptions({
         restrictions: {
+            minDate: new tempusDominus.DateTime().startOf("minutes"),
             maxDate: e.date
         },
         display: {
             components: {
                 useTwentyfourHour: true
+            }
         }
-    }
     });
 });
 
@@ -434,68 +455,62 @@ function modifyInsertion(insertionid) {
 
 async function deleteInsertion(insertionid) {
     //chiamata per eliminare la reservation
-    if(confirm('Are you sure you want to delete this insertion?'))
-    {
-       try {
-           const res = await fetch(`/api/v1/insertions/${insertionid}`, {
-               method: "DELETE",
-           });
-           data = await res.json();
+    if (confirm('Are you sure you want to delete this insertion?')) {
+        try {
+            const res = await fetch(`/api/v1/insertions/${insertionid}`, {
+                method: "DELETE",
+            });
+            data = await res.json();
 
-           if (!res.ok) throw data;
-           //refresh
-           await getMyInsertions()
-       } catch (err) {
-           console.log(err)
-           alert(err.message)
-       }
-   }
+            if (!res.ok) throw data;
+            //refresh
+            await getMyInsertions()
+        } catch (err) {
+            console.log(err)
+            alert(err.message)
+        }
+    }
 }
 
-async function deleteParking(parkingid)
-{
+async function deleteParking(parkingid) {
     console.log(parkingid)
-    if(confirm('Are you sure you want to delete this parking?'))
-    {
-       try {
-           const res = await fetch(`/api/v1/parkings/${parkingid}`, {
-               method: "DELETE",
-           });
-           data = await res.json();
+    if (confirm('Are you sure you want to delete this parking?')) {
+        try {
+            const res = await fetch(`/api/v1/parkings/${parkingid}`, {
+                method: "DELETE",
+            });
+            data = await res.json();
 
-           if (!res.ok) throw data;
-           //refresh
-           window.location.href = "/privateArea"
-       } catch (err) {
-           console.log(err)
-           alert(err.message)
-       }
-   }
+            if (!res.ok) throw data;
+            //refresh
+            window.location.href = "/privateArea"
+        } catch (err) {
+            console.log(err)
+            alert(err.message)
+        }
+    }
 }
 
 // avoid possible input errors from keyboard
-$('#insertion-hourlyPrice').keypress(function(e){
+$('#insertion-hourlyPrice').keypress(function (e) {
     var txt = String.fromCharCode(e.which);
-    if(!txt.match(/[0-9,]/)) 
-    {
+    if (!txt.match(/[0-9,]/)) {
         return false;
     }
 })
 
 // avoid possible input errors from keyboard
-$('#insertion-dailyPrice').keypress(function(e){
+$('#insertion-dailyPrice').keypress(function (e) {
     var txt = String.fromCharCode(e.which);
-    if(!txt.match(/[0-9,]/)) 
-    {
+    if (!txt.match(/[0-9,]/)) {
         return false;
     }
 })
 
 // avoid possible input errors from keyboard
-$('#insertion-minInterval').keypress(function(e){
+$('#insertion-minInterval').keypress(function (e) {
     var txt = String.fromCharCode(e.which);
-    if(!txt.match(/[0-9]/))
-    {
+    if (!txt.match(/[0-9]/)) {
         return false;
     }
 })

@@ -8,7 +8,7 @@ async function createNewInsertionAndParking() {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     if (!$('form')[0].checkValidity() || !$('form')[1].checkValidity()) {
@@ -88,8 +88,8 @@ async function createNewInsertionAndParking() {
         image: ""
     }))
 
-    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00"
-    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00"
+    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00"
+    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00"
     
     formData.append('insertion', JSON.stringify({
         name: name,

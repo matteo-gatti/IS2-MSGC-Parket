@@ -13,7 +13,7 @@ function convertToISO(date) {
         splitDate[0][0] +
         "T" +
         splitDate[1];
-    return date + ":00+01:00";
+    return date + ":00+02:00";
 }
 
 function cleanseList() {

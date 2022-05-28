@@ -9,7 +9,7 @@ async function createInsertion() {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     // check if the form is valid
@@ -26,6 +26,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -34,6 +36,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -42,6 +46,8 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Crea inserzione")
         return
     }
 
@@ -85,8 +91,8 @@ async function createInsertion() {
                 recurrent: $("#recurrence").is(":checked"),
                 recurrenceData: {
                     daysOfTheWeek: days,
-                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00",
-                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00",
+                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00",
+                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00",
                 },
             }),
         })

@@ -219,7 +219,7 @@ async function modifyReserv(reservationId) {
             
             // convert date to gg/mm/aaaa, hh:mm format
             var date = new Date(data.datetimeStart)
-            date.setHours(date.getHours() - 1)
+            date.setHours(date.getHours())
             var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
             var month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
             var year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
@@ -228,14 +228,37 @@ async function modifyReserv(reservationId) {
             $('#linkedPickers1Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
 
             // convert date to gg/mm/aaaa, hh:mm format
-            date = new Date(data.datetimeEnd)
-            date.setHours(date.getHours() - 1)
-            day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
-            month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
-            year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
-            hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
-            minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+            var date2 = new Date(data.datetimeEnd)
+            date2.setHours(date2.getHours())
+            day = date2.getDate() < 10 ? '0' + date2.getDate() : date2.getDate()
+            month = date2.getMonth() < 10 ? '0' + (date2.getMonth() + 1) : date2.getMonth() + 1
+            year = date2.getFullYear() < 10 ? '0' + date2.getFullYear() : date2.getFullYear()
+            hours = date2.getHours() < 10 ? '0' + date2.getHours() : date2.getHours()
+            minutes = date2.getMinutes() < 10 ? '0' + date2.getMinutes() : date2.getMinutes()
             $('#linkedPickers2Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+
+            linked1.updateOptions({
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: new tempusDominus.DateTime(data.datetimeStart),
+                viewDate: new tempusDominus.DateTime(data.datetimeStart),
+            }, true);
+
+            linked2.updateOptions({
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: (new tempusDominus.DateTime(data.datetimeEnd)),
+                viewDate: (new tempusDominus.DateTime(data.datetimeEnd)),
+            }, true);
+
+            linked1.dates.setValue(new tempusDominus.DateTime(data.datetimeStart))
+            linked2.dates.setValue(new tempusDominus.DateTime(data.datetimeEnd))
 
             $('#btnSubmit').attr('onclick', `modifyReservSubmit('${reservationId}')`)
 
@@ -256,7 +279,7 @@ async function modifyReservSubmit(reservationId) {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     // check if the form is valid

@@ -120,9 +120,9 @@ async function loadPrenotazioni() {
                 currency: "EUR",
             }) +
             "</span><br>" +
-            "<div class=\"mt-1\">" +
-            `<button type="button" class="btn btn-danger" onclick="removeReserv('${id}')" > Elimina </button>` +
-            `<button type="button" class="btn btn-warning" onclick="modifyReserv('${id}')" > Modifica </button>` +
+            "<div class=\"mt-1 d-flex gap-2 flex-wrap\">" +
+            `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="modifyReserv('${id}')" > Modifica </button>` +
+            `<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeReserv('${id}')" > Elimina </button>` +
             "</div>" +
             "</div>";
 

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <head>
     <title>Inserimento nuovo parcheggio!</title>
-    <link rel="icon" href="img/logo.png">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="img/logo.png">
  <!-- JQuery-->
  <script
  src="https://code.jquery.com/jquery-3.3.1.js"
@@ -31,7 +31,7 @@ crossorigin="anonymous"></script>
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css"
  rel="stylesheet" crossorigin="anonymous">
-    <script src="scriptNewParking.js"></script>
+    <script src="scriptModifyParking.js"></script>
 
 </head>
 
@@ -43,7 +43,7 @@ crossorigin="anonymous"></script>
         <div class="col-sm form-signin ">
             <form action="/api/v1/parkings" method="POST" enctype="multipart/form-data">
             <!--<img class="mb-4" src="img/logo.png" alt="" width="200" height="200">-->
-            <h1 class="h3 mb-3 fw-normal">Nuovo Parcheggio</h1>
+            <h1 class="h3 mb-3 fw-normal">Modifica Parcheggio</h1>
 
             <p class="text-danger" id="message" hidden>Messaggio</p>
 
@@ -54,7 +54,7 @@ crossorigin="anonymous"></script>
             <div class="mb-3"></div>
             
             <div class="form-floating">
-                <input type="text" class="form-control" id="indirizzo" placeholder="via Frutta 11" required>
+                <input type="text" class="form-control" id="indirizzo" placeholder="Via Lonato, 11" required>
                 <label for="indirizzo">Indirizzo</label>
             </div>
             <div class="mb-3"></div>
@@ -73,13 +73,17 @@ crossorigin="anonymous"></script>
                 <label for="descrizione">Descrizione</label>
             </div>
             <div class="mb-3"></div>
-            <div class="">
-                <input type="file" class="form-control" id="image" name="image" onchange="">
-            </div>        
-            <div class="checkbox mb-3">
-            </div> 
-            <button class="w-100 btn btn-lg btn-primary" type="button" onclick="createParking()">Inserisci</button>
-            <!-- <input type="submit" placeholder="ciao"> -->
+            <!-- Add checkbox to modify image -->
+            <div class="mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="modifyImage" name="modifyImage" onclick="toggleChooseFile()">
+                    <label class="form-check-label" for="modifyImage">Modifica immagine</label>
+                </div>
+                <div class="" id="choose-file" hidden>
+                    <input type="file" class="form-control" id="image" name="image" onchange="">
+                </div>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="button" onclick="editParking()">Modifica</button>
             </form>
         </div>
         <div class="col-sm"></div>

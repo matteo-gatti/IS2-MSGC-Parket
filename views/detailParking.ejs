@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <head>
   <title>Dettagli parcheggio</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="img/logo.png" />
   <!-- JQuery-->
   <script
@@ -17,8 +20,8 @@
 crossorigin="anonymous"></script>
 
   <!-- Tempus Dominus JavaScript -->
-<script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
-crossorigin="anonymous"></script>
+<!-- <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@development/dist/js/tempus-dominus.js?b=7"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tempus-dominus/6-beta4/js/tempus-dominus.js" integrity="sha512-sVBWs4OpF/NBgL3op5qtx2jjGr5MOC7l2T537+iQ9qbekDbXMSDOkBGHiTBaF9904KOxEvNwr6ABARhoaAeW/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
 crossorigin="anonymous"></script>
 
@@ -84,7 +87,7 @@ crossorigin="anonymous"></script>
           <% if (owner) { %>
             <div class="d-flex w-100 gap-2 flex-end mt-auto">
               <button class=" btn  btn-outline-success" onclick="toggleVisible()" id="btnVisible">Visibile: <label id="lblVisible">Sì</label></button>
-              <button class=" btn  btn-outline-secondary " onclick="modifyParking()" id="btnEdit">Modifica Parcheggio</button>
+              <button class=" btn  btn-outline-secondary " onclick="modifyParking()" id="btnModifica">Modifica Parcheggio</button>
               <button class=" btn  btn-outline-danger ms-auto" onclick="deleteParking()" id="btnElimina">Elimina Parcheggio</button>
             </div>
           <% } %>
@@ -132,7 +135,6 @@ crossorigin="anonymous"></script>
               <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div id="dummy"></div>
             <div class="modal-body" id="form">
               <form id="insertionForm">
                 <div class="mb-3">
@@ -228,8 +230,6 @@ crossorigin="anonymous"></script>
                 </div>
               </form>
 
-
-              
                 <!-- Checkbox for recurrence or non recurrence -->
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="" id="recurrence" onclick="toggleRecurrence()">
@@ -343,7 +343,7 @@ crossorigin="anonymous"></script>
 
             <div class="modal-footer">
               <button type="button" id="close-modal" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
-              <button type="button" id="btnSubmit" onclick="createInsertion()" class="btn btn-primary">Crea inserzione</button>
+              <button type="button" id="btnSubmit" onclick="createInsertion()" class="btn btn-primary">Invia</button>
             </div>
           </div>
         </div>

@@ -64,6 +64,15 @@ router.get('/createParking', tokenValid, function (req, res) {
         res.redirect("/login")
 })
 
+// Form page to modify a parking
+router.get('/modifyParking', tokenValid, function (req, res) {
+    if (isAuthToken(req)) {
+        res.render('./modifyPark.ejs', { logged: true })
+    }
+    else
+        res.redirect("/login")
+})
+
 // Form page for creating a new parking and a new insertion together
 router.get('/createParkingInsertion', tokenValid, function (req, res) {
     if (isAuthToken(req)) {

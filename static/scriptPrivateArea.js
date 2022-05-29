@@ -79,7 +79,7 @@ async function loadPrenotazioni() {
     data = await res.json();
 
     if (!res.ok) throw data;
-    console.log(data)
+
     let container = $("#reservList");
     if (data.length === 0) {
         $("#msgNoReservations").removeAttr("hidden");
@@ -120,15 +120,224 @@ async function loadPrenotazioni() {
                 currency: "EUR",
             }) +
             "</span><br>" +
+            "<div class=\"mt-1\">" +
             `<button type="button" class="btn btn-danger" onclick="removeReserv('${id}')" > Elimina </button>` +
+            `<button type="button" class="btn btn-warning" onclick="modifyReserv('${id}')" > Modifica </button>` +
+            "</div>" +
             "</div>";
-
 
         container.append(tmpHTML);
     }
 }
 
+// datetimepicker logic
+var exampleModal = document.getElementById('exampleModal')
+exampleModal.addEventListener('show.bs.modal', function (event) {
+    try {
+        var button = event.relatedTarget
+        var recipient = button.getAttribute('data-bs-name')
+        var id = button.getAttribute('data-bs-id')
+        
+        $('#parkId').text(id)
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
 
+        modalTitle.textContent = 'Nuova inserzione per: ' + recipient
+    } catch (err) {
+        console.log(err)
+    }
+})
+tempusDominus.loadLocale(tempusDominus.locales.it);
+
+// globally
+tempusDominus.locale(tempusDominus.locales.it.name);
+
+//--------------------------------- period datepickers ---------------------------------------
+const linkedPicker1Element = document.getElementById('linkedPickers1');
+const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
+
+linked1.updateOptions({
+    restrictions: {
+        minDate: new tempusDominus.DateTime().startOf("minutes")
+    },
+    display: {
+        components: {
+            useTwentyfourHour: true
+        }
+    }
+})
+
+const linked2 = new tempusDominus.TempusDominus(document.getElementById('linkedPickers2'), {
+    useCurrent: false,
+    display: {
+        components: {
+            useTwentyfourHour: true
+        }
+    }
+});
+
+// using event listeners
+linkedPicker1Element.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+    linked2.updateOptions({
+        restrictions: {
+            minDate: e.detail.date
+        },
+        display: {
+            components: {
+                useTwentyfourHour: true
+            }
+        }
+    });
+});
+
+// using subscribe method
+const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+    linked1.updateOptions({
+        restrictions: {
+            maxDate: e.date
+        },
+        display: {
+            components: {
+                useTwentyfourHour: true
+        }
+    }
+    });
+});
+//--------------------------------- end period datepickers ------------------------------------
+
+// clear the modal every time it is closed
+$('#exampleModal').on('hidden.bs.modal', function () {
+    $('#exampleModal').find('form')[0].reset()
+    // clear the error message
+    $("#message-modal").text('')
+    $("#message-modal").attr('hidden', 'true')
+})
+
+// modify reservation
+async function modifyReserv(reservationId) {
+    // retrieve old reservation data from the server
+    fetch(`/api/v1/reservations/${reservationId}`)
+        .then(response => response.json())
+        .then(data => {
+            
+            // convert date to gg/mm/aaaa, hh:mm format
+            var date = new Date(data.datetimeStart)
+            date.setHours(date.getHours())
+            var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+            var month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+            var year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
+            var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+            var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+            $('#linkedPickers1Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+
+            // convert date to gg/mm/aaaa, hh:mm format
+            var date2 = new Date(data.datetimeEnd)
+            date2.setHours(date2.getHours())
+            day = date2.getDate() < 10 ? '0' + date2.getDate() : date2.getDate()
+            month = date2.getMonth() < 10 ? '0' + (date2.getMonth() + 1) : date2.getMonth() + 1
+            year = date2.getFullYear() < 10 ? '0' + date2.getFullYear() : date2.getFullYear()
+            hours = date2.getHours() < 10 ? '0' + date2.getHours() : date2.getHours()
+            minutes = date2.getMinutes() < 10 ? '0' + date2.getMinutes() : date2.getMinutes()
+            $('#linkedPickers2Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+
+            linked1.updateOptions({
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: new tempusDominus.DateTime(data.datetimeStart),
+                viewDate: new tempusDominus.DateTime(data.datetimeStart),
+            }, true);
+
+            linked2.updateOptions({
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: (new tempusDominus.DateTime(data.datetimeEnd)),
+                viewDate: (new tempusDominus.DateTime(data.datetimeEnd)),
+            }, true);
+
+            linked1.dates.setValue(new tempusDominus.DateTime(data.datetimeStart))
+            linked2.dates.setValue(new tempusDominus.DateTime(data.datetimeEnd))
+
+            $('#btnSubmit').attr('onclick', `modifyReservSubmit('${reservationId}')`)
+
+            // show modal
+            $('#exampleModal').modal('show')
+        })
+        .catch(error => console.error(error))
+}
+
+// modify reservation submit
+async function modifyReservSubmit(reservationId) {
+    $('#btnSubmit').prop("disabled", true)
+    $('#btnSubmit').text("Invio ...")
+    $("#message-modal").attr('hidden')
+
+    // convert the date to the right format
+    function convertToISO(date) {
+        splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
+        splitDate[0] = splitDate[0].split("-")
+        date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
+        return date + ":00+02:00"
+    }
+
+    // check if the form is valid
+    if (!$('form')[0].checkValidity()) {
+        $("#message-modal").removeAttr('hidden')
+        $("#message-modal").text("Per favore inserire tutti i dati")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Invia")
+        return
+    }
+
+    let d1 = $("#linkedPickers1Input").val()
+    let d2 = $("#linkedPickers2Input").val()
+
+    d1 = convertToISO(d1)
+    d2 = convertToISO(d2)
+
+    try {
+        // fetch the insertion from the database
+        const res = await fetch(`../api/v1/reservations/${reservationId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: reservationId,
+                datetimeStart: d1,
+                datetimeEnd: d2,
+            }),
+        })
+
+        // if the response is not ok, throw data
+        if (!res.ok) {
+            throw await res.json()
+        } else {
+            // if the insertion ismodified, close the modal
+            $('#close-modal').click()
+            $('#btnSubmit').prop("disabled", false)
+            $('#btnSubmit').text("Invia")
+            $(':input','form')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+            // and reload the reservations
+            // empty container
+            $('#reservList').empty()
+            await loadPrenotazioni()
+        }
+    } catch (err) {
+        // if the reservation is not modified, show the error message
+        $("#message-modal").text(err.message)
+        $("#message-modal").removeAttr('hidden')
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Invia")
+    }
+}
 
 async function removeReserv(param) {
     //chiamata per eliminare la reservation
@@ -151,7 +360,8 @@ async function removeReserv(param) {
 }
 
 async function load() {
-    await loadData();
-    await loadPrenotazioni();
+    await loadData()
+    await loadPrenotazioni()
 }
-load();
+
+load()

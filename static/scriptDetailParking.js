@@ -116,7 +116,7 @@ async function createInsertion() {
     } catch (err) {
         // if the insertion is not created, show the error message
         $("#message").text(err.message)
-        $("#message").removeAttr('hidden');
+        $("#message").removeAttr('hidden')
         $('#btnSubmit').prop("disabled", false)
         $('#btnSubmit').text("Crea inserzione")
     }
@@ -152,6 +152,7 @@ async function loadDetails() {
             $("#btnVisible").removeClass(data.visible ? "btn-outline-dark" : "btn-outline-success")
             $("#btnVisible").addClass(data.visible ? "btn-outline-success" : "btn-outline-dark")
             $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
+            $("#btnModifica").attr("onclick", `modifyParking('${data._id}')`);
 
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
@@ -169,6 +170,7 @@ function goBack() {
     //go back to previous page
     window.location = document.referrer
 }
+
 
 // load the insertions of the parking
 async function getMyInsertions() {
@@ -267,15 +269,19 @@ async function toggleVisible() {
 // datetimepicker logic
 var exampleModal = document.getElementById('exampleModal')
 exampleModal.addEventListener('show.bs.modal', function (event) {
-    var button = event.relatedTarget
-    var recipient = button.getAttribute('data-bs-name')
-    var id = button.getAttribute('data-bs-id')
+    try {
+        var button = event.relatedTarget
+        var recipient = button.getAttribute('data-bs-name')
+        var id = button.getAttribute('data-bs-id')
+        
+        $('#parkId').text(id)
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
 
-    $('#parkId').text(id)
-    var modalTitle = exampleModal.querySelector('.modal-title')
-    var modalBodyInput = exampleModal.querySelector('.modal-body input')
-
-    modalTitle.textContent = 'Nuova inserzione per: ' + recipient
+        modalTitle.textContent = 'Nuova inserzione per: ' + recipient
+    } catch (err) {
+        console.log(err)
+    }
 })
 tempusDominus.loadLocale(tempusDominus.locales.it);
 
@@ -303,36 +309,42 @@ linked1Recurrence.updateOptions({
             seconds: false
         }
     },
-    defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+    viewDate: (new Date((new Date()).setHours(0,0,0,0))),
+    useCurrent: false
 })
 
 const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
     restrictions: {
         minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
-        maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
+        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
+
     },
-    display: {
-        viewMode: "clock",
-        components: {
-            useTwentyfourHour: true,
-            decades: false,
-            year: false,
-            month: false,
-            date: false,
-            hours: true,
-            minutes: true,
-            seconds: false
-        }
-    },
-    defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
+        display: {
+            viewMode: "clock",
+            components: {
+                useTwentyfourHour: true,
+                decades: false,
+                year: false,
+                month: false,
+                date: false,
+                hours: true,
+                minutes: true,
+                seconds: false
+            }
+        },
+        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+        viewDate: (new Date((new Date()).setHours(23,59,0,0))),
+        useCurrent: false
 });
 
 // using event listeners
-linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.change, (e) => {
+const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events.change, function (e) {   
+    console.log("1 updated 2", (linked2Recurrrence.dates._dates)) 
     linked2Recurrrence.updateOptions({
         restrictions: {
-            minDate: e.detail.date,
-            maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
+            minDate: e.date,
+            maxDate: (new tempusDominus.DateTime((new Date()).setHours(23,59,0,0)))
         },
         display: {
             viewMode: "clock",
@@ -347,17 +359,22 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+        useCurrent: false,
+        //defaultDate: linked2Recurrrence.dates._dates[0]//(new Date((new Date()).setHours(23,59,0,0))),
+        //defaultDate: linked2Recurrrence.dates._dates[0] == undefined ? ((new Date((new Date()).setHours(23,59,0,0)))) : (linked2Recurrrence.dates._dates[0]),//(new Date((new Date()).setHours(0,0,0,0))),
+        viewDate: d2 == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(23,59,0,0)))) : (d2)//(new Date((new Date()).setHours(0,0,0,0))),
+
     });
 
 });
 
 // using subscribe method
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
+    console.log("2 updated 1",(linked1Recurrence.dates._dates))
     linked1Recurrence.updateOptions({
         restrictions: {
-            minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
-            maxDate: e.detail.date
+            minDate: (new tempusDominus.DateTime((new Date()).setHours(0,0,0,0))),
+            maxDate: e.date
         },
         display: {
             viewMode: "clock",
@@ -372,7 +389,9 @@ const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.event
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
+        useCurrent: false,
+        //defaultDate: linked1Recurrence.dates._dates[0] == undefined ? ((new Date((new Date()).setHours(0,0,0,0)))) : (linked1Recurrence.dates._dates[0]),//(new Date((new Date()).setHours(0,0,0,0))),
+        viewDate: d == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(0,0,0,0)))) : (d)//(new Date((new Date()).setHours(0,0,0,0))),
     });
 });
 
@@ -428,8 +447,8 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
         }
     });
 });
-
 //--------------------------------- end period datepickers ------------------------------------
+
 function toggleRecurrence() {
     if ($("#recurrence").is(":checked")) {
         $("#recurrenceContainer").removeAttr("hidden")
@@ -449,8 +468,287 @@ function detailInsertion(insertionid) {
     window.location.href = `/insertion?insertion=${insertionid}`
 }
 
+// clear the modal every time it is closed
+$('#exampleModal').on('hidden.bs.modal', function () {
+    $('#exampleModal').find('form')[0].reset()
+    $('#exampleModal').find('form')[1].reset()
+    $("#recurrenceContainer").attr("hidden", "true")
+    $('#btnSubmit').attr('onclick', `createInsertion()`)
+    // clear the error message
+    $("#message").text('')
+    $("#message").attr('hidden', 'true')
+})
+
 function modifyInsertion(insertionid) {
-    alert(`TODO edit ${insertionid}`)
+    // retrieve old insertion data from the server
+    fetch(`/api/v1/insertions/${insertionid}`)
+        .then(response => response.json())
+        .then(data => {
+            var recurrent
+
+            // fill the modal with the old data
+            $("#insertion-name").val(data.name)
+
+            // convert date to gg/mm/aaaa, hh:mm format
+            var date = new Date(data.datetimeStart)
+            date.setHours(date.getHours())
+            var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+            var month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+            var year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
+            var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+            var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+            $('#linkedPickers1Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+
+            // convert date to gg/mm/aaaa, hh:mm format
+            date = new Date(data.datetimeEnd)
+            date.setHours(date.getHours())
+            day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+            month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+            year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
+            hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+            minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+            $('#linkedPickers2Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+
+            linked1.updateOptions({
+                restrictions: {
+                    minDate: new tempusDominus.DateTime().startOf("minutes")
+                },
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: new Date(data.datetimeStart)
+            });
+
+            linked2.updateOptions({
+                restrictions: {
+                    minDate: new tempusDominus.DateTime().startOf("minutes")
+                },
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    }
+                },
+                defaultDate: new Date(data.datetimeEnd)
+            });
+
+            $('#insertion-hourlyPrice').val(data.priceHourly)
+            $('#insertion-dailyPrice').val(data.priceDaily)
+            $('#insertion-minInterval').val(data.minInterval)
+            $('#recurrence').prop('checked', data.recurrence)
+
+            recurrent = data.recurrent
+            if(recurrent) {
+                $("#recurrence").prop("checked", true)
+                $("#recurrenceContainer").removeAttr("hidden")
+                $('#monday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("monday"))
+                $('#tuesday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("tuesday"))
+                $('#wednesday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("wednesday"))
+                $('#thursday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("thursday"))
+                $('#friday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("friday"))
+                $('#saturday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("saturday"))
+                $('#sunday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("sunday"))
+
+                // convert date to hh:mm format
+                dateStart = new Date(data.recurrenceData.timeStart)
+                dateStart.setHours(dateStart.getHours())
+                hoursStart = dateStart.getHours() < 10 ? "0" + dateStart.getHours() : dateStart.getHours()
+                minutesStart = dateStart.getMinutes() < 10 ? "0" + dateStart.getMinutes() : dateStart.getMinutes()
+                $('#recurrenceStartInput').val(`${hoursStart}:${minutesStart}`)
+
+                // convert date to hh:mm format
+                dateEnd = new Date(data.recurrenceData.timeEnd)
+                dateEnd.setHours(dateEnd.getHours())
+                hoursEnd = dateEnd.getHours() < 10 ? "0" + dateEnd.getHours() : dateEnd.getHours()
+                minutesEnd = dateEnd.getMinutes() < 10 ? "0" + dateEnd.getMinutes() : dateEnd.getMinutes()
+                $('#recurrenceEndInput').val(`${hoursEnd}:${minutesEnd}`)
+
+                d = (new Date((new Date().setHours(hoursStart,minutesStart,0,0))))
+                console.log("modify update 1", d)
+                d2 = (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0))))
+                console.log("modify update 2", d2)
+
+                linked1Recurrence.dates.setValue(new tempusDominus.DateTime(d))
+                linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(d2))
+
+                /* linked1Recurrence.updateOptions({
+                    restrictions: {
+                        minDate: (new Date((new Date()).setHours(0,0,0,0)))
+                    },
+                    display: {
+                        viewMode: "clock",
+                        components: {
+                            useTwentyfourHour: true,
+                            decades: false,
+                            year: false,
+                            month: false,
+                            date: false,
+                            hours: true,
+                            minutes: true,
+                            seconds: false
+                        }
+                    },
+                    defaultDate: (new Date((new Date().setHours(hoursStart,minutesStart,0,0)))),
+                    viewDate: (new Date((new Date().setHours(hoursStart,minutesStart,0,0)))),
+                    useCurrent: false
+                });
+                //linked1Recurrence.dates._dates[0] = (new Date((new Date().setHours(hoursStart,minutesStart,0,0))))
+
+
+                linked2Recurrrence.updateOptions({
+                    restrictions: {
+                        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
+                    },
+                    display: {
+                        viewMode: "clock",
+                        components: {
+                            useTwentyfourHour: true,
+                            decades: false,
+                            year: false,
+                            month: false,
+                            date: false,
+                            hours: true,
+                            minutes: true,
+                            seconds: false
+                        }
+                    },
+                    defaultDate: (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0)))),
+                    viewDate: (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0)))),
+                    useCurrent: false
+                }); */
+                //linked2Recurrrence.dates._dates[0] = (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0))))
+            }
+
+            $('#exampleModalLabel').text('Modifica inserzione')
+            $('#btnSubmit').attr('onclick', `modifyInsertionSubmit('${insertionid}')`)
+
+            // show modal
+            $('#exampleModal').modal('show')
+        })
+        .catch(error => console.error(error))
+}
+
+async function modifyInsertionSubmit(insertionid) {
+    $('#btnSubmit').prop("disabled", true)
+    $('#btnSubmit').text("Invio ...")
+    $("#message").attr('hidden')
+
+    // convert the date to the right format
+    function convertToISO(date) {
+        splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
+        splitDate[0] = splitDate[0].split("-")
+        date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
+        return date + ":00+02:00"
+    }
+
+    // check if the form is valid
+    if (!$('form')[0].checkValidity()) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("Per favore inserire tutti i dati")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Invia")
+        return
+    }
+
+    // show error if the min interval is lower than 0
+    if ($("#insertion-minInterval").val() < 0) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        return
+    }
+
+    // check price format
+    if (!$("#insertion-hourlyPrice").val().match(/^\d/)) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        $("#message").text("Prezzo non valido")
+        return
+    }
+
+    // check price format
+    if (!$("#insertion-dailyPrice").val().match(/^\d/)) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("L'intervallo minimo deve essere maggiore di 0")
+        $("#message").text("Prezzo non valido")
+        return
+    }
+
+    const name = $("#insertion-name").val()
+    let d1 = $("#linkedPickers1Input").val()
+    let d2 = $("#linkedPickers2Input").val()
+
+    d1 = convertToISO(d1)
+    d2 = convertToISO(d2)
+
+    // convert days in array
+    const days = []
+
+    // push the days in the array
+    $("#dayCheckboxes div div .form-check-input").each((i, checkbox) => {
+        if (checkbox.checked) days.push(checkbox.id)
+    });
+
+    // if days is empty, return error message
+    if ($("#recurrence").is(":checked") && days.length === 0) {
+        $("#message").removeAttr('hidden')
+        $("#message").text("Per favore selezionare almeno un giorno")
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Invia")
+        return
+    }
+
+    try {
+        // fetch the insertion from the database
+        const res = await fetch(`../api/v1/insertions/${insertionid}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: insertionid,
+                name: name,
+                datetimeStart: d1,
+                datetimeEnd: d2,
+                priceHourly: $("#insertion-hourlyPrice").val(),
+                priceDaily: $("#insertion-dailyPrice").val(),
+                minInterval: $("#insertion-minInterval").val(),
+                recurrent: $("#recurrence").is(":checked"),
+                // if recurrent is false, do not send recurrence data
+                recurrenceData: $("#recurrence").is(":checked") ? {
+                    daysOfTheWeek: days,
+                    timeStart: "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00",
+                    timeEnd: "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00",
+                } : null
+            }),
+        })
+
+        // if the response is not ok, throw data
+        if (!res.ok) {
+            throw await res.json()
+        } else {
+            // if the insertion ismodified, close the modal
+            $('#close-modal').click()
+            $('#btnSubmit').prop("disabled", false)
+            $('#btnSubmit').text("Invia")
+            $(':input','form')
+            .not(':button, :submit, :reset, :hidden')
+            .val('')
+            .prop('checked', false)
+            .prop('selected', false);
+
+            linked1Recurrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(0,0,0,0)))
+
+            linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(23,59,0,0)))
+            // and reload the insertions
+            await getMyInsertions()
+        }
+    } catch (err) {
+        // if the insertion is not modified, show the error message
+        $("#message").text(err.message)
+        $("#message").removeAttr('hidden')
+        $('#btnSubmit').prop("disabled", false)
+        $('#btnSubmit').text("Invia")
+    }
 }
 
 async function deleteInsertion(insertionid) {
@@ -472,7 +770,13 @@ async function deleteInsertion(insertionid) {
     }
 }
 
-async function deleteParking(parkingid) {
+async function modifyParking(parkId) {
+    // call newPark page and pass the park id
+    window.location.href = `/modifyParking?park=${parkId}`
+}
+
+async function deleteParking(parkingid)
+{
     console.log(parkingid)
     if (confirm('Are you sure you want to delete this parking?')) {
         try {

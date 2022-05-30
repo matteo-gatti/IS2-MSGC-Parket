@@ -16,13 +16,63 @@ function toggleAdvanced() {
     $(".advance-search").slideToggle("normal"); 
 }
 
+// call searchParkings function when the page is loaded
+$(document).ready(function () {
+    searchParkings();
+    if (localStorage.getItem("query") != null) {
+        // repopulate the search bar with the last query
+        query = localStorage.getItem("query")
+        query = query.substring(query.indexOf("?") + 1)
+        // console.log(query)
+        if (query != null) {
+            // if minPrice or maxPrice or dateMin or dateMax are not null check advanced-toggle checkbox and hidden div
+            if (query.includes("priceMin") || query.includes("priceMax") || query.includes("dateMin") || query.includes("dateMax")) {
+                $("#advanced-toggle").prop("checked", true)
+                $(".advance-search").css("display", "block")
+            }
+            query = query.split("&")
+            // console.log(query)
+            for (i = 0; i < query.length; i++) {
+                query[i] = query[i].split("=")
+                if (query[i][0] == "search") {
+                    $('#search').val(query[i][1])
+                } else if (query[i][0] == "priceMin") {
+                    $('#minPrice').val(query[i][1])
+                } else if (query[i][0] == "priceMax") {
+                    $('#maxPrice').val(query[i][1])
+                } else if (query[i][0] == "dateMin") {
+                    var date = new Date(query[i][1].replace("%2B", "+"))
+                    date.setHours(date.getHours())
+                    var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+                    var month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+                    var year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
+                    var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+                    var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+                    $('#linkedPickers1Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+                } else if (query[i][0] == "dateMax") {
+                    var date = new Date(query[i][1].replace("%2B", "+"))
+                    date.setHours(date.getHours())
+                    var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+                    var month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
+                    var year = date.getFullYear() < 10 ? '0' + date.getFullYear() : date.getFullYear()
+                    var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+                    var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+                    $('#linkedPickers2Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
+                }
+            }
+        }
+    }
+});
+
 async function searchParkings() {
+    let query = `/api/v1/parkings?`
+
     const searchKey = $('#search').val()
     const minPrice = $('#minPrice').val()
     const maxPrice = $('#maxPrice').val()
 
-    console.log("min", minPrice)
-    console.log("max", maxPrice)
+    // console.log("min", minPrice)
+    // console.log("max", maxPrice)
     
     let minDate = $("#linkedPickers1Input").val()
     if(minDate != "") {
@@ -33,10 +83,12 @@ async function searchParkings() {
         maxDate = convertToISO(maxDate).replace("+", "%2B")
     }
 
-    if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "") 
+    // console.log(localStorage.getItem("query"))
+
+    if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && localStorage.getItem("query") == null) {
         return
-    
-    let query = `/api/v1/parkings?`
+    }
+
     try {   
         //check if search key is empty
         if (searchKey != "") {
@@ -56,6 +108,14 @@ async function searchParkings() {
         if (maxPrice != "") {
             query += `priceMax=${maxPrice}&`
         }
+
+        if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "") {
+            query = localStorage.getItem("query")
+        }
+
+        // save query to local storage
+        localStorage.setItem("query", query)
+
         // fetch the user from the database
         const res = await fetch(query, {
             method: "GET",
@@ -219,7 +279,8 @@ $('form').on('reset', function (event) {
         $('#advanced-toggle').prop("checked", state)
         await getAllParkings()
       }, 1);
-    
+    // delete query from local storage
+    localStorage.removeItem("query")
 });
 
 

@@ -228,6 +228,68 @@ async function getMyInsertions() {
     }
 }
 
+
+async function getReviews(){
+    /*
+     <div id="reviewContainer">   -- accodare qui
+     <div id="primaReview">  -- copiare questo
+    
+        campi
+        reviewStars
+        <span class="mr-2" id="reviewTitle">Titolo</span>
+                          <span class="mr-2" id="space"> - </span>
+                          <span class="mr-2" id="reviewUser">Utente</span>
+                        </div>
+                        <small id="reviewTime"></small>
+                  </div>
+                  <p class="text-justify comment-text mb-0" id="reviewDescription"></p>
+    
+     */
+
+    const fullStar = '<i class="fa-solid fa-star mr-2"></i>'
+    const emptyStar = '<i class="fa-regular fa-star mr-2"></i>'
+
+    try {
+        //get all the reviews from the backend
+        const id = $('#parkingId').html()
+        const res = await fetch(`/api/v1/parkings/${id}/reviews`, {
+            method: "GET",
+        })
+        data = await res.json()
+
+        if (!res.ok) {
+            throw data
+        }
+        
+        //load the reviews in the page
+            const container = $('#reviewContainer')
+            container.children().not(":first").remove()
+            const reviewHTML = $('#primaReview')
+            for (review in data.reviews) {
+                tmpInsHTML = reviewHTML.clone()
+                tmpInsHTML.removeAttr("hidden")
+                $(tmpInsHTML.find("span")[0]).html("<b>"+data.reviews[review].title+"</b>")
+                $(tmpInsHTML.find("span")[2]).html(data.reviews[review].writer.username + "&nbsp;&nbsp;")
+                $(tmpInsHTML.find("small")[0]).text(new Date(data.reviews[review].datetime).toLocaleString("it-IT").slice(0, -3))
+                $(tmpInsHTML.find("p")[0]).text(data.reviews[review].description)
+
+                
+                for (let i = 0; i < data.reviews[review].stars; i++) {
+                    $(tmpInsHTML.find("div")[3]).append(fullStar)
+                }
+                for (let i = data.reviews[review].stars; i < 5; i++) {
+                    $(tmpInsHTML.find("div")[3]).append(emptyStar)
+                }
+
+                container.append(tmpInsHTML)
+            }
+                
+    } catch (err) {
+        $("#message").text(err.message)
+        $("#message").removeAttr('hidden');
+    }
+}
+
 // toggle the visibility of the parking
 async function toggleVisible() {
     try {
@@ -461,6 +523,7 @@ function toggleRecurrence() {
 async function main() {
     await loadDetails()
     await getMyInsertions()
+    await getReviews()
 }
 
 // navigate to the insertion page

@@ -8,6 +8,7 @@ import { insertions } from './insertions.js'
 import { insertionsNested } from './insertionsNested.js'
 import { reservations } from './reservations.js'
 import { reservationsNested } from './reservationsNested.js'
+import { reviewsNested } from './reviewsNested.js'
 import authentication from './authentication.js'
 import statics from './statics.js'
 
@@ -54,6 +55,7 @@ app.use('/api/v1/auth', authentication)
 app.use('/api/v1/users', users)
 app.use('/api/v1/parkings', parkings)
 app.use('/api/v1/parkings', insertionsNested)
+app.use('/api/v1/parkings', reviewsNested)
 app.use('/api/v1/insertions', insertions)
 app.use('/api/v1/insertions', reservationsNested)
 app.use('/api/v1/reservations', reservations)

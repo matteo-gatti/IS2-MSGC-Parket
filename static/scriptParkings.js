@@ -126,7 +126,7 @@ async function getAllParkings() {
                 if(reviews["average"] != null) {
                     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
                     const avg = Math.round(reviews["average"] * 10) / 10
-                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar)
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
                 }
                 
                 container.append(tmpParkHTML)

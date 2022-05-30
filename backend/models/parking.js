@@ -57,6 +57,10 @@ const parkingSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Insertion',
     }],
+    reviews: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Review',
+    }]
 })
 
 parkingSchema.plugin(mongoose_fuzzy_searching.default, {

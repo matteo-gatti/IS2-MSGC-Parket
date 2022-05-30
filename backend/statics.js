@@ -3,6 +3,7 @@ import express from 'express'
 import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
 import Insertion from './models/insertion.js'
+import Reservation from './models/reservation.js'
 import user from './models/user.js'
 
 const router = express.Router()
@@ -87,10 +88,16 @@ router.get('/detailParking', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
             let parking = await Parking.findById(req.query.id).populate("owner")
+            const reservations = await Reservation.find({ client: req.loggedInUser.userId, reviewed: false })
+            console.log(reservations)
+            let reviewable = false
+            if (reservations.length !== 0) {
+                reviewable = true
+            }
             if (req.loggedInUser.userId !== parking.owner.id) {
-                res.render('./detailParking.ejs', { logged: true, owner: false })
+                res.render('./detailParking.ejs', { logged: true, owner: false, reviewable: reviewable })
             } else {
-                res.render('./detailParking.ejs', { logged: true, owner: true })
+                res.render('./detailParking.ejs', { logged: true, owner: true, reviewable: reviewable })
             }
         } catch (err) {
             console.log(err)

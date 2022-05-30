@@ -158,6 +158,9 @@ async function loadDetails() {
                 $('#parkingImage').attr("src", data.image)
             $("#newInsertion").attr("data-bs-name", `${data.name}`);
             $("#newInsertion").attr("data-bs-id", `${data._id}`);
+
+            $("#newReview").attr("data-bs-name", `${data.name}`);
+            $("#newReview").attr("data-bs-id", `${data._id}`);
         }
     } catch (err) {
         $("#message").text(err.message)
@@ -228,6 +231,47 @@ async function getMyInsertions() {
     }
 }
 
+async function createReview() {
+    try {
+        // fetch the user from the database
+        const id = $('#parkingId').html()
+
+        let rating = 0
+        for (let i = 5; i > 0; i--) {
+            if ($(`#${i}`).prop("checked")) {
+                rating = i
+                break
+            }
+        }
+
+        if(rating == 0) {
+            throw {message: "Seleziona una valutazione"}
+        }
+
+        const res = await fetch(`/api/v1/parkings/${id}/reviews`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "title": $('#reviewTitle').val(),
+                "description": $('#reviewDesc').val(),
+                "stars": rating,
+            })
+        })
+
+        if (!res.ok)
+            throw {message: "Qualcosa è andato storto"}
+        else {
+            $('#close-review-modal').click()
+            getReviews()
+        }
+
+    } catch (err) {
+        $("#message").text(err.message)
+        $("#message").removeAttr('hidden');
+    }
+}
 
 async function getReviews() {
     /*
@@ -270,10 +314,9 @@ async function getReviews() {
             tmpInsHTML = reviewHTML.clone()
             tmpInsHTML.removeAttr("hidden")
             $(tmpInsHTML.find("span")[0]).html("<b>" + data.reviews[review].title + "</b>")
-            $(tmpInsHTML.find("span")[2]).html(data.reviews[review].writer.username + "&nbsp;&nbsp;")
+            $(tmpInsHTML.find("span")[2]).html("<i>" + data.reviews[review].writer.username + "</i>&nbsp;&nbsp;")
             $(tmpInsHTML.find("small")[0]).text(new Date(data.reviews[review].datetime).toLocaleString("it-IT").slice(0, -3))
             $(tmpInsHTML.find("p")[0]).text(data.reviews[review].description)
-
 
             for (let i = 0; i < data.reviews[review].stars; i++) {
                 $(tmpInsHTML.find("div")[3]).append(fullStar)
@@ -353,23 +396,40 @@ async function toggleVisible() {
     //loadDetails()
 }
 
-// datetimepicker logic
 var exampleModal = document.getElementById('exampleModal')
 exampleModal.addEventListener('show.bs.modal', function (event) {
     try {
         var button = event.relatedTarget
         var recipient = button.getAttribute('data-bs-name')
         var id = button.getAttribute('data-bs-id')
-
+        
         $('#parkId').text(id)
         var modalTitle = exampleModal.querySelector('.modal-title')
         var modalBodyInput = exampleModal.querySelector('.modal-body input')
-
+        
         modalTitle.textContent = 'Nuova inserzione per: ' + recipient
     } catch (err) {
         console.log(err)
     }
 })
+
+var reviewModal = document.getElementById('reviewModal')
+reviewModal.addEventListener('show.bs.modal', function (event) {
+    try {
+        var button = event.relatedTarget
+        var recipient = button.getAttribute('data-bs-name')
+        var id = button.getAttribute('data-bs-id')
+        
+        $('#parkId').text(id)
+        var modalTitle = reviewModal.querySelector('.modal-title')
+        
+        modalTitle.textContent = 'Nuova recensione per: ' + recipient
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+// datetimepicker logic
 tempusDominus.loadLocale(tempusDominus.locales.it);
 
 // globally

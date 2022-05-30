@@ -183,6 +183,44 @@
       clear: both;
       display: table;
     }
+
+    .rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center
+    }
+
+    .rating>input {
+      display: none
+    }
+
+    .rating>label {
+      position: relative;
+      width: 1em;
+      font-size: 30px;
+      font-weight: 300;
+      color: #ffc107;
+      cursor: pointer
+    }
+
+    .rating>label::before {
+      content: "\2605";
+      position: absolute;
+      opacity: 0
+    }
+
+    .rating>label:hover:before,
+    .rating>label:hover~label:before {
+      opacity: 1 !important
+    }
+
+    .rating>input:checked~label:before {
+      opacity: 1
+    }
+
+    .rating:hover>input:checked~label:before {
+      opacity: 0.4
+    }
   </style>
 </head>
 
@@ -232,7 +270,7 @@
               <% } %>
 
           </div>
-          
+
         </div>
         <!-- /.row -->
         <hr />
@@ -244,28 +282,28 @@
             data-bs-target="#exampleModal" data-bs-name="" data-bs-id="">Nuova Inserzione</btn>
           <% } %>
             <!-- <div class="row"> -->
-              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 col-md-11" id="insertionContainer">
-                <div class="col" id="firstInsertion" hidden>
-                  <div class="card shadow-sm">
-                    <div class="card-body">
-                      <p class="card-text insertionId" hidden></p>
-                      <p class="card-text insertionName"></p>
-                      <p class="card-text insertionStartDate"></p>
-                      <p class="card-text insertionEndDate"></p>
-                      <p class="card-text insertionPriceHourly"></p>
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex w-100 gap-2">
-                          <button onclick="detailInsertion()" type="button"
-                            class="btn  btn-outline-primary">Dettagli</button>
-                          <% if (owner) { %>
-                            <button onclick="modifyInsertion()" type="button"
-                              class="btn  btn-outline-secondary">Modifica</button>
-                            <button onclick="deleteInsertion()" type="button"
-                              class="btn  btn-outline-danger ms-auto">Elimina</button>
-                            <% } %>
-                        </div>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 col-md-11" id="insertionContainer">
+              <div class="col" id="firstInsertion" hidden>
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <p class="card-text insertionId" hidden></p>
+                    <p class="card-text insertionName"></p>
+                    <p class="card-text insertionStartDate"></p>
+                    <p class="card-text insertionEndDate"></p>
+                    <p class="card-text insertionPriceHourly"></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex w-100 gap-2">
+                        <button onclick="detailInsertion()" type="button"
+                          class="btn  btn-outline-primary">Dettagli</button>
+                        <% if (owner) { %>
+                          <button onclick="modifyInsertion()" type="button"
+                            class="btn  btn-outline-secondary">Modifica</button>
+                          <button onclick="deleteInsertion()" type="button"
+                            class="btn  btn-outline-danger ms-auto">Elimina</button>
+                          <% } %>
                       </div>
                     </div>
+                  </div>
                   <!-- </div> -->
                 </div>
               </div>
@@ -274,295 +312,341 @@
             <hr />
             <!-- REVIEWS VISUALIZER -->
             <h3 class="my-4">Recensioni</h3>
-                <!-- REVIEWS CONTAINER-->
-                <div class="container row mt-3 float">
-                <div class="col-md-4">
-                  <div class="container">
-                    <div class="">
-                      <div class="rating-card">
-                        <div class="text-center m-b-30">
-                          <h4>Panoramica recensioni</h4>
-                          <br>
-                          <h1 class="rating-number"><span id="starAverage">0</span><small>/5</small></h1>
-                          <div class="rating-stars d-inline-block position-relative mr-2">
-                            <img src="img/grey-star.svg" alt="">
-                            <div class="filled-star" style="width:0%" id="starBar"></div> <!-- modifica width per lunghezza barra -->
-                          </div>
-                          <div class="text-muted"><span id="totalReviews">0</span> recensioni</div>
+            <!-- REVIEWS CONTAINER-->
+            <div class="container row mt-3 float">
+              <div class="col-md-4">
+                <div class="container">
+                  <div class="">
+                    <div class="rating-card">
+                      <div class="text-center m-b-30">
+                        <h4>Panoramica recensioni</h4>
+                        <br>
+                        <h1 class="rating-number"><span id="starAverage">0</span><small>/5</small></h1>
+                        <div class="rating-stars d-inline-block position-relative mr-2">
+                          <img src="img/grey-star.svg" alt="">
+                          <div class="filled-star" style="width:0%" id="starBar"></div>
+                          <!-- modifica width per lunghezza barra -->
                         </div>
-                        <div class="rating-divided">
-                          <div class="rating-progress">
-                            <span class="rating-grade">5 <img src="./img/star.svg" alt=""></span>
-                            <div class="progress">
-                              <div id="5starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="rating-value" id="5starTot">0</span>
+                        <div class="text-muted"><span id="totalReviews">0</span> recensioni</div>
+                      </div>
+                      <div class="rating-divided">
+                        <div class="rating-progress">
+                          <span class="rating-grade">5 <img src="./img/star.svg" alt=""></span>
+                          <div class="progress">
+                            <div id="5starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"
+                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
-                          <div class="rating-progress">
-                            <span class="rating-grade">4 <img src="./img/star.svg" alt=""></span>
-                            <div class="progress">
-                              <div id="4starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="rating-value" id="4starTot">0</span>
+                          <span class="rating-value" id="5starTot">0</span>
+                        </div>
+                        <div class="rating-progress">
+                          <span class="rating-grade">4 <img src="./img/star.svg" alt=""></span>
+                          <div class="progress">
+                            <div id="4starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0"
+                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
-                          <div class="rating-progress">
-                            <span class="rating-grade">3 <img src="./img/star.svg" alt=""></span>
-                            <div class="progress">
-                              <div id="3starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="rating-value" id="3starTot">0</span>
+                          <span class="rating-value" id="4starTot">0</span>
+                        </div>
+                        <div class="rating-progress">
+                          <span class="rating-grade">3 <img src="./img/star.svg" alt=""></span>
+                          <div class="progress">
+                            <div id="3starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"
+                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
-                          <div class="rating-progress">
-                            <span class="rating-grade">2 <img src="./img/star.svg" alt=""></span>
-                            <div class="progress">
-                              <div id="2starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="rating-value" id="2starTot">0</span>
+                          <span class="rating-value" id="3starTot">0</span>
+                        </div>
+                        <div class="rating-progress">
+                          <span class="rating-grade">2 <img src="./img/star.svg" alt=""></span>
+                          <div class="progress">
+                            <div id="2starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"
+                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
-                          <div class="rating-progress">
-                            <span class="rating-grade">1 <img src="./img/star.svg" alt=""></span>
-                            <div class="progress">
-                              <div id="1starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="rating-value" id="1starTot">0</span>
+                          <span class="rating-value" id="2starTot">0</span>
+                        </div>
+                        <div class="rating-progress">
+                          <span class="rating-grade">1 <img src="./img/star.svg" alt=""></span>
+                          <div class="progress">
+                            <div id="1starBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"
+                              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
+                          <span class="rating-value" id="1starTot">0</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                <div class="container col-md-8 m-0">
+              </div>
 
-                  <div class="row height d-flex justify-content-center align-items-center">
-                    <div class="card" id="reviewContainer">
+              <div class="container col-md-8 m-0">
 
-                      <!-- <div class="p-3">          CODICE PER AGGIUNGERE UNA RECENSIONE 
+                <div class="row height d-flex justify-content-center align-items-center">
+                  <div class="card" id="reviewContainer">
+
+                    <!-- <div class="p-3">          CODICE PER AGGIUNGERE UNA RECENSIONE 
                 <h6>Comments</h6>
               </div>
               <div class="mt-3 d-flex flex-row align-items-center p-3 form-color">
                 <img src="https://i.imgur.com/zQZSWrt.jpg" width="50" class="rounded-circle mr-2">
                 <input type="text" class="form-control" placeholder="Enter your comment...">
               </div> -->
-                      <div class="mt-2" id="primaReview" hidden>
-                        <div class="d-flex flex-row p-3">
-                          <img src="https://img.icons8.com/bubbles/100/000000/user.png" width="40" height="40"
-                            class="rounded-circle mr-3">
-                          <div class="w-100">
-                            <div class="d-flex justify-content-between align-items-center">
-                              <div class="d-flex flex-row align-items-center">
-                                <span class="mr-2">Titolo</span>
-                                <span class="mr-2">&nbsp;da&nbsp;</span>
-                                <span class="mr-2">Utente</span>
-                                <span class="mr-2">&nbsp;&nbsp;</span>
-                              </div>
-                              <small id="reviewTime"></small>
+                    <div class="mt-2" id="primaReview" hidden>
+                      <div class="d-flex flex-row p-3">
+                        <img src="https://img.icons8.com/bubbles/100/000000/user.png" width="40" height="40"
+                          class="rounded-circle mr-3">
+                        <div class="w-100">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex flex-row align-items-center">
+                              <span class="mr-2">Titolo</span>
+                              <span class="mr-2">&nbsp;da&nbsp;</span>
+                              <span class="mr-2">Utente</span>
+                              <span class="mr-2">&nbsp;&nbsp;</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center"></div>
-                            <p class="text-justify comment-text mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing
-                              elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-                              veniam</p>
-                            <!-- <div class="d-flex flex-row user-feed">
+                            <small id="reviewTime"></small>
+                          </div>
+                          <div class="d-flex justify-content-between align-items-center"></div>
+                          <p class="text-justify comment-text mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+                            veniam</p>
+                          <!-- <div class="d-flex flex-row user-feed">
                     <span class="wish"><i class="fa fa-heart mr-2"></i>0</span>                    
                   </div>     -->
-                          </div>
                         </div>
                       </div>
                     </div>
-                    
-                    <% if (!owner) { %>
-                      <btn class="btn btn-lg btn-primary mb-3 mt-3" id="newReview" data-bs-toggle="modal"
-                        data-bs-target="#reviewModal" data-bs-name="" data-bs-id="">Nuova Recensione</btn>
-                      <% } %>
                   </div>
 
+                  <% if (!owner) { %>
+                    <btn class="btn btn-lg btn-primary mb-3 mt-3" id="newReview" data-bs-toggle="modal"
+                      data-bs-target="#reviewModal" data-bs-name="" data-bs-id="">Nuova Recensione</btn>
+                    <% } %>
+                </div>
+
+              </div>
+            </div>
+            <!-- FINE REVIEWS CONTAINER-->
+
+            <!-- MODALE PER REVIEWS-->
+            <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Nuova recensione per: </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <label id="message" class="text-danger d-block text-center"></label>
+                  <div class="modal-body" id="form">
+                    <form id="insertionForm">
+                      <div class="mb-3">
+                        <label id="title" class="text-danger d-block"></label>
+                        <label id="parkId" hidden></label>
+                        <label for="recipient-name" class="col-form-label">Titolo:</label>
+                        <input type="text" class="form-control" id="reviewTitle" required>
+                      </div>
+                      <span>Voto:</span>
+                      <div class="rating"> 
+                        <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
+                        <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label> 
+                        <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
+                        <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label> 
+                        <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label>
+                      </div>
+                      <div class="mb-3">
+                        <label id="description" class=" d-block"></label>
+                        <label id="parkId" hidden></label>
+                        <label for="recipient-name" class="col-form-label">Descrizione:</label>
+                        <textarea class="form-control" id="reviewDesc" style="height: 150px" rows="3"></textarea>
+                      </div> 
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" id="close-review-modal" class="btn btn-secondary"
+                      data-bs-dismiss="modal">Chiudi</button>
+                    <button type="button" id="btnSubmit" onclick="createReview()" class="btn btn-primary">Invia</button>
+                  </div>
                 </div>
               </div>
-                <!-- FINE REVIEWS CONTAINER-->
+            </div>
 
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                  aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body" id="form">
-                        <form id="insertionForm">
-                          <div class="mb-3">
-                            <label id="message" class="text-danger d-block"></label>
-                            <label id="parkId" hidden></label>
-                            <label for="recipient-name" class="col-form-label">Nome:</label>
-                            <input type="text" class="form-control" id="insertion-name" required>
-                          </div>
-                          <!-- dt picker -->
-                          <div class='row mb-3'>
-                            <div class='col-sm-6'>
-                              <label for='linkedPickers1Input' class='form-label'>Da:</label>
-                              <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
-                                data-td-target-toggle='nearest'>
-                                <input id='linkedPickers1Input' type='text' class='form-control'
-                                  data-td-target='#linkedPickers1' required />
-                                <span class='input-group-text' data-td-target='#linkedPickers1'
-                                  data-td-toggle='datetimepicker'>
-                                  <span class='fa-solid fa-calendar'></span>
-                                </span>
-                              </div>
-                            </div>
-                            <div class='col-sm-6'>
-                              <label for='linkedPickers2Input' class='form-label'>A:</label>
-                              <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
-                                data-td-target-toggle='nearest'>
-                                <input id='linkedPickers2Input' type='text' class='form-control'
-                                  data-td-target='#linkedPickers2' required />
-                                <span class='input-group-text' data-td-target='#linkedPickers2'
-                                  data-td-toggle='datetimepicker'>
-                                  <span class='fa-solid fa-calendar'></span>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- Insert price -->
-                          <div class="row">
-                            <div class='col-sm-6'>
-                              <!-- Insert hourly price -->
-                              <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
-                              <div class="input-group">
-                                <div class="input-group-prepend">
-                                  <span class="input-group-text">€</span>
-                                </div>
-                                <input type="number" step=".01" min="0" class="form-control" id="insertion-hourlyPrice"
-                                  required>
-                              </div>
-                            </div>
-                            <div class='col-sm-6'>
-                              <!-- Insert daily price -->
-                              <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
-                              <div class="mb-3">
-                                <div class="input-group">
-                                  <div class="input-group-prepend">
-                                    <span class="input-group-text">€</span>
-                                  </div>
-                                  <input type="number" step=".01" min="0" class="form-control"
-                                    id="insertion-dailyPrice">
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Insert min interval of reservation -->
-                            <label for="minInterval" class="form-label">Intervallo minimo di prenotazione
-                              (minuti):</label>
-                            <div class="mb-3">
-                              <div class="mb-3 input-group">
-                                <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
-                                <div class="input-group-append">
-                                  <span class="input-group-text">min</span>
-                                </div>
-                              </div>
-                            </div>
-                        </form>
 
-                        <!-- Checkbox for recurrence or non recurrence -->
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" value="" id="recurrence"
-                            onclick="toggleRecurrence()">
-                          <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
-                        </div>
-                        <form>
-                          <!-- Select days of the week -->
-                          <div class="form-check mb-3" id="recurrenceContainer" hidden>
-                            <div class="row mb-3" id="dayCheckboxes">
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="monday">
-                                  <label class="form-check-label" for="monday">Lunedì</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="tuesday">
-                                  <label class="form-check-label" for="tuesday">Martedì</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="wednesday">
-                                  <label class="form-check-label" for="wednesday">Mercoledì</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="thursday">
-                                  <label class="form-check-label" for="thursday">Giovedì</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="friday">
-                                  <label class="form-check-label" for="friday">Venerdì</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="saturday">
-                                  <label class="form-check-label" for="friday">Sabato</label>
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-check">
-                                  <input class="form-check-input" type="checkbox" value="" id="sunday">
-                                  <label class="form-check-label" for="friday">Domenica</label>
-                                </div>
-                              </div>
-                            </div>
-                            <!-- Select time start -->
-                            <!-- Time picker -->
-                            <div class="row">
-                              <div class="col-sm-6">
-                                <label for="recurrenceStart" class="form-label">Ora di inizio:</label>
-                                <div class='input-group log-event' id='recurrenceStart' data-td-target-input='nearest'
-                                  data-td-target-toggle='nearest'>
-                                  <input id='recurrenceStartInput' type='text' class='form-control'
-                                    data-td-target='#recurrenceStart' required />
-                                  <span class='input-group-text' data-td-target='#recurrenceStart'
-                                    data-td-toggle='datetimepicker'>
-                                    <span class='fa-solid fa-clock'></span>
-                                  </span>
-                                </div>
-                              </div>
-                              <!-- Select time end -->
-                              <div class="col-sm-6">
-                                <label for="recurrenceEnd" class="form-label">Ora di fine:</label>
-                                <div class='input-group log-event' id='recurrenceEnd' data-td-target-input='nearest'
-                                  data-td-target-toggle='nearest'>
-                                  <input id='recurrenceEndInput' type='text' class='form-control'
-                                    data-td-target='#recurrenceEndInput' required />
-                                  <span class='input-group-text' data-td-target='#recurrenceEndInput'
-                                    data-td-toggle='datetimepicker'>
-                                    <span class='fa-solid fa-clock'></span>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                        </form>
+            <!-- FINE MODALE REVIEWS-->
 
-                      </div>
-
-                    </div>
-
-                    <div class="modal-footer">
-                      <button type="button" id="close-modal" class="btn btn-secondary"
-                        data-bs-dismiss="modal">Chiudi</button>
-                      <button type="button" id="btnSubmit" onclick="createInsertion()"
-                        class="btn btn-primary">Invia</button>
-                    </div>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Nuova inserzione per: </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
+                  <div class="modal-body" id="form">
+                    <form id="insertionForm">
+                      <div class="mb-3">
+                        <label id="message" class="text-danger d-block"></label>
+                        <label id="parkId" hidden></label>
+                        <label for="recipient-name" class="col-form-label">Nome:</label>
+                        <input type="text" class="form-control" id="insertion-name" required>
+                      </div>
+                      <!-- dt picker -->
+                      <div class='row mb-3'>
+                        <div class='col-sm-6'>
+                          <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                          <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
+                            data-td-target-toggle='nearest'>
+                            <input id='linkedPickers1Input' type='text' class='form-control'
+                              data-td-target='#linkedPickers1' required />
+                            <span class='input-group-text' data-td-target='#linkedPickers1'
+                              data-td-toggle='datetimepicker'>
+                              <span class='fa-solid fa-calendar'></span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class='col-sm-6'>
+                          <label for='linkedPickers2Input' class='form-label'>A:</label>
+                          <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
+                            data-td-target-toggle='nearest'>
+                            <input id='linkedPickers2Input' type='text' class='form-control'
+                              data-td-target='#linkedPickers2' required />
+                            <span class='input-group-text' data-td-target='#linkedPickers2'
+                              data-td-toggle='datetimepicker'>
+                              <span class='fa-solid fa-calendar'></span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Insert price -->
+                      <div class="row">
+                        <div class='col-sm-6'>
+                          <!-- Insert hourly price -->
+                          <label for="hourlyPrice" class="form-label">Prezzo orario:</label>
+                          <div class="input-group">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text">€</span>
+                            </div>
+                            <input type="number" step=".01" min="0" class="form-control" id="insertion-hourlyPrice"
+                              required>
+                          </div>
+                        </div>
+                        <div class='col-sm-6'>
+                          <!-- Insert daily price -->
+                          <label for="dailyPrice" class="form-label">Prezzo giornaliero:</label>
+                          <div class="mb-3">
+                            <div class="input-group">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text">€</span>
+                              </div>
+                              <input type="number" step=".01" min="0" class="form-control" id="insertion-dailyPrice">
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Insert min interval of reservation -->
+                        <label for="minInterval" class="form-label">Intervallo minimo di prenotazione
+                          (minuti):</label>
+                        <div class="mb-3">
+                          <div class="mb-3 input-group">
+                            <input type="number" min="0" class="form-control" id="insertion-minInterval" required>
+                            <div class="input-group-append">
+                              <span class="input-group-text">min</span>
+                            </div>
+                          </div>
+                        </div>
+                    </form>
+
+                    <!-- Checkbox for recurrence or non recurrence -->
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="" id="recurrence"
+                        onclick="toggleRecurrence()">
+                      <label class="form-check-label" for="recurrence">Ripetere l'inserzione</label>
+                    </div>
+                    <form>
+                      <!-- Select days of the week -->
+                      <div class="form-check mb-3" id="recurrenceContainer" hidden>
+                        <div class="row mb-3" id="dayCheckboxes">
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="monday">
+                              <label class="form-check-label" for="monday">Lunedì</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="tuesday">
+                              <label class="form-check-label" for="tuesday">Martedì</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="wednesday">
+                              <label class="form-check-label" for="wednesday">Mercoledì</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="thursday">
+                              <label class="form-check-label" for="thursday">Giovedì</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="friday">
+                              <label class="form-check-label" for="friday">Venerdì</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="saturday">
+                              <label class="form-check-label" for="friday">Sabato</label>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="sunday">
+                              <label class="form-check-label" for="friday">Domenica</label>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Select time start -->
+                        <!-- Time picker -->
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <label for="recurrenceStart" class="form-label">Ora di inizio:</label>
+                            <div class='input-group log-event' id='recurrenceStart' data-td-target-input='nearest'
+                              data-td-target-toggle='nearest'>
+                              <input id='recurrenceStartInput' type='text' class='form-control'
+                                data-td-target='#recurrenceStart' required />
+                              <span class='input-group-text' data-td-target='#recurrenceStart'
+                                data-td-toggle='datetimepicker'>
+                                <span class='fa-solid fa-clock'></span>
+                              </span>
+                            </div>
+                          </div>
+                          <!-- Select time end -->
+                          <div class="col-sm-6">
+                            <label for="recurrenceEnd" class="form-label">Ora di fine:</label>
+                            <div class='input-group log-event' id='recurrenceEnd' data-td-target-input='nearest'
+                              data-td-target-toggle='nearest'>
+                              <input id='recurrenceEndInput' type='text' class='form-control'
+                                data-td-target='#recurrenceEndInput' required />
+                              <span class='input-group-text' data-td-target='#recurrenceEndInput'
+                                data-td-toggle='datetimepicker'>
+                                <span class='fa-solid fa-clock'></span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                    </form>
+
+                  </div>
+
                 </div>
+
+                <div class="modal-footer">
+                  <button type="button" id="close-modal" class="btn btn-secondary"
+                    data-bs-dismiss="modal">Chiudi</button>
+                  <button type="button" id="btnSubmit" onclick="createInsertion()"
+                    class="btn btn-primary">Invia</button>
+                </div>
+              </div>
+            </div>
       </div>
 
       <!--       <div class="row">

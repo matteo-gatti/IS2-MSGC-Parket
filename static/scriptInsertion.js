@@ -254,6 +254,7 @@ async function main() {
 
     //Opzioni di A quando cambia DA
     linked1.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
         let eventDate = new tempusDominus.DateTime(e.date);
         let enabledDates = [];
         let recmaxDate = maxDate;
@@ -304,6 +305,10 @@ async function main() {
                 },
             });
         }
+    });
+
+    linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
     });
 
     /* linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
@@ -370,6 +375,37 @@ async function main() {
     //--------------------------------- end period datepickers ------------------------------------
 }
 
+function checkDatesAndUpdatePrice() {
+    try {
+        let dateFrom = new Date(convertToISO($("#linkedPickers1Input").val()));
+        let dateTo = new Date(convertToISO($("#linkedPickers2Input").val()));
+        if (Object.prototype.toString.call(dateFrom) !== "[object Date]" || Object.prototype.toString.call(dateTo) !== "[object Date]" || isNaN(dateFrom) || isNaN(dateTo))
+            return
+
+        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);   
+        let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0]) : 0
+        let total = 0
+        // get hours between dates
+        let minutes = Math.abs(dateTo - dateFrom) / 60e3;
+        console.log("mins", minutes)
+        // get days between dates
+        if (priceD !== 0) {
+            let days = Math.floor((dateTo - dateFrom) / 864e5)
+            console.log("days", days)
+            minutes -= days * 24 * 60;
+            total += days * priceD;
+            console.log("minsUpdate", minutes, "ttl", total)
+        }
+        
+        total += minutes / 60 * priceH;
+        console.log("total", total)
+        $("#lblTot").text(''+ total)
+
+    } catch(err) {
+        console.log(err)
+    }
+}
+
 async function createReservation() {
     let d1 = $("#linkedPickers1Input").val();
     let d2 = $("#linkedPickers2Input").val();
@@ -395,6 +431,9 @@ async function createReservation() {
         if (!res.ok) {
             throw await res.json();
         } else {
+            let data = await res.json();
+            console.log(data)
+            window.location.href = data.url
             cleanseList();
             await loadInfo();
         }

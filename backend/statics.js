@@ -3,7 +3,8 @@ import express from 'express'
 import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
 import Insertion from './models/insertion.js'
-import user from './models/user.js'
+import Reservation from './models/reservation.js'
+import User from './models/user.js'
 
 const router = express.Router()
 
@@ -21,6 +22,52 @@ router.get('/login', tokenValid, function (req, res) {
 router.get('/register', tokenValid, function (req, res) {
     if (!isAuthToken(req))
         res.render('./register.ejs', { logged: false })
+    else
+        res.redirect("/")
+})
+
+// Register page
+router.get('/success', tokenValid, async function (req, res) {
+    if (isAuthToken(req)) {
+        try {
+            const insId = req.query.insertion
+            const resId = req.query.reservation
+            let reservation = await Reservation.findById(resId)
+            let insertion = await Insertion.findById(insId).populate("reservations parking")
+            let parking = await Parking.findById(insertion.parking.id).populate("owner")
+            insertion.reservations.push(reservation)
+            await insertion.save()
+            if (req.loggedInUser.userId !== parking.owner.id) {
+                res.render('./insertion.ejs', { logged: true, owner: false })
+            } else {
+                res.render('./insertion.ejs', { logged: true, owner: true })
+            }
+        } catch(err){
+            console.log(err)
+            res.redirect("/")
+        }
+    }
+
+    else
+        res.redirect("/")
+})
+
+// Register page
+router.get('/cancel', tokenValid, async function (req, res) {
+    if (isAuthToken(req)) {
+        try {
+            const resId = req.query.reservation
+            let reservation = await Reservation.findById(resId)
+            console.log("cancel reser", reservation)
+            if (reservation !==null) {
+                await reservation.remove()
+            }
+            res.render('./cancel.ejs', { logged: true })
+        } catch(err){
+            console.log(err)
+            res.redirect("/")
+        }
+    }
     else
         res.redirect("/")
 })

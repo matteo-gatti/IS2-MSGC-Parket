@@ -398,7 +398,8 @@ function checkDatesAndUpdatePrice() {
         }
         
         total += minutes / 60 * priceH;
-        console.log("total", total)
+        // round to 2 decimals
+        total = Math.round(total * 100) / 100;
         $("#lblTot").text(''+ total)
 
     } catch(err) {

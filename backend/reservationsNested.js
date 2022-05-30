@@ -9,7 +9,6 @@ import Stripe from "stripe"
 
 const router = express.Router()
 const stripe = new Stripe(process.env.STRIPE_PR_KEY)
-console.log(stripe)
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
@@ -92,6 +91,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         reservation.self = `/api/v1/reservations/${reservation.id}`
         reservation = await reservation.save()
 
+        const URL = req.protocol + '://' + req.get('host')
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
@@ -99,14 +99,15 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
                 price_data: {
                     currency: 'eur',
                     product_data: {
-                        name: `Reservation for ${insertion.parking.name} from ${moment(reservation.datetimeStart).format("DD/MM/YYYY, hh:mm")} to ${moment(reservation.datetimeEnd).format("DD/MM/YYYY, hh:mm")}`
+                        name: `Prenotazione per il parcheggio: ${insertion.parking.name} - inserzione: ${insertion.name}`,
+                        description: `Da: ${moment(reservation.datetimeStart).format("DD/MM/YYYY, hh:mm")} A: ${moment(reservation.datetimeEnd).format("DD/MM/YYYY, hh:mm")}`,
                     },
                     unit_amount: reservation.price * 100
                 },
                 quantity: 1,
             }],
-            success_url: `http://localhost:5000/success?insertion=${insertion.id}&reservation=${reservation.id}`,
-            cancel_url: `http://localhost:5000/cancel?reservation=${reservation.id}`,
+            success_url: `${URL}/success?insertion=${insertion.id}&reservation=${reservation.id}`,
+            cancel_url: `${URL}/cancel?reservation=${reservation.id}`,
         })
 
         res.location(reservation.self).status(201).json({url: session.url})

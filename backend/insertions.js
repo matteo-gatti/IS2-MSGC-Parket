@@ -146,7 +146,7 @@ router.get('/:insertionId', async (req, res) => {
             {
                 path: "parking",
                 model: "Parking",
-                select: {_id: 0, __v:0, insertions: 0, owner: 0},
+                select: {__v:0, insertions: 0, owner: 0},
             }]
         )
         return res.status(200).json(insertion)

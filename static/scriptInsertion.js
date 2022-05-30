@@ -1,5 +1,11 @@
 function goBack() {
-    history.back();
+    if(window.history.length > 1 && 
+        document.referrer.indexOf(window.location.host) !== -1) {
+          window.history.back();
+    } else {
+        window.location.href = "/detailParking?id=" + $("#idParking").val()
+    }
+    /* history.back(); */
 }
 
 function convertToISO(date) {
@@ -93,6 +99,7 @@ async function loadInfo() {
                 );
             }
 
+            $("#idParking").val(data.parking._id);
             $("#imgParking").attr("src", data.parking.image);
             $("#nameParking").text(data.parking.name);
             $("#addressParking").html(

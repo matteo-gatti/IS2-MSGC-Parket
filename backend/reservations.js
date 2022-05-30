@@ -3,6 +3,7 @@ import User from './models/user.js'
 import moment from 'moment'
 
 import Reservation from './models/reservation.js'
+import Review from './models/review.js'
 import Insertion from './models/insertion.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
 
@@ -13,20 +14,20 @@ router.get('/myReservations', tokenChecker, async (req, res) => {
     try {
         let user = await User.findById(req.loggedInUser.userId)
         if (user == null) throw new Error()
-        let reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { __v: 0 }).populate(
+        let reservations = await Reservation.find({ client: { $eq: req.loggedInUser.userId } }, { __v: 0 }).populate(
             {
                 path: "insertion",
                 model: "Insertion",
-                select: {__v:0},
+                select: { __v: 0 },
                 populate: [{
                     path: "parking",
                     model: "Parking",
-                    select: {self: 1, name: 1, owner:1},
-                        populate: [{
-                            path: "owner",
-                            model: "User",
-                            select: {email: 1}
-                        }]
+                    select: { self: 1, name: 1, owner: 1 },
+                    populate: [{
+                        path: "owner",
+                        model: "User",
+                        select: { email: 1 }
+                    }]
                 }]
             }
         )
@@ -108,7 +109,7 @@ router.put('/:reservationId', tokenChecker, async (req, res) => {
             }
         }
 
-        if(insertion.recurrent) {
+        if (insertion.recurrent) {
             // check that the new reservation is in the same days of the week of the insertion
             let newReservationDay = new Date(req.body.datetimeStart).getDay()
             let days = new Map()
@@ -148,7 +149,7 @@ router.put('/:reservationId', tokenChecker, async (req, res) => {
         // if all went smoothly, update the reservation
         reservation.datetimeStart = req.body.datetimeStart
         reservation.datetimeEnd = req.body.datetimeEnd
-        reservation = await reservation.save( { _id: 0, __v: 0, new: true } )
+        reservation = await reservation.save({ _id: 0, __v: 0, new: true })
 
         return res.status(200).json(reservation)
     } catch (err) {
@@ -161,16 +162,18 @@ router.put('/:reservationId', tokenChecker, async (req, res) => {
 router.delete('/:reservationId', tokenChecker, async (req, res) => {
     try {
         let test = await Reservation.findById(req.params.reservationId, { _id: 0, __v: 0 })
-        if(String(test.client) !== req.loggedInUser.userId) {
-            return res.status(403).send({message: "User doesn't have the permission to delete this Reservation"})
+        if (String(test.client) !== req.loggedInUser.userId) {
+            return res.status(403).send({ message: "User doesn't have the permission to delete this Reservation" })
         }
 
-        await Reservation.findOneAndDelete({_id: req.params.reservationId})
-        
-        return res.status(200).send({message: "Reservation deleted"})
-    } catch(err) {
+        await Review.findOneAndDelete({ reservation: req.params.reservationId })
+
+        await Reservation.findOneAndDelete({ _id: req.params.reservationId })
+
+        return res.status(200).send({ message: "Reservation deleted" })
+    } catch (err) {
         console.log(err)
-        return res.status(404).send({message: "Reservation not found" })
+        return res.status(404).send({ message: "Reservation not found" })
     }
 })
 

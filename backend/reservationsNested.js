@@ -86,6 +86,8 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             reservation.price += dayDiff * insertion.priceDaily
         }
         reservation.price += minutesDiff / 60 * insertion.priceHourly
+        reservation.price = Math.round(reservation.price * 100) / 100
+        reservation.price = reservation.price.toFixed(2)
 
         reservation = await reservation.save()
         reservation.self = `/api/v1/reservations/${reservation.id}`
@@ -102,7 +104,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
                         name: `Prenotazione per il parcheggio: ${insertion.parking.name} - inserzione: ${insertion.name}`,
                         description: `Da: ${moment(reservation.datetimeStart).format("DD/MM/YYYY, hh:mm")} A: ${moment(reservation.datetimeEnd).format("DD/MM/YYYY, hh:mm")}`,
                     },
-                    unit_amount: reservation.price * 100
+                    unit_amount: Math.round(reservation.price * 100)
                 },
                 quantity: 1,
             }],

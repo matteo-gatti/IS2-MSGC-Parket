@@ -31,6 +31,11 @@ const reviewSchema = new Schema({
         type: 'Date',
         required: true
     },
+    reservation: {
+        type: Schema.Types.ObjectId,
+        ref: 'Reservation',
+        required: true
+    }
 })
 
 export default mongoose.model('Review', reviewSchema)

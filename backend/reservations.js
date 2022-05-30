@@ -13,7 +13,7 @@ router.get('/myReservations', tokenChecker, async (req, res) => {
     try {
         let user = await User.findById(req.loggedInUser.userId)
         if (user == null) throw new Error()
-        let reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { _id: 0, __v: 0 }).populate(
+        let reservations = await Reservation.find({client: {$eq: req.loggedInUser.userId}}, { __v: 0 }).populate(
             {
                 path: "insertion",
                 model: "Insertion",

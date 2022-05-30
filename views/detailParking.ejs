@@ -400,12 +400,11 @@
                               <span class="mr-2">Utente</span>
                               <span class="mr-2">&nbsp;&nbsp;</span>
                             </div>
-                            <small id="reviewTime"></small>
+                            <small></small>
                           </div>
+                          <small></small>
                           <div class="d-flex justify-content-between align-items-center"></div>
-                          <p class="text-justify comment-text mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-                            veniam</p>
+                          <p class="text-justify comment-text mb-0"></p>
                           <!-- <div class="d-flex flex-row user-feed">
                     <span class="wish"><i class="fa fa-heart mr-2"></i>0</span>                    
                   </div>     -->
@@ -415,9 +414,13 @@
                   </div>
 
                   <% if (!owner) { %>
-                    <btn class="btn btn-lg btn-primary mb-3 mt-3" id="newReview" data-bs-toggle="modal"
-                      data-bs-target="#reviewModal" data-bs-name="" data-bs-id="">Nuova Recensione</btn>
+                    <% if (reviewable) { %>
+                      <btn class="btn btn-lg btn-primary mb-3 mt-3" id="newReview" data-bs-toggle="modal"
+                        data-bs-target="#reviewModal" data-bs-name="" data-bs-id="">Nuova Recensione</btn>
+                    <% } else {%>
+                      <btn class="btn btn-lg btn-primary mb-3 mt-3 disabled" id="newReview">Non hai prenotatazioni da recensire! 😭</btn>
                     <% } %>
+                  <% } %>
                 </div>
 
               </div>
@@ -435,33 +438,39 @@
                   </div>
                   <label id="message" class="text-danger d-block text-center"></label>
                   <div class="modal-body" id="form">
-                    <form id="insertionForm">
+                    <form id="reviewForm">
                       <div class="mb-3">
                         <label id="title" class="text-danger d-block"></label>
-                        <label id="parkId" hidden></label>
+                        <label id="parkIdReview" hidden></label>
                         <label for="recipient-name" class="col-form-label">Titolo:</label>
                         <input type="text" class="form-control" id="reviewTitle" required>
                       </div>
                       <span>Voto:</span>
-                      <div class="rating"> 
+                      <div class="rating">
                         <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
-                        <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label> 
+                        <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label>
                         <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
-                        <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label> 
+                        <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label>
                         <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label>
                       </div>
                       <div class="mb-3">
                         <label id="description" class=" d-block"></label>
-                        <label id="parkId" hidden></label>
+                        <label id="parkIdReviewLabel" hidden></label>
                         <label for="recipient-name" class="col-form-label">Descrizione:</label>
                         <textarea class="form-control" id="reviewDesc" style="height: 150px" rows="3"></textarea>
-                      </div> 
+                      </div>
+                      <div>
+                        <label>Per la prenotazione:</label>
+                        <select class="form-select" aria-label="Default select example" id="reservationsForm">
+                        </select>
+                      </div>
                     </form>
                   </div>
                   <div class="modal-footer">
                     <button type="button" id="close-review-modal" class="btn btn-secondary"
                       data-bs-dismiss="modal">Chiudi</button>
-                    <button type="button" id="btnSubmit" onclick="createReview()" class="btn btn-primary">Invia</button>
+                    <button type="button" id="btnSubmitReview" onclick="createReview()"
+                      class="btn btn-primary">Invia</button>
                   </div>
                 </div>
               </div>

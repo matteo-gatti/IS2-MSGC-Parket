@@ -140,7 +140,6 @@ async function loadDetails() {
             throw data
 
         // load the data in the page
-        console.log(data)
         if (data) {
             $("#parkingName").text(data.name)
             $("#parkingDesc").text(data.description)
@@ -244,8 +243,8 @@ async function createReview() {
             }
         }
 
-        if(rating == 0) {
-            throw {message: "Seleziona una valutazione"}
+        if (rating == 0) {
+            throw { message: "Seleziona una valutazione" }
         }
 
         const res = await fetch(`/api/v1/parkings/${id}/reviews`, {
@@ -257,13 +256,16 @@ async function createReview() {
                 "title": $('#reviewTitle').val(),
                 "description": $('#reviewDesc').val(),
                 "stars": rating,
+                "reservation": $('#reservationsForm option:selected').val(),
             })
         })
 
         if (!res.ok)
-            throw {message: "Qualcosa è andato storto"}
+            throw { message: "Qualcosa è andato storto" }
         else {
             $('#close-review-modal').click()
+            $('#reviewForm').trigger('reset')
+            $("#message").text()
             getReviews()
         }
 
@@ -316,6 +318,7 @@ async function getReviews() {
             $(tmpInsHTML.find("span")[0]).html("<b>" + data.reviews[review].title + "</b>")
             $(tmpInsHTML.find("span")[2]).html("<i>" + data.reviews[review].writer.username + "</i>&nbsp;&nbsp;")
             $(tmpInsHTML.find("small")[0]).text(new Date(data.reviews[review].datetime).toLocaleString("it-IT").slice(0, -3))
+            $(tmpInsHTML.find("small")[1]).html("<i> Visitato dal " + new Date(data.reviews[review].reservation.datetimeStart).toLocaleString("it-IT").slice(0, -3) + ' al ' + new Date(data.reviews[review].reservation.datetimeEnd).toLocaleString("it-IT").slice(0, -3) + "</i>")
             $(tmpInsHTML.find("p")[0]).text(data.reviews[review].description)
 
             for (let i = 0; i < data.reviews[review].stars; i++) {
@@ -328,9 +331,8 @@ async function getReviews() {
 
             container.append(tmpInsHTML)
         }
-        if(data.reviews.length == 0) 
-        {
-            $("#reviewContainer").css( "border", "1px solid #fff" );
+        if (data.reviews.length == 0) {
+            $("#reviewContainer").css("border", "1px solid #fff");
             $("#reviewContainer").append(`<h3 class="fw-light px-4 py-5 text-center" id="noParks">Nessuna recensione 😭</h3>`)
         }
 
@@ -349,10 +351,11 @@ async function getReviews() {
 
         for (let i = 1; i <= 5; i++) {
             $('#' + i + 'starTot').text(starTot[i])
-            $('#' + i + 'starBar').attr("style", `width: ${starTot[i] * 20}%`)
+            $('#' + i + 'starBar').attr("style", `width: ${starTot[i] / data.reviews.length * 5 * 20}%`)
         }
 
     } catch (err) {
+        console.log(err)
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
     }
@@ -402,28 +405,54 @@ exampleModal.addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget
         var recipient = button.getAttribute('data-bs-name')
         var id = button.getAttribute('data-bs-id')
-        
+
         $('#parkId').text(id)
         var modalTitle = exampleModal.querySelector('.modal-title')
         var modalBodyInput = exampleModal.querySelector('.modal-body input')
-        
+
         modalTitle.textContent = 'Nuova inserzione per: ' + recipient
     } catch (err) {
         console.log(err)
     }
 })
 
+let mutex = true
+
 var reviewModal = document.getElementById('reviewModal')
-reviewModal.addEventListener('show.bs.modal', function (event) {
+reviewModal.addEventListener('show.bs.modal', async function (event) {
     try {
         var button = event.relatedTarget
         var recipient = button.getAttribute('data-bs-name')
         var id = button.getAttribute('data-bs-id')
-        
-        $('#parkId').text(id)
+
+        $('#parkIdReview').text(id)
         var modalTitle = reviewModal.querySelector('.modal-title')
-        
+
         modalTitle.textContent = 'Nuova recensione per: ' + recipient
+        // get all the reservations for this user
+        if (mutex === true) {
+            mutex = false
+            const res = await fetch(`/api/v1/reservations/myReservations`)
+            data = await res.json()
+            if (!res.ok) {
+                throw data
+            } else {
+                $("#reservationsForm").empty()
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].reviewed === false && data[i].insertion.parking._id === id) {
+                        const dateStart = (new Date(data[i].datetimeStart).toLocaleString("it-IT").slice(0, -3))
+                        const dateEnd = (new Date(data[i].datetimeEnd).toLocaleString("it-IT").slice(0, -3))
+                        $("#reservationsForm").append(`<option value="${data[i]._id}">${dateStart} - ${dateEnd}</option>`)
+                    }
+                }
+                if(($("#reservationsForm")).children().length === 0) {
+                    $("#reservationsForm").append(`<option value="">Nessuna prenotazione disponibile</option>`)
+                    $("#reservationsForm").attr("disabled", true)
+                }
+            }
+            mutex = true
+        }
+
     } catch (err) {
         console.log(err)
     }

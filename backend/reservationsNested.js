@@ -5,8 +5,10 @@ import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import Stripe from "stripe"
 
 const router = express.Router()
+const stripe = new Stripe(process.env.STRIPE_PR_KEY)
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
@@ -89,10 +91,26 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         reservation.self = `/api/v1/reservations/${reservation.id}`
         reservation = await reservation.save()
 
-        insertion.reservations.push(reservation)
-        await insertion.save()
+        const URL = req.protocol + '://' + req.get('host')
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [{
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: `Prenotazione per il parcheggio: ${insertion.parking.name} - inserzione: ${insertion.name}`,
+                        description: `Da: ${moment(reservation.datetimeStart).format("DD/MM/YYYY, hh:mm")} A: ${moment(reservation.datetimeEnd).format("DD/MM/YYYY, hh:mm")}`,
+                    },
+                    unit_amount: reservation.price * 100
+                },
+                quantity: 1,
+            }],
+            success_url: `${URL}/success?insertion=${insertion.id}&reservation=${reservation.id}`,
+            cancel_url: `${URL}/cancel?reservation=${reservation.id}`,
+        })
 
-        res.location(reservation.self).status(201).send()
+        res.location(reservation.self).status(201).json({url: session.url})
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

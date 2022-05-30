@@ -5,7 +5,8 @@ import User from './models/user.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import multer from "multer"
+import fs from 'fs'
+import path from 'path'
 
 async function cleanDB() {
     const collections = mongoose.connection.collections
@@ -26,6 +27,7 @@ describe("GET /api/v1/reservations/myReservations", () => {
     let insertionId
 
     beforeAll(async () => {
+        jest.setTimeout(5000);
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
@@ -73,10 +75,10 @@ describe("GET /api/v1/reservations/myReservations", () => {
         })
 
         const jsonInsertion = JSON.stringify({
-            name: "insertion name", 
-            datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-            datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-            priceHourly: 10, 
+            name: "insertion name",
+            datetimeStart: "2022-06-06T08:00:00.000+00:00",
+            datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+            priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
         })
@@ -90,13 +92,15 @@ describe("GET /api/v1/reservations/myReservations", () => {
 
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
-        
+
+        expect.assertions(0)
+
         await request(app)
-            .post('/api/v1/insertions/'+insertionId+'/reservations')
+            .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+00:00", 
-                datetimeEnd: "2022-06-10T11:00:00.000+00:00", 
+                datetimeStart: "2022-06-10T09:00:00.000+00:00",
+                datetimeEnd: "2022-06-10T11:00:00.000+00:00",
             })
             .expect(201).expect("location", /\/api\/v1\/reservations\/(.*)/)
     })
@@ -104,35 +108,50 @@ describe("GET /api/v1/reservations/myReservations", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
+        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
+        console.log("MONGO CONN", mongoServer.state)
+
+        const directory = './static/uploads';
+
+        const fileNames = await fs.promises.readdir(directory)
+
+        for (const file of fileNames) {
+            if (file !== ".gitkeep") {
+                fs.unlink(path.join(directory, file), err => {
+                    if (err) throw err;
+                });
+            }
+        }
     })
 
     test("GET /api/v1/reservations/myReservations with non-exisisting user, should respond with 404", async () => {
+        expect.assertions(0)
         const res = await request(app)
             .get('/api/v1/reservations/myReservations')
-            .set("authorization", jwt.sign({userId: "1000", email: "test@ciaoo"}, process.env.SUPER_SECRET, {
+            .set("authorization", jwt.sign({ userId: "1000", email: "test@ciaoo" }, process.env.SUPER_SECRET, {
                 expiresIn: 86400 // expires in 24 hours
             }))
             .expect(404, { message: "User not found" })
-    
+
     })
 
     test("GET /api/v1/reservations/myReservations without authentication, should respond with 401", async () => {
+        expect.assertions(0)
         const res = await request(app)
             .get('/api/v1/reservations/myReservations')
             .expect(401, { auth: false, message: 'Token missing or invalid' })
-    
+
     })
 
     test("GET /api/v1/reservations/myReservations, should respond with 200 and a list of reservations", async () => {
+        expect.assertions(1)
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
-
-
         const res = await request(app)
             .get('/api/v1/reservations/myReservations')
             .set("authorization", token2)
             .expect(200)
-            
+
         if (res.body && res.body[0]) {
             expect(res.body[0]).toMatchObject({
                 self: expect.any(String),
@@ -145,7 +164,7 @@ describe("GET /api/v1/reservations/myReservations", () => {
                 datetimeEnd: expect.any(String),
                 price: expect.any(Number),
             })
-            }
-        
+        }
+
     })
 })

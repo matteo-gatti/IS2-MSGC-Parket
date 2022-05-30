@@ -5,7 +5,8 @@ import User from './models/user.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import multer from "multer"
+import fs from 'fs'
+import path from 'path'
 
 async function cleanDB() {
     const collections = mongoose.connection.collections
@@ -22,8 +23,8 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
     let fakeId
     let parkId
     let parkFakeId
-    let payload 
-    let payloadFake 
+    let payload
+    let payloadFake
     let token
     let tokenFake
     beforeAll(async () => {
@@ -52,7 +53,7 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
         token = jwt.sign(payload, process.env.SUPER_SECRET, {
             expiresIn: 86400 // expires in 24 hours
         })
-        
+
         payloadFake = {
             userId: fakeId,
             email: "fake@fake",
@@ -95,9 +96,23 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
+        console.log("CONN", mongoose.connection.readyState);
+
+        const directory = './static/uploads';
+
+        const fileNames = await fs.promises.readdir(directory)
+
+        for (const file of fileNames) {
+            if (file !== ".gitkeep") {
+                fs.unlink(path.join(directory, file), err => {
+                    if (err) throw err;
+                });
+            }
+        }
     })
 
     test("POST /api/v1/parkings/:parkId/insertions with non-existing parking in DB respond with 404", async () => {
+        expect.assertions(0)
         const res = await request(app)
             .post('/api/v1/parkings/100/insertions')
             .set("Authorization", token)
@@ -105,35 +120,38 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
     })
 
     test("POST /api/v1/parkings/:parkId/insertions parking of another user should respond with 403", async () => {
+        expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/'+parkFakeId+'/insertions')
+            .post('/api/v1/parkings/' + parkFakeId + '/insertions')
             .set("Authorization", token)
             .expect(403, { message: "User is not authorized to perform this action" });
     })
 
     test("POST /api/v1/parkings/:parkId/insertions omitting a field", async () => {
+        expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/'+parkId+'/insertions')
+            .post('/api/v1/parkings/' + parkId + '/insertions')
             .set("authorization", token)
             .send({
                 //name: "insertion name", 
-                datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-                priceHourly: 10, 
+                datetimeStart: "2022-06-06T08:00:00.000+00:00",
+                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                priceHourly: 10,
                 priceDaily: 100,
             })
             .expect(400, { message: 'Some fields are empty or undefined' })
     })
-    
+
     test("POST /api/v1/parkings/:parkId/insertions with some fields empty should respond with 201", async () => {
+        expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/'+parkId+'/insertions')
+            .post('/api/v1/parkings/' + parkId + '/insertions')
             .set("authorization", token)
             .send({
-                name: "insertion name", 
-                datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-                priceHourly: 10, 
+                name: "insertion name",
+                datetimeStart: "2022-06-06T08:00:00.000+00:00",
+                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                priceHourly: 10,
                 priceDaily: 100,
             })
             .expect(201).expect("location", /\/api\/v1\/\insertions\/(.*)/)
@@ -143,11 +161,12 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
 describe("GET /api/v1/parkings/:parkId/insertions", () => {
     let userId
     let parkId
-    let payload 
+    let payload
     let token
-    
+
     beforeAll(async () => {
-        mongoServer = await MongoMemoryServer.create()
+        jest.setTimeout(5000);
+        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
         const res = await request(app).post('/api/v1/users').send({
             username: "test",
@@ -180,13 +199,13 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
             .attach("image", "./static/img/logo.png")
         parkId = parkId.header.location.split("parkings/")[1]
         await request(app)
-            .post('/api/v1/parkings/'+parkId+'/insertions')
+            .post('/api/v1/parkings/' + parkId + '/insertions')
             .set("authorization", token)
             .send({
-                name: "insertion name", 
-                datetimeStart: "2022-06-06T08:00:00.000+00:00", 
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00", 
-                priceHourly: 10, 
+                name: "insertion name",
+                datetimeStart: "2022-06-06T08:00:00.000+00:00",
+                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                priceHourly: 10,
                 priceDaily: 100,
             })
     })
@@ -194,29 +213,46 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
+        console.log("CONN", mongoose.connection.readyState);
+        await mongoServer.stop()
+        console.log("MONGO CONN", mongoServer.state)
+
+        const directory = './static/uploads';
+
+        const fileNames = await fs.promises.readdir(directory)
+
+        for (const file of fileNames) {
+            if (file !== ".gitkeep") {
+                fs.unlink(path.join(directory, file), err => {
+                    if (err) throw err;
+                });
+            }
+        }
     })
 
     test("GET /api/v1/parkings/:parkId/insertions with non-existing parking", async () => {
-        const res = request(app)
+        expect.assertions(0);
+        const res = await request(app)
             .get("/api/v1/parkings/100/insertions")
             .set("Authorization", token)
             .expect(404, { message: "Parking not found" })
     })
 
     test("GET /api/v1/parkings/:parkId/insertions with non-existing parking", async () => {
+        expect.assertions(1)
         const res = await request(app)
             .get("/api/v1/parkings/" + parkId + "/insertions")
             .set("Authorization", token)
             .expect(200)
-        if(res.body) {
+        if (res.body) {
             expect(res.body).toEqual(expect.objectContaining({
                 _id: expect.any(String),
                 insertions: [{
                     self: expect.any(String),
-                    name: expect.any(String), 
-                    datetimeStart: expect.anything(), 
-                    datetimeEnd: expect.anything(), 
-                    priceHourly: expect.any(Number), 
+                    name: expect.any(String),
+                    datetimeStart: expect.anything(),
+                    datetimeEnd: expect.anything(),
+                    priceHourly: expect.any(Number),
                     priceDaily: expect.any(Number),
                     reservations: [],
                     minInterval: expect.anything(),
@@ -225,5 +261,5 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
             }))
         }
     })
-    
+
 })

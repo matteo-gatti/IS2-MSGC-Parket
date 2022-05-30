@@ -102,9 +102,7 @@ async function loadInfo() {
                     "<br>" +
                     data.parking.country
             );
-            console.log(data.reservations.length)
             if (data.reservations.length === 0) {
-                console.log("no reservations")
                 $('#noReservations').removeAttr('hidden');
                 
             }
@@ -387,14 +385,11 @@ function checkDatesAndUpdatePrice() {
         let total = 0
         // get hours between dates
         let minutes = Math.abs(dateTo - dateFrom) / 60e3;
-        console.log("mins", minutes)
         // get days between dates
         if (priceD !== 0) {
             let days = Math.floor((dateTo - dateFrom) / 864e5)
-            console.log("days", days)
             minutes -= days * 24 * 60;
             total += days * priceD;
-            console.log("minsUpdate", minutes, "ttl", total)
         }
         
         total += minutes / 60 * priceH;
@@ -433,7 +428,6 @@ async function createReservation() {
             throw await res.json();
         } else {
             let data = await res.json();
-            console.log(data)
             window.location.href = data.url
             cleanseList();
             await loadInfo();

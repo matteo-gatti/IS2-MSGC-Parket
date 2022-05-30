@@ -77,13 +77,13 @@ async function searchParkings() {
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self)
                 $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
+                
                 container.append(tmpParkHTML)
             }
         } else {
             $('#noParks').removeAttr("hidden")
         }
     } catch (err) {
-        $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")
     }   
@@ -109,6 +109,7 @@ async function getAllParkings() {
             const parkingHTML = $('#firstPark')
             container.empty()
             for (parking in data) {
+                console.log(data[parking])
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
@@ -116,8 +117,19 @@ async function getAllParkings() {
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self)
                 $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
+                
+                const res = await fetch(data[parking].self + "/reviews", {
+                    method: "GET",
+                })
+                reviews = await res.json()
+                
+                if(reviews["average"] != null) {
+                    const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
+                    const avg = Math.round(reviews["average"] * 10) / 10
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar)
+                }
+                
                 container.append(tmpParkHTML)
-
             }
         }
         else {

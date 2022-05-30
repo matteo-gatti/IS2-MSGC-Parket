@@ -29,8 +29,8 @@ router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
         }
 
         //check if stars is between 1 and 5
-        if (req.body.stars < 0 || req.body.stars > 5) {
-            return res.status(400).send({ message: "Stars must be between 0 and 5" })
+        if (req.body.stars < 1 || req.body.stars > 5 || !Number.isInteger(req.body.stars)) {
+            return res.status(400).send({ message: "Stars must be integer between 0 and 5" })
         }
         
         //create the review

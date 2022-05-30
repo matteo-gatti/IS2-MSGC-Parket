@@ -229,7 +229,7 @@ async function getMyInsertions() {
 }
 
 
-async function getReviews(){
+async function getReviews() {
     /*
      <div id="reviewContainer">   -- accodare qui
      <div id="primaReview">  -- copiare questo
@@ -246,8 +246,8 @@ async function getReviews(){
     
      */
 
-    const fullStar = '<i class="fa-solid fa-star mr-2"></i>'
-    const emptyStar = '<i class="fa-regular fa-star mr-2"></i>'
+    const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
+    const emptyStar = '<i class="fa-solid fa-star mr-2" style="color: #eeeeee"></i>'
 
     try {
         //get all the reviews from the backend
@@ -260,30 +260,55 @@ async function getReviews(){
         if (!res.ok) {
             throw data
         }
-        
+
         //load the reviews in the page
-            const container = $('#reviewContainer')
-            container.children().not(":first").remove()
-            const reviewHTML = $('#primaReview')
-            for (review in data.reviews) {
-                tmpInsHTML = reviewHTML.clone()
-                tmpInsHTML.removeAttr("hidden")
-                $(tmpInsHTML.find("span")[0]).html("<b>"+data.reviews[review].title+"</b>")
-                $(tmpInsHTML.find("span")[2]).html(data.reviews[review].writer.username + "&nbsp;&nbsp;")
-                $(tmpInsHTML.find("small")[0]).text(new Date(data.reviews[review].datetime).toLocaleString("it-IT").slice(0, -3))
-                $(tmpInsHTML.find("p")[0]).text(data.reviews[review].description)
+        const container = $('#reviewContainer')
+        container.children().not(":first").remove()
+        const reviewHTML = $('#primaReview')
+        let starTot = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        for (review in data.reviews) {
+            tmpInsHTML = reviewHTML.clone()
+            tmpInsHTML.removeAttr("hidden")
+            $(tmpInsHTML.find("span")[0]).html("<b>" + data.reviews[review].title + "</b>")
+            $(tmpInsHTML.find("span")[2]).html(data.reviews[review].writer.username + "&nbsp;&nbsp;")
+            $(tmpInsHTML.find("small")[0]).text(new Date(data.reviews[review].datetime).toLocaleString("it-IT").slice(0, -3))
+            $(tmpInsHTML.find("p")[0]).text(data.reviews[review].description)
 
-                
-                for (let i = 0; i < data.reviews[review].stars; i++) {
-                    $(tmpInsHTML.find("div")[3]).append(fullStar)
-                }
-                for (let i = data.reviews[review].stars; i < 5; i++) {
-                    $(tmpInsHTML.find("div")[3]).append(emptyStar)
-                }
 
-                container.append(tmpInsHTML)
+            for (let i = 0; i < data.reviews[review].stars; i++) {
+                $(tmpInsHTML.find("div")[3]).append(fullStar)
             }
-                
+            for (let i = data.reviews[review].stars; i < 5; i++) {
+                $(tmpInsHTML.find("div")[3]).append(emptyStar)
+            }
+            starTot[data.reviews[review].stars] += 1
+
+            container.append(tmpInsHTML)
+        }
+        if(data.reviews.length == 0) 
+        {
+            $("#reviewContainer").css( "border", "1px solid #fff" );
+            $("#reviewContainer").append(`<h3 class="fw-light px-4 py-5 text-center" id="noParks">Nessuna recensione 😭</h3>`)
+        }
+
+        $("#totalReviews").text(data.reviews.length)
+
+        let starAvg = 0
+        if (data.reviews.length != 0) {
+            for (let i = 1; i <= 5; i++) {
+                starAvg += i * starTot[i]
+            }
+            starAvg /= data.reviews.length
+            starAvg = Math.round(starAvg * 10) / 10
+        }
+        $('#starAverage').text(starAvg)
+        $('#starBar').attr("style", `width: ${starAvg * 20}%`)
+
+        for (let i = 1; i <= 5; i++) {
+            $('#' + i + 'starTot').text(starTot[i])
+            $('#' + i + 'starBar').attr("style", `width: ${starTot[i] * 20}%`)
+        }
+
     } catch (err) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
@@ -335,7 +360,7 @@ exampleModal.addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget
         var recipient = button.getAttribute('data-bs-name')
         var id = button.getAttribute('data-bs-id')
-        
+
         $('#parkId').text(id)
         var modalTitle = exampleModal.querySelector('.modal-title')
         var modalBodyInput = exampleModal.querySelector('.modal-body input')
@@ -371,42 +396,42 @@ linked1Recurrence.updateOptions({
             seconds: false
         }
     },
-    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
-    viewDate: (new Date((new Date()).setHours(0,0,0,0))),
+    defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
+    viewDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
     useCurrent: false
 })
 
 const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
     restrictions: {
         minDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
-        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
+        maxDate: (new Date((new Date()).setHours(23, 59, 0, 0)))
 
     },
-        display: {
-            viewMode: "clock",
-            components: {
-                useTwentyfourHour: true,
-                decades: false,
-                year: false,
-                month: false,
-                date: false,
-                hours: true,
-                minutes: true,
-                seconds: false
-            }
-        },
-        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
-        viewDate: (new Date((new Date()).setHours(23,59,0,0))),
-        useCurrent: false
+    display: {
+        viewMode: "clock",
+        components: {
+            useTwentyfourHour: true,
+            decades: false,
+            year: false,
+            month: false,
+            date: false,
+            hours: true,
+            minutes: true,
+            seconds: false
+        }
+    },
+    defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
+    viewDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
+    useCurrent: false
 });
 
 // using event listeners
-const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events.change, function (e) {   
-    console.log("1 updated 2", (linked2Recurrrence.dates._dates)) 
+const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events.change, function (e) {
+    console.log("1 updated 2", (linked2Recurrrence.dates._dates))
     linked2Recurrrence.updateOptions({
         restrictions: {
             minDate: e.date,
-            maxDate: (new tempusDominus.DateTime((new Date()).setHours(23,59,0,0)))
+            maxDate: (new tempusDominus.DateTime((new Date()).setHours(23, 59, 0, 0)))
         },
         display: {
             viewMode: "clock",
@@ -424,7 +449,7 @@ const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events
         useCurrent: false,
         //defaultDate: linked2Recurrrence.dates._dates[0]//(new Date((new Date()).setHours(23,59,0,0))),
         //defaultDate: linked2Recurrrence.dates._dates[0] == undefined ? ((new Date((new Date()).setHours(23,59,0,0)))) : (linked2Recurrrence.dates._dates[0]),//(new Date((new Date()).setHours(0,0,0,0))),
-        viewDate: d2 == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(23,59,0,0)))) : (d2)//(new Date((new Date()).setHours(0,0,0,0))),
+        viewDate: d2 == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(23, 59, 0, 0)))) : (d2)//(new Date((new Date()).setHours(0,0,0,0))),
 
     });
 
@@ -432,10 +457,10 @@ const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events
 
 // using subscribe method
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
-    console.log("2 updated 1",(linked1Recurrence.dates._dates))
+    console.log("2 updated 1", (linked1Recurrence.dates._dates))
     linked1Recurrence.updateOptions({
         restrictions: {
-            minDate: (new tempusDominus.DateTime((new Date()).setHours(0,0,0,0))),
+            minDate: (new tempusDominus.DateTime((new Date()).setHours(0, 0, 0, 0))),
             maxDate: e.date
         },
         display: {
@@ -453,7 +478,7 @@ const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.event
         },
         useCurrent: false,
         //defaultDate: linked1Recurrence.dates._dates[0] == undefined ? ((new Date((new Date()).setHours(0,0,0,0)))) : (linked1Recurrence.dates._dates[0]),//(new Date((new Date()).setHours(0,0,0,0))),
-        viewDate: d == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(0,0,0,0)))) : (d)//(new Date((new Date()).setHours(0,0,0,0))),
+        viewDate: d == undefined ? ((new tempusDominus.DateTime((new Date()).setHours(0, 0, 0, 0)))) : (d)//(new Date((new Date()).setHours(0,0,0,0))),
     });
 });
 
@@ -602,7 +627,7 @@ function modifyInsertion(insertionid) {
             $('#recurrence').prop('checked', data.recurrence)
 
             recurrent = data.recurrent
-            if(recurrent) {
+            if (recurrent) {
                 $("#recurrence").prop("checked", true)
                 $("#recurrenceContainer").removeAttr("hidden")
                 $('#monday').prop('checked', data.recurrenceData.daysOfTheWeek.includes("monday"))
@@ -627,9 +652,9 @@ function modifyInsertion(insertionid) {
                 minutesEnd = dateEnd.getMinutes() < 10 ? "0" + dateEnd.getMinutes() : dateEnd.getMinutes()
                 $('#recurrenceEndInput').val(`${hoursEnd}:${minutesEnd}`)
 
-                d = (new Date((new Date().setHours(hoursStart,minutesStart,0,0))))
+                d = (new Date((new Date().setHours(hoursStart, minutesStart, 0, 0))))
                 console.log("modify update 1", d)
-                d2 = (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0))))
+                d2 = (new Date((new Date().setHours(hoursEnd, minutesEnd, 0, 0))))
                 console.log("modify update 2", d2)
 
                 linked1Recurrence.dates.setValue(new tempusDominus.DateTime(d))
@@ -793,15 +818,15 @@ async function modifyInsertionSubmit(insertionid) {
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
             $('#btnSubmit').text("Invia")
-            $(':input','form')
-            .not(':button, :submit, :reset, :hidden')
-            .val('')
-            .prop('checked', false)
-            .prop('selected', false);
+            $(':input', 'form')
+                .not(':button, :submit, :reset, :hidden')
+                .val('')
+                .prop('checked', false)
+                .prop('selected', false);
 
-            linked1Recurrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(0,0,0,0)))
+            linked1Recurrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(0, 0, 0, 0)))
 
-            linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(23,59,0,0)))
+            linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(23, 59, 0, 0)))
             // and reload the insertions
             await getMyInsertions()
         }
@@ -838,8 +863,7 @@ async function modifyParking(parkId) {
     window.location.href = `/modifyParking?park=${parkId}`
 }
 
-async function deleteParking(parkingid)
-{
+async function deleteParking(parkingid) {
     console.log(parkingid)
     if (confirm('Are you sure you want to delete this parking?')) {
         try {

@@ -355,6 +355,7 @@ async function removeReserv(param) {
             await loadPrenotazioni()
         } catch (err) {
             console.log(err)
+            alert(err.message)
         }
     }
 }

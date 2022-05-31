@@ -165,6 +165,13 @@ router.delete('/:reservationId', tokenChecker, async (req, res) => {
         if (String(test.client) !== req.loggedInUser.userId) {
             return res.status(403).send({ message: "User doesn't have the permission to delete this Reservation" })
         }
+       
+        let reservation = await Reservation.findById(req.params.reservationId)
+        let date = reservation.datetimeStart
+        let diff = moment(new Date()).diff(moment(date), "days")
+        if (-diff < 2) {
+            return res.status(400).send({ message: "Reservation cannot be deleted before two days" })
+        }
 
         await Review.findOneAndDelete({ reservation: req.params.reservationId })
 

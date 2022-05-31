@@ -66,6 +66,15 @@ $(document).ready(function () {
 
 async function searchParkings() {
     let query = `/api/v1/parkings?`
+    
+    //check value of rating field
+    let rating = 0
+    for (let i = 5; i > 0; i--) {
+        if ($(`#${i}`).prop("checked")) {
+            rating = i
+            break
+        }
+    }
 
     const searchKey = $('#search').val()
     const minPrice = $('#minPrice').val()
@@ -86,6 +95,15 @@ async function searchParkings() {
     // console.log(localStorage.getItem("query"))
 
     if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && localStorage.getItem("query") == null) {
+        
+        let rating = 0
+        for (let i = 5; i > 0; i--) {
+            if ($(`#${i}`).prop("checked")) {
+                rating = i
+                break
+            }
+        } 
+        if(rating != 0) {console.log(`voto minimo ${rating}`);getAllParkings(true)}
         return
     }
 
@@ -131,6 +149,21 @@ async function searchParkings() {
             const parkingHTML = $('#firstPark')
             for (parking in data) {
                 tmpParkHTML = parkingHTML.clone()
+                const res = await fetch(data[parking].self + "/reviews", {
+                    method: "GET",
+                })
+                reviews = await res.json()
+                
+                if(reviews["average"] != null && reviews["average"] >= rating) {
+                    const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
+                    const avg = Math.round(reviews["average"] * 10) / 10
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
+                }
+                if(reviews["average"] != null && reviews["average"] < rating ) {
+                    continue;
+                }
+                    
+                
                 tmpParkHTML.removeAttr("hidden")
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
                 $(tmpParkHTML.find("p")[2]).text(data[parking].address + " " + data[parking].city + " " + data[parking].country)
@@ -152,14 +185,21 @@ async function searchParkings() {
 // add event listener to the button
 $("#btnSearch").on("click",searchParkings)
 
-async function getAllParkings() {
-    try {
-        
+async function getAllParkings(checkStelle,rating) {
+    try {     
         // fetch the user from the database
         const res = await fetch("/api/v1/parkings", {
             method: "GET",
         })
         data = await res.json()
+
+        let rating = 0
+        for (let i = 5; i > 0; i--) {
+            if ($(`#${i}`).prop("checked")) {
+                rating = i
+                break
+            }
+        } 
 
         if (!res.ok)
             throw data
@@ -169,25 +209,31 @@ async function getAllParkings() {
             const parkingHTML = $('#firstPark')
             container.empty()
             for (parking in data) {
-                console.log(data[parking])
-                tmpParkHTML = parkingHTML.clone()
-                tmpParkHTML.removeAttr("hidden")
+                    //console.log(parking)
+                    //console.log(data[parking])
+                    tmpParkHTML = parkingHTML.clone()
+                    tmpParkHTML.removeAttr("hidden")
+                    const res2 = await fetch(data[parking].self + "/reviews", {
+                        method: "GET",
+                    })
+                    reviews = await res2.json()
+                    
+                    if(reviews["average"] != null && (!checkStelle || reviews["average"] >= rating)) {
+                        //console.log("stelline")
+                        const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
+                        const avg = Math.round(reviews["average"] * 10) / 10
+                        $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
+                    }
+                    if((reviews["average"] != null && reviews["average"] < rating && checkStelle) || (checkStelle && !reviews["average"])) {
+                        //console.log("continue")
+                        continue;
+                    }
+
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
                 $(tmpParkHTML.find("p")[2]).text(data[parking].address + " " + data[parking].city + " " + data[parking].country)
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self)
                 $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
-                
-                const res = await fetch(data[parking].self + "/reviews", {
-                    method: "GET",
-                })
-                reviews = await res.json()
-                
-                if(reviews["average"] != null) {
-                    const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
-                    const avg = Math.round(reviews["average"] * 10) / 10
-                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
-                }
                 
                 container.append(tmpParkHTML)
             }
@@ -199,7 +245,7 @@ async function getAllParkings() {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")
-        //alert("Wrong email or password");
+        alert(err.message);
     }
 }
 function newParking() {
@@ -289,12 +335,12 @@ $('form').on('reset', function (event) {
     setTimeout(async function() {
         // executes after the form has been reset
         $('#advanced-toggle').prop("checked", state)
-        await getAllParkings()
+        await getAllParkings(false)
       }, 1);
     // delete query from local storage
     localStorage.removeItem("query")
 });
 
 
-getAllParkings()
+getAllParkings(false)
 $('#advanced-toggle').prop("checked", false)

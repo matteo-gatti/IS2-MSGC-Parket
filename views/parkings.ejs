@@ -1,49 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>PARKET - private Area</title>
-    <link rel="icon" href="img/logo.png" />
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <!-- JQuery-->
-   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-   crossorigin="anonymous"></script>
 
- <!-- JavaScript Bundle with Popper -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
-   integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
-   crossorigin="anonymous"></script>
+<head>
+  <title>PARKET - private Area</title>
+  <link rel="icon" href="img/logo.png" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- JQuery-->
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    crossorigin="anonymous"></script>
 
- <!-- Popperjs -->
- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
-   crossorigin="anonymous"></script>
+  <!-- JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+    crossorigin="anonymous"></script>
 
- <!-- Bootstrap-->
- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-   integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
- <!-- Tempus Dominus JavaScript -->
- <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
-   crossorigin="anonymous"></script>
- <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
-   crossorigin="anonymous"></script>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+  <!-- Popperjs -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
 
-
-   <!-- ICONS -->
- 
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <!-- Bootstrap-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+  <!-- Tempus Dominus JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
 
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
- <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
-   crossorigin="anonymous">
- <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
-   crossorigin="anonymous">
- <link rel="stylesheet" href="css/searchbar.css" crossorigin="anonymous">
- <script src="scriptParkings.js" defer></script>
-    <style>
-      /* GLOBAL STYLES
+  <!-- ICONS -->
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="css/searchbar.css" crossorigin="anonymous">
+  <script src="scriptParkings.js" defer></script>
+  <style>
+    /* GLOBAL STYLES
 -------------------------------------------------- */
     /* Padding below the footer and lighter body text */
     .card-img-top {
@@ -197,9 +198,8 @@
           <div class="inner-form">
             <div class="basic-search">
               <div class="input-field">
-                <input id="search" type="text" placeholder="Cerca un parcheggio" autocomplete="off"/>
-                <div class="icon-wrap d-flex justify-content-center"
-                  style="cursor:pointer" id="btnSearch">
+                <input id="search" type="text" placeholder="Cerca un parcheggio" autocomplete="off" />
+                <div class="icon-wrap d-flex justify-content-center" style="cursor:pointer" id="btnSearch">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path
                       d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z">
@@ -213,11 +213,13 @@
               <div class="flex-grow-1 text-center" style="flex:1">
               </div>
               <div class="flex-grow-1 text-center my-auto">
-                <input class="form-check-input" type="checkbox" value="" id="advanced-toggle" onclick="toggleAdvanced()">
+                <input class="form-check-input" type="checkbox" value="" id="advanced-toggle"
+                  onclick="toggleAdvanced()">
                 <label class="form-check-label" for="recurrence">Ricerca avanzata</label>
               </div>
               <div class="group-btn" style="flex:1">
-                <button type="reset" class="btn btn-sm btn-outline-danger d-block ms-auto me-2" id="delete">RESET</button>
+                <button type="reset" class="btn btn-sm btn-outline-danger d-block ms-auto me-2"
+                  id="delete">RESET</button>
               </div>
             </div>
             <div class="advance-search" style="display: none;">
@@ -246,8 +248,7 @@
                   <label for='linkedPickers1Input' class='form-label'>Da:</label>
                   <div class='input-group log-event' id='linkedPickers1' data-td-target-input='nearest'
                     data-td-target-toggle='nearest'>
-                    <input id='linkedPickers1Input' type='text' class='form-control' data-td-target='#linkedPickers1'
-                       />
+                    <input id='linkedPickers1Input' type='text' class='form-control' data-td-target='#linkedPickers1' />
                     <span class='input-group-text' data-td-target='#linkedPickers1' data-td-toggle='datetimepicker'>
                       <span class='fa-solid fa-calendar'></span>
                     </span>
@@ -257,8 +258,7 @@
                   <label for='linkedPickers2Input' class='form-label'>A:</label>
                   <div class='input-group log-event' id='linkedPickers2' data-td-target-input='nearest'
                     data-td-target-toggle='nearest'>
-                    <input id='linkedPickers2Input' type='text' class='form-control' data-td-target='#linkedPickers2'
-                       />
+                    <input id='linkedPickers2Input' type='text' class='form-control' data-td-target='#linkedPickers2' />
                     <span class='input-group-text' data-td-target='#linkedPickers2' data-td-toggle='datetimepicker'>
                       <span class='fa-solid fa-calendar'></span>
                     </span>
@@ -277,7 +277,7 @@
               </div>
               <div class="row third">
                 <div class="input-field">
-                  <div class="result-count"> 
+                  <div class="result-count">
                   </div>
                 </div>
               </div>
@@ -328,8 +328,12 @@
         </div>
       </div>
       <!-- inserimento -->
-
-      <div class="px-4 py-5 my-5 text-center">
+      <div class="py-1 my-1 text-center">
+        <small class=" mx-auto mt-2 text-center">I parcheggi mostrati in questa lista sono soltanto quelli con
+          inserzioni disponibili per la prenotazione.<br>
+          Non trovi il tuo parcheggio? Prova a creare un'inserzione ed unisciti agli utenti di Parket!</small>
+      </div>
+      <div class="px-4 py-2 my-3 text-center">
         <div class="col-lg-6 mx-auto">
           <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
             <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParking()">Inserisci nuovo

@@ -52,10 +52,8 @@ async function getParkingData() {
     parkData = await parkData.json()
     // fill the form with the park data
     $("#nome").val(parkData.name)
+    $("#searchBar").val(parkData.address + ", " + parkData.city + ", " + parkData.country)
     $("#indirizzo").val(parkData.address)
-    $("#descrizione").val(parkData.description)
-    $("#citta").val(parkData.city)
-    $("#nazione").val(parkData.country)
 }
 
 function toggleChooseFile() {
@@ -64,4 +62,36 @@ function toggleChooseFile() {
     } else {
         $("#choose-file").attr("hidden", "true")
     }
+}
+
+function initAutocomplete() {
+    // Create the search box and link it to the UI element.
+    const searchBar = document.getElementById("searchBar")
+    const searchBox = new google.maps.places.Autocomplete(searchBar)
+
+    searchBox.addListener("place_changed", () => {
+        $("#lat").val("")
+        $("#long").val("")
+        $("#indirizzo").val("")
+        $("#message").attr('hidden', true);
+        const place = searchBox.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+            $("#message").text("Indirizzo non valido")
+            $("#message").removeAttr('hidden');
+            return;
+        }
+
+        const base = place.address_components.length === 8 ? 1 : 0;
+        let address = place.address_components[base].long_name
+        if(place.address_components.length === 8) {
+            address += ", " + place.address_components[0].long_name
+        }
+
+        $("#lat").val(place.geometry.location.lat())
+        $("#long").val(place.geometry.location.lng())
+        $("#citta").val(place.address_components[base+1].long_name)
+        $("#nazione").val(place.address_components[base+5].long_name)
+        $("#indirizzo").val(address)
+    });
 }

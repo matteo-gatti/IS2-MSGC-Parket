@@ -13,7 +13,7 @@ function convertToISO(date) {
 }
 
 function toggleAdvanced() {
-    $(".advance-search").slideToggle("normal"); 
+    $(".advance-search").slideToggle("normal");
 }
 
 // call searchParkings function when the page is loaded
@@ -66,7 +66,7 @@ $(document).ready(function () {
 
 async function searchParkings() {
     let query = `/api/v1/parkings?`
-    
+
     //check value of rating field
     let rating = 0
     for (let i = 5; i > 0; i--) {
@@ -82,32 +82,32 @@ async function searchParkings() {
 
     // console.log("min", minPrice)
     // console.log("max", maxPrice)
-    
+
     let minDate = $("#linkedPickers1Input").val()
-    if(minDate != "") {
+    if (minDate != "") {
         minDate = convertToISO(minDate).replace("+", "%2B")
     }
     let maxDate = $("#linkedPickers2Input").val()
-    if(maxDate != "") {
+    if (maxDate != "") {
         maxDate = convertToISO(maxDate).replace("+", "%2B")
     }
 
     // console.log(localStorage.getItem("query"))
 
     if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && localStorage.getItem("query") == null) {
-        
+
         let rating = 0
         for (let i = 5; i > 0; i--) {
             if ($(`#${i}`).prop("checked")) {
                 rating = i
                 break
             }
-        } 
-        if(rating != 0) {console.log(`voto minimo ${rating}`);getAllParkings(true)}
+        }
+        if (rating != 0) { console.log(`voto minimo ${rating}`); getAllParkings(true) }
         return
     }
 
-    try {   
+    try {
         //check if search key is empty
         if (searchKey != "") {
             query += `search=${searchKey}&`
@@ -127,7 +127,7 @@ async function searchParkings() {
             query += `priceMax=${maxPrice}&`
         }
 
-        if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "") {
+        if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && rating == 0) {
             query = localStorage.getItem("query")
         }
 
@@ -153,24 +153,24 @@ async function searchParkings() {
                     method: "GET",
                 })
                 reviews = await res.json()
-                
-                if(reviews["average"] != null && reviews["average"] >= rating) {
+
+                if (reviews["average"] != null && reviews["average"] >= rating) {
                     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
                     const avg = Math.round(reviews["average"] * 10) / 10
                     $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
                 }
-                if(reviews["average"] != null && reviews["average"] < rating ) {
+                if (rating !== 0 && (reviews["average"] == null || reviews["average"] < rating)) {
                     continue;
                 }
-                    
-                
+
+
                 tmpParkHTML.removeAttr("hidden")
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
                 $(tmpParkHTML.find("p")[2]).text(data[parking].address + " " + data[parking].city + " " + data[parking].country)
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self)
-                $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
+                $(tmpParkHTML.find("button")[0]).attr("onclick", `detailParking('${data[parking]._id}')`)
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
-                
+
                 container.append(tmpParkHTML)
             }
         } else {
@@ -179,14 +179,14 @@ async function searchParkings() {
     } catch (err) {
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")
-    }   
+    }
 }
 
 // add event listener to the button
-$("#btnSearch").on("click",searchParkings)
+$("#btnSearch").on("click", searchParkings)
 
-async function getAllParkings(checkStelle,rating) {
-    try {     
+async function getAllParkings(checkStelle, rating) {
+    try {
         // fetch the user from the database
         const res = await fetch("/api/v1/parkings", {
             method: "GET",
@@ -199,7 +199,7 @@ async function getAllParkings(checkStelle,rating) {
                 rating = i
                 break
             }
-        } 
+        }
 
         if (!res.ok)
             throw data
@@ -209,32 +209,32 @@ async function getAllParkings(checkStelle,rating) {
             const parkingHTML = $('#firstPark')
             container.empty()
             for (parking in data) {
-                    //console.log(parking)
-                    //console.log(data[parking])
-                    tmpParkHTML = parkingHTML.clone()
-                    tmpParkHTML.removeAttr("hidden")
-                    const res2 = await fetch(data[parking].self + "/reviews", {
-                        method: "GET",
-                    })
-                    reviews = await res2.json()
-                    
-                    if(reviews["average"] != null && (!checkStelle || reviews["average"] >= rating)) {
-                        //console.log("stelline")
-                        const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
-                        const avg = Math.round(reviews["average"] * 10) / 10
-                        $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
-                    }
-                    if((reviews["average"] != null && reviews["average"] < rating && checkStelle) || (checkStelle && !reviews["average"])) {
-                        //console.log("continue")
-                        continue;
-                    }
+                //console.log(parking)
+                //console.log(data[parking])
+                tmpParkHTML = parkingHTML.clone()
+                tmpParkHTML.removeAttr("hidden")
+                const res2 = await fetch(data[parking].self + "/reviews", {
+                    method: "GET",
+                })
+                reviews = await res2.json()
+
+                if (reviews["average"] != null && (!checkStelle || reviews["average"] >= rating)) {
+                    //console.log("stelline")
+                    const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
+                    const avg = Math.round(reviews["average"] * 10) / 10
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
+                }
+                if ((reviews["average"] != null && reviews["average"] < rating && checkStelle) || (checkStelle && !reviews["average"])) {
+                    //console.log("continue")
+                    continue;
+                }
 
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name)
                 $(tmpParkHTML.find("p")[2]).text(data[parking].address + " " + data[parking].city + " " + data[parking].country)
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self)
-                $(tmpParkHTML.find("button")[0]).attr("onclick",`detailParking('${data[parking]._id}')`)
+                $(tmpParkHTML.find("button")[0]).attr("onclick", `detailParking('${data[parking]._id}')`)
                 $(tmpParkHTML.find("img")[0]).attr("src", data[parking].image)
-                
+
                 container.append(tmpParkHTML)
             }
         }
@@ -245,7 +245,7 @@ async function getAllParkings(checkStelle,rating) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")
-        alert(err.message);
+        //alert(err.message);
     }
 }
 function newParking() {
@@ -254,7 +254,7 @@ function newParking() {
 
 function detailParking(id) {
     window.location.href = "/detailParking?id=" + id
-    
+
 }
 
 tempusDominus.loadLocale(tempusDominus.locales.it);
@@ -326,17 +326,17 @@ linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, (e)
 
 $('form input').keypress(function (e) {
     var key = e.which;
-    if(key == 13)  // the enter key code
-       $('#btnSearch').click();
-});   
+    if (key == 13)  // the enter key code
+        $('#btnSearch').click();
+});
 
 $('form').on('reset', function (event) {
     const state = $('#advanced-toggle').prop("checked")
-    setTimeout(async function() {
+    setTimeout(async function () {
         // executes after the form has been reset
         $('#advanced-toggle').prop("checked", state)
         await getAllParkings(false)
-      }, 1);
+    }, 1);
     // delete query from local storage
     localStorage.removeItem("query")
 });

@@ -163,6 +163,14 @@ router.get('/parkings', tokenValid, function (req, res) {
 
 })
 
+// Map page
+router.get('/map', tokenValid, function (req, res) {
+    let loggedBool = false
+    if (isAuthToken(req))
+        loggedBool = true
+    res.render('./map.ejs', { logged: loggedBool})
+})
+
 // Index page
 router.get('/', tokenValid, function (req, res) {
     let loggedBool = false

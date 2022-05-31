@@ -13,11 +13,11 @@ async function createInsertion() {
     }
 
     // check if the form is valid
-    if (!$('form')[0].checkValidity()) {
+    if (!$('#insertionForm')[0].checkValidity()) {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore inserire tutti i dati")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -27,7 +27,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -37,7 +37,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -47,7 +47,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -72,7 +72,7 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore selezionare almeno un giorno")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -104,7 +104,7 @@ async function createInsertion() {
             // if the insertion is created, close the modal
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
-            $('#btnSubmit').text("Crea inserzione")
+            $('#btnSubmit').text("Invia")
             $(':input', 'form')
                 .not(':button, :submit, :reset, :hidden')
                 .val('')
@@ -118,7 +118,7 @@ async function createInsertion() {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden')
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
     }
 
 }

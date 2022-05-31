@@ -35,6 +35,11 @@
     crossorigin="anonymous">
   <script src="scriptNewInsertionAndParking.js" defer></script>
 
+  <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU3e_OE0se9mggt7FEAoqg8Zoye4xuxIk&callback=initAutocomplete&v=weekly&libraries=places"
+      defer
+    ></script>
+
 </head>
 
 <body class="text-center">
@@ -53,6 +58,28 @@
             <div class="mb-3"></div>
 
             <div class="form-floating">
+              <input type="text" class="form-control" id="searchBar" placeholder="via Frutta 11" required>
+              <label for="indirizzo">Indirizzo</label>
+            </div>
+            <div class="form-floating" hidden>
+              <input type="text" class="form-control" id="indirizzo" required>
+            </div>
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="citta" required>
+            </div>
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="nazione" required>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="lat" required>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="long" required>
+            </div>
+
+            <!-- <div class="form-floating">
               <input type="text" class="form-control" id="indirizzo" placeholder="via Frutta 11" required>
               <label for="indirizzo">Indirizzo</label>
             </div>
@@ -65,7 +92,7 @@
             <div class="form-floating">
               <input type="text" class="form-control" id="nazione" placeholder="Italia" required>
               <label for="nazione">Nazione</label>
-            </div>
+            </div> -->
             <div class="mb-3"></div>
             <div class="form-floating">
               <input type="text" class="form-control" id="descrizione" placeholder="Breve descrizione del parcheggio"

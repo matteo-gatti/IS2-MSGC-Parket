@@ -127,10 +127,6 @@ async function searchParkings() {
             query += `priceMax=${maxPrice}&`
         }
 
-        if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && rating == 0) {
-            query = localStorage.getItem("query")
-        }
-
         // save query to local storage
         localStorage.setItem("query", query)
 
@@ -187,7 +183,6 @@ $("#btnSearch").on("click", searchParkings)
 
 async function getAllParkings(checkStelle, rating) {
     try {
-        // fetch the user from the database
         const res = await fetch("/api/v1/parkings", {
             method: "GET",
         })

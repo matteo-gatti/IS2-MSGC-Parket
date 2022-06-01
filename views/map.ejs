@@ -17,9 +17,12 @@
 </head>
 <body class="min-vh-100 d-flex flex-column">
     <%- include('header.ejs', {logged: logged}) %>
-    <div id="map" class="w-100 h-50 flex-grow-1"></div>
 
-    <input class="form-control w-25 mt-3 border border-dark" id="searchTextField" type="text" size="50" style="border-radius: 1rem;" placeholder="Cerca qui">
+    <div class="d-flex justify-content-center position-absolute">
+      <input class="form-control w-25 mt-3 border border-dark" id="searchTextField" type="text" size="50" style="border-radius: 1rem;" placeholder="Cerca qui">
+    </div>
+    
+    <div id="map" class="w-100 h-50 flex-grow-1"></div>
 
     <!-- 
      The `defer` attribute causes the callback to execute after the full HTML
@@ -28,7 +31,7 @@
      with https://www.npmjs.com/package/@googlemaps/js-api-loader.
     -->
     <div class="d-flex flex-row-reverse">
-    <img class=" mt-2 " src="img/powered_by_google_on_white.png" width="100vw" alt="Powered by Google">
+    <img class="mt-2" src="img/powered_by_google_on_white.png" width="100vw" alt="Powered by Google">
     </div>
     <small class=" mx-auto mt-2 text-center">I parcheggi mostrati su questa mappa sono soltanto quelli con inserzioni disponibili per la prenotazione.<br>
     Non trovi il tuo parcheggio? Prova a creare un'inserzione ed unisciti agli utenti di Parket!</small>
@@ -37,7 +40,6 @@
       defer
     ></script>
     
-    </body>
     <%- include('footer.ejs', {logged: logged}) %>
 </body>
 </html>

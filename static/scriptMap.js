@@ -18,31 +18,36 @@ function addMarker(map, id, lat, lng, title, description, image) {
             scaledSize: new google.maps.Size(33, 46),
         }
     });
+
     //add info window to the marker
-    const contentString = `<div id="content">
-                                <div id="siteNotice">
-                                </div>
-                                <div id="bodyContent">
-                                <h5>${title}</h5>
-                                <p>${description}</p>
-                                <img src="${image}" alt="parking-pin" width="150" height="150" class="rounded-circle" onclick='imageClick("detailParking?id=${id}")'></img>
-                                </div>
-                                </div>`;
+    const contentString = `<div class="card" style="width: 18rem;">
+                            <img src="${image}" class="card-img-top rounded" style="cursor:pointer" alt="..." onclick='imageClick("detailParking?id=${id}")'>
+                            <div class="card-body">
+                            <h5 class="card-title">${title}</h5>
+                            <p class="card-text">${description}</p>
+                            <a href="detailParking?id=${id}" class="btn btn-primary">Vai ai dettagli</a>
+                            </div>
+                            </div>`;
+
     const infowindow = new google.maps.InfoWindow({
         content: contentString
     });
     marker.addListener('click', function () {
         infowindow.open(map, marker);
+        // close the info window if the user clicks on the map
+        google.maps.event.addListener(map, 'click', function () {
+            infowindow.close();
+        });
     });
 }
 
 // Initialize and add the map
 async function initMap() {
 
-    const vietnammo = { lat: 46.06900002992592, lng: 11.149703082567576 };
+    const vietnam = { lat: 46.06900002992592, lng: 11.149703082567576 };
     const map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
-        center: vietnammo,
+        center: vietnam,
         mapId: "cdf6eba00718c578"
     });
 
@@ -63,15 +68,20 @@ async function initMap() {
         "<p>Il <b>Vietnam</b> di Trento è il parcheggio più bello del mondo e per questo non è prenotabile.<br>Prova con uno dei tanti parcheggi di Parket!</p>" +
         "</div>" +
         "</div>";
+
     const infowindow = new google.maps.InfoWindow({
         content: contentString,
     });
     const marker = new google.maps.Marker({
-        position: vietnammo,
-        icon: icon,
+        position: vietnam,
         map: map,
+        icon: icon,
         title: "Vietnam (TN)",
+        animation: google.maps.Animation.BOUNCE,
     });
+    setTimeout(function () {
+        marker.setAnimation(null);
+    }, 10000)
     marker.addListener("click", () => {
         infowindow.open({
             anchor: marker,
@@ -79,9 +89,12 @@ async function initMap() {
             shouldFocus: false,
         });
     });
+    // close the info window if the user clicks on the map
+    google.maps.event.addListener(map, 'click', function () {
+        infowindow.close();
+    });
 
-
-    //get every parking in the database
+    // get every parking in the database
     const res = await fetch("/api/v1/parkings", {
         method: "GET",
     })
@@ -90,12 +103,14 @@ async function initMap() {
     data.forEach(parking => {
         addMarker(map, parking._id, parking.latitude, parking.longitude, parking.name, parking.description, parking.image)
     });
+
     initAutocomplete(map)
 }
 
+// Initialize the autocomplete feature
 function initAutocomplete(map) {
 
-    // Create the search box and link it to the UI element.
+    // create the search box and link it to the UI element
     const searchBar = document.getElementById("searchTextField")
     const searchBox = new google.maps.places.SearchBox(searchBar);
 
@@ -103,7 +118,7 @@ function initAutocomplete(map) {
 
     let markers = [];
 
-    // Listen for the event fired when the user selects a prediction and retrieve
+    // listen for the event fired when the user selects a prediction and retrieve
     // more details for that place.
     searchBox.addListener("places_changed", () => {
         const places = searchBox.getPlaces();
@@ -112,13 +127,13 @@ function initAutocomplete(map) {
             return;
         }
 
-        // Clear out the old markers.
+        // clear out the old markers
         markers.forEach((marker) => {
             marker.setMap(null);
         });
         markers = [];
 
-        // For each place, get the icon, name and location.
+        // for each place, get the icon, name and location
         const bounds = new google.maps.LatLngBounds();
 
         places.forEach((place) => {
@@ -135,7 +150,7 @@ function initAutocomplete(map) {
                 scaledSize: new google.maps.Size(25, 25),
             };
 
-            // Create a marker for each place.
+            // create a marker for each place
             markers.push(
                 new google.maps.Marker({
                     map,
@@ -146,7 +161,7 @@ function initAutocomplete(map) {
             );
 
             if (place.geometry.viewport) {
-                // Only geocodes have viewport.
+                // only geocodes have viewport
                 bounds.union(place.geometry.viewport);
             } else {
                 bounds.extend(place.geometry.location);

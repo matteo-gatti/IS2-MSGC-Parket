@@ -170,6 +170,14 @@ router.get('/map', tokenValid, function (req, res) {
     res.render('./map.ejs', { logged: loggedBool})
 })
 
+// Info page
+router.get('/info', tokenValid, function (req, res) {
+    let loggedBool = false
+    if (isAuthToken(req))
+        loggedBool = true
+    res.render('./info.ejs', { logged: loggedBool })
+})
+
 // Index page
 router.get('/', tokenValid, function (req, res) {
     let loggedBool = false

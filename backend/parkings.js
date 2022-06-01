@@ -1,6 +1,9 @@
 import express from 'express'
 import multer from 'multer'
 import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
+import { Storage } from '@google-cloud/storage'
+import fs from 'fs'
+import path from 'path'
 
 import Parking from './models/parking.js'
 import User from './models/user.js'
@@ -28,6 +31,19 @@ const upload = multer({
     }
 })
 
+const googleStorage = new Storage();
+
+async function uploadFile(filePath, id) {
+    const bucketName = 'parket-pictures';
+    await googleStorage.bucket(bucketName).upload(filePath, {
+        destination: id,
+    });
+}
+
+async function deleteFile(fileName) {
+    await googleStorage.bucket('parket-pictures').file(fileName).delete();
+}
+
 const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
@@ -49,7 +65,14 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
 
         let parkingId = newParking._id
         newParking.self = "/api/v1/parkings/" + parkingId
+
+        await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+        newParking.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
         newParking = await newParking.save()
+
+        fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+            if (err) throw err;
+        });
 
         // add reference into the user object
         user.parkings.push(newParking)
@@ -202,15 +225,22 @@ router.get('', async (req, res) => {
 // Modify a parking
 router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, res) => {
     let bodyJSON
+    let newImage = null
     if (req.body["json"] !== undefined) {
         bodyJSON = await JSON.parse(req.body["json"])
+        const oldParking = await Parking.findById(req.params.parkingId)
         if (!req.file) {
             // if no image is uploaded, the old one is kept
-            const oldParking = await Parking.findById(req.params.parkingId)
             bodyJSON.image = oldParking.image
             //return res.status(415).send({ message: 'Wrong file type for images' })
         } else {
-            bodyJSON.image = "uploads/" + req.file["filename"]
+            await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+            bodyJSON.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
+            const oldImage = oldParking.image.split("/")[oldParking.image.split("/").length - 1]
+            await deleteFile(oldImage)
+            fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+                if (err) throw err;
+            });
         }
 
         const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
@@ -256,6 +286,9 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
         } if (parking.insertions.length != 0) {
             return res.status(405).send({ message: 'Cannot delete parking with active insertions' })
         }
+
+        const oldImage = parking.image.split("/")[parking.image.split("/").length - 1]
+        await deleteFile(oldImage)
 
         await parking.remove()
         return res.status(200).send({ message: 'Parking deleted' })

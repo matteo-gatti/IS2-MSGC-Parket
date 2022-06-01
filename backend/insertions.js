@@ -1,6 +1,9 @@
 import express from 'express'
 import multer from 'multer'
 import moment from 'moment'
+import { Storage } from '@google-cloud/storage'
+import fs from 'fs'
+import path from 'path'
 
 import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
@@ -29,6 +32,15 @@ const upload = multer({storage: storage,
         }
     }
 })
+
+const googleStorage = new Storage();
+
+async function uploadFile(filePath, id) {
+    const bucketName = 'parket-pictures';
+    await googleStorage.bucket(bucketName).upload(filePath, {
+        destination: id,
+    });
+}
 
 const router = express.Router()
 
@@ -86,6 +98,14 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         // Set the correct self field and save it
         parking.self = "/api/v1/parkings/" + parking.id
         insertion.self = "/api/v1/insertions/" + insertion.id
+
+        await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+        parking.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
+
+        fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+            if (err) throw err;
+        });
+
         insertion = await insertion.save()
         parking = await parking.save()
 

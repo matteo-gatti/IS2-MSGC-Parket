@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" class="min-vh-100 m-0">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="img/logo.png" />
+        <title>Info</title>
+
+        <!-- JQuery-->
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous"
+        ></script>
+        <!-- Bootstrap-->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+            crossorigin="anonymous"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+        />
+        <script src="scriptInfo.js"></script>
+
+        <style>
+            /* GLOBAL STYLES
+            -------------------------------------------------- */
+            /* Padding below the footer and lighter body text */
+            body {
+                padding-top: 0rem;
+                padding-bottom: 3rem;
+                font-family: "Roboto", sans-serif;
+                font-weight: 300;
+            }
+
+            /* CUSTOMIZE THE CAROUSEL
+            -------------------------------------------------- */
+            @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap");
+
+            .container {
+                margin-top: 50px;
+            }
+
+            .card-img-top {
+                width: 100%;
+                height: 30vw;
+                object-fit: cover;
+            }
+
+            .info {
+                width: 250px;
+                height: 50px;
+                position: absolute;
+                bottom: 15px;
+                border-radius: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .info-red {
+                background-color: #ed514c;
+                color: #fff;
+            }
+
+            .info-green {
+                background-color: green;
+                color: #fff;
+            }
+
+            .info-blue {
+                background-color: blue;
+                color: #fff;
+            }
+
+            .info-purple {
+                background-color: purple;
+                color: #fff;
+            }
+
+            .user-icons {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #fff;
+                border-radius: 50%;
+                bottom: 0px;
+                right: 23px;
+                position: relative;
+            }
+
+            .user {
+                line-height: 14px;
+            }
+
+            .name {
+                font-size: 17px;
+                /* Set distance to right */
+                margin-right: 10px;
+            }
+
+            .designation {
+                font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- setup our canvas element -->
+        <%- include("header.ejs", {logged: logged}) %>
+        <div class="container">
+            <div class="content">
+                <h2 class="display-2 text-center">A cosa serve Parket</h2>
+                <p class="text-center lead">
+                    Parket è un servizio che permette di
+                    <mark>risparmiare tempo e denaro</mark> fornendo ai propri
+                    utenti una piattaforma per affittare e prenotare parcheggi
+                    privati messi a disposizione da altri utenti del servizio.
+                    <br />
+                    L’applicazione vuole incentivare la condivisione di spazi di
+                    parcheggio privati che altrimenti rimarrebbero inutilizzati,
+                    come accade di frequente nelle grandi città. Il servizio
+                    riesce così a
+                    <mark>facilitare la mobilità degli utenti</mark>, che
+                    possono viaggiare in tutta tranquillità avendo il posto auto
+                    già riservato alla loro destinazione per tutto il tempo
+                    necessario.
+                    <br />
+                    Se un utente possiede un posto auto libero durante certe
+                    fasce orarie, può renderlo disponibile attraverso il
+                    servizio Parket, proponendo una propria tariffa. L’utente
+                    che usufruisce del servizio ha poi la possibilità di cercare
+                    tra tutte le inserzioni messe a disposizione dai venditori
+                    della community, filtrando tra varie caratteristiche del
+                    parcheggio, come luogo, tariffa, dimensioni ed altro, per
+                    trovare così il parcheggio più adatto alle proprie esigenze.
+                    <br />
+                    Una volta trovato il posto migliore l’utente procede alla
+                    prenotazione, paga in tutta sicurezza e viene messo in
+                    contatto col venditore.
+                    <mark>Sia il venditore che l’utente guadagnano</mark> dallo
+                    scambio: all’utente non rimane che guidare verso la
+                    destinazione e parcheggiare la sua auto, magari ottenendo un
+                    <mark>prezzo più vantaggioso</mark>, mentre il venditore
+                    tiene occupato il suo posto, altrimenti inutilizzato, e
+                    <mark>guadagna</mark>.
+                </p>
+                <h2 class="display-2 text-center">Inizia ad usarlo</h2>
+                <p class="text-center lead">
+                    Per creare un nuovo account, vai alla pagina di
+                    <a href="/register" style="text-decoration: none"
+                        >Registrazione</a
+                    >, inserisci i tuoi dati e clicca sul bottone "Registrati".
+                    Sarai poi reindirizzato ad una pagina dove poter fare il
+                    login. In seguito, potrai usufruire a pieno dei servizi
+                    Parket, come creare un nuovo parcheggio e renderlo visibile
+                    aggiungendo una nuova inserzione. Oppure vai in
+                    <a href="/parkings" style="text-decoration: none"
+                        >Parcheggi</a
+                    >
+                    e prenota il posto auto del tuo prossimo viaggio.
+                </p>
+            </div>
+        </div>
+
+        <div class="container marketing text-center">
+            <h2 class="display-3 text-center mb-4">I nostri principi</h2>
+            <div class="row">
+                <div class="col-lg-4">
+                    <h2>Insieme 💎</h2>
+                    <p>
+                        <em
+                            >Se vuoi andare veloce vai da solo. Se vuoi andare
+                            lontano vai insieme.</em
+                        >
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                    <h2>Abilità 🧠</h2>
+                    <p>
+                        <em
+                            >Se fai solo quello che sai fare, non sarai mai più
+                            di quello che sei già adesso.</em
+                        >
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                    <h2>Magia 🌠</h2>
+                    <p>
+                        <em
+                            >L'apparenza delle cose cambia con le emozioni e
+                            perciò ci vediamo la magia e la bellezza in loro,
+                            mentre in realtà la magia e la bellezza risiedono in
+                            noi stessi.</em
+                        >
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-5 mb-5">
+            <div class="text-center mb-3">
+                <h3 class="display-3">Il team</h3>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" id="merlo">
+                        <img
+                            src="img/gruth.jpg"
+                            class="card-img-top rounded mx-auto"
+                            style="cursor: pointer"
+                            onclick="random()"
+                        />
+                        <div
+                            class="d-flex justify-content-center align-items-center"
+                        >
+                            <div class="info info-green">
+                                <span class="user-icons">🐢</span>
+                                <div class="user-profile d-flex flex-row">
+                                    <div class="d-flex flex-column mr-4">
+                                        <span class="name">Matteo Merler</span>
+                                        <small class="designation"
+                                            >Project Manager</small
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" id="ericsua">
+                        <img
+                            src="img/ironman.jpg"
+                            class="card-img-top rounded mx-auto"
+                            style="cursor: pointer"
+                            onclick="random()"
+                        />
+                        <div
+                            class="d-flex justify-content-center align-items-center"
+                        >
+                            <div class="info info-blue">
+                                <span class="user-icons">⚡</span>
+                                <div class="user-profile d-flex flex-row">
+                                    <div class="d-flex flex-column mr-3">
+                                        <span class="name">Eric Suardi</span>
+                                        <small class="designation"
+                                            >Senior Engineer</small
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" id="gatteo">
+                        <img
+                            src="img/strange.jpg"
+                            class="card-img-top rounded mx-auto"
+                            style="cursor: pointer"
+                            onclick="random()"
+                        />
+                        <div
+                            class="d-flex justify-content-center align-items-center"
+                        >
+                            <div class="info info-red">
+                                <span class="user-icons">😺</span>
+                                <div class="user-profile d-flex flex-row">
+                                    <div class="d-flex flex-column mr-4">
+                                        <span class="name">Matteo Gatti</span>
+                                        <small class="designation"
+                                            >UX Strategy & Research</small
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-stretch">
+                    <div class="card" id="circuitz">
+                        <img
+                            src="img/shangchi.jpg"
+                            class="card-img-top rounded mx-auto"
+                            style="cursor: pointer"
+                            onclick="random()"
+                        />
+                        <div
+                            class="d-flex justify-content-center align-items-center"
+                        >
+                            <div class="info info-purple">
+                                <span class="user-icons">🦥</span>
+                                <div class="user-profile d-flex flex-row">
+                                    <div class="d-flex flex-column mr-4">
+                                        <span class="name">Matteo Circa</span>
+                                        <small class="designation"
+                                            >Junior Engineer</small
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="content">
+                <h2 class="display-3 text-center">Crediti</h2>
+                <p class="text-center lead">
+                    <em>Questa applicazione è stata realizzata da</em>
+                    <a
+                        href="https://github.com/MSGC-TEAM"
+                        style="text-decoration: none"
+                        >MSGC-TEAM</a
+                    >
+                </p>
+            </div>
+        </div>
+        <%- include("footer.ejs", {logged: logged}) %>
+    </body>
+</html>

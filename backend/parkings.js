@@ -67,7 +67,7 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         newParking.self = "/api/v1/parkings/" + parkingId
 
         await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
-        newParking.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
+        newParking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
         newParking = await newParking.save()
 
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
@@ -235,7 +235,7 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
             //return res.status(415).send({ message: 'Wrong file type for images' })
         } else {
             await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
-            bodyJSON.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
+            bodyJSON.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
             const oldImage = oldParking.image.split("/")[oldParking.image.split("/").length - 1]
             await deleteFile(oldImage)
             fs.unlink(path.join("static/uploads", req.file["filename"]), err => {

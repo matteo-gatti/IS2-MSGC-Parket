@@ -100,7 +100,7 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         insertion.self = "/api/v1/insertions/" + insertion.id
 
         await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
-        parking.image = `https://storage.cloud.google.com/parket-pictures/${req.file["filename"]}`
+        parking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
 
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
             if (err) throw err;

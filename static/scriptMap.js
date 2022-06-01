@@ -41,14 +41,48 @@ function addMarker(map, id, lat, lng, title, description, image) {
     });
 }
 
+let map, infoWindow
+
 // Initialize and add the map
 async function initMap() {
 
     const vietnam = { lat: 46.06900002992592, lng: 11.149703082567576 };
-    const map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
         center: vietnam,
         mapId: "cdf6eba00718c578"
+    });
+
+    infoWindow = new google.maps.InfoWindow();
+
+    const locationButton = document.createElement("button");
+
+    locationButton.textContent = "Pan to Current Location";
+    locationButton.classList.add("custom-map-control-button");
+    map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
+    locationButton.addEventListener("click", () => {
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+            const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };
+
+            infoWindow.setPosition(pos);
+            infoWindow.setContent("Location found.");
+            infoWindow.open(map);
+            map.setCenter(pos);
+            },
+            () => {
+            handleLocationError(true, infoWindow, map.getCenter());
+            }
+        );
+        } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+        }
     });
 
     const icon = {
@@ -169,6 +203,16 @@ function initAutocomplete(map) {
         });
         map.fitBounds(bounds);
     });
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(
+      browserHasGeolocation
+        ? "Error: The Geolocation service failed."
+        : "Error: Your browser doesn't support geolocation."
+    );
+    infoWindow.open(map);
 }
 
 window.initMap = initMap;

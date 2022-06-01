@@ -13,11 +13,11 @@ async function createInsertion() {
     }
 
     // check if the form is valid
-    if (!$('form')[0].checkValidity()) {
+    if (!$('#insertionForm')[0].checkValidity()) {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore inserire tutti i dati")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -27,7 +27,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -37,7 +37,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -47,7 +47,7 @@ async function createInsertion() {
         $("#message").text("L'intervallo minimo deve essere maggiore di 0")
         $("#message").text("Prezzo non valido")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -72,7 +72,7 @@ async function createInsertion() {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore selezionare almeno un giorno")
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
         return
     }
 
@@ -104,7 +104,7 @@ async function createInsertion() {
             // if the insertion is created, close the modal
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
-            $('#btnSubmit').text("Crea inserzione")
+            $('#btnSubmit').text("Invia")
             $(':input', 'form')
                 .not(':button, :submit, :reset, :hidden')
                 .val('')
@@ -118,9 +118,13 @@ async function createInsertion() {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden')
         $('#btnSubmit').prop("disabled", false)
-        $('#btnSubmit').text("Crea inserzione")
+        $('#btnSubmit').text("Invia")
     }
 
+}
+
+function openMap(lat, long) {
+    window.location.href = `map?lat=${lat}&long=${long}`
 }
 
 // load the details of the parking
@@ -152,6 +156,8 @@ async function loadDetails() {
             $("#btnVisible").addClass(data.visible ? "btn-outline-success" : "btn-outline-dark")
             $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
             $("#btnModifica").attr("onclick", `modifyParking('${data._id}')`);
+
+            $("#btnOpenMap").attr("onclick", `openMap('${data.latitude}', '${data.longitude}')`);
 
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)
@@ -930,7 +936,7 @@ async function modifyInsertionSubmit(insertionid) {
 
 async function deleteInsertion(insertionid) {
     //chiamata per eliminare la reservation
-    if (confirm('Are you sure you want to delete this insertion?')) {
+    if (confirm('Vuoi veramente eliminare questa inserzione?\nL\'operazione non può essere annullata.')) {
         try {
             const res = await fetch(`/api/v1/insertions/${insertionid}`, {
                 method: "DELETE",
@@ -954,7 +960,7 @@ async function modifyParking(parkId) {
 
 async function deleteParking(parkingid) {
     console.log(parkingid)
-    if (confirm('Are you sure you want to delete this parking?')) {
+    if (confirm('Vuoi veramente eliminare questo parcheggio?\nL\'operazione non può essere annullata.')) {
         try {
             const res = await fetch(`/api/v1/parkings/${parkingid}`, {
                 method: "DELETE",

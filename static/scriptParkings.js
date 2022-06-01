@@ -127,10 +127,6 @@ async function searchParkings() {
             query += `priceMax=${maxPrice}&`
         }
 
-        if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && rating == 0) {
-            query = localStorage.getItem("query")
-        }
-
         // save query to local storage
         localStorage.setItem("query", query)
 
@@ -149,17 +145,17 @@ async function searchParkings() {
             const parkingHTML = $('#firstPark')
             for (parking in data) {
                 tmpParkHTML = parkingHTML.clone()
-                const res = await fetch(data[parking].self + "/reviews", {
+                /* const res = await fetch(data[parking].self + "/reviews", {
                     method: "GET",
                 })
-                reviews = await res.json()
+                reviews = await res.json() */
 
-                if (reviews["average"] != null && reviews["average"] >= rating) {
+                if (data[parking].averageStars != null && data[parking].averageStars >= rating) {
                     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
-                    const avg = Math.round(reviews["average"] * 10) / 10
-                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
+                    const avg = Math.round(data[parking].averageStars * 10) / 10
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + data[parking].reviews.length + ")")
                 }
-                if (rating !== 0 && (reviews["average"] == null || reviews["average"] < rating)) {
+                if (rating !== 0 && (data[parking].averageStars == null || data[parking].averageStars < rating)) {
                     continue;
                 }
 
@@ -187,7 +183,6 @@ $("#btnSearch").on("click", searchParkings)
 
 async function getAllParkings(checkStelle, rating) {
     try {
-        // fetch the user from the database
         const res = await fetch("/api/v1/parkings", {
             method: "GET",
         })
@@ -209,22 +204,24 @@ async function getAllParkings(checkStelle, rating) {
             const parkingHTML = $('#firstPark')
             container.empty()
             for (parking in data) {
-                //console.log(parking)
+                console.log(parking)
                 //console.log(data[parking])
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
-                const res2 = await fetch(data[parking].self + "/reviews", {
+                /* const res2 = await fetch(data[parking].self + "/reviews", {
                     method: "GET",
                 })
-                reviews = await res2.json()
+                reviews = await res2.json() */
 
-                if (reviews["average"] != null && (!checkStelle || reviews["average"] >= rating)) {
+                console.log(data[parking].averageStars)
+
+                if (data[parking].averageStars != null && (!checkStelle || data[parking].averageStars >= rating)) {
                     //console.log("stelline")
                     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
-                    const avg = Math.round(reviews["average"] * 10) / 10
-                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + reviews["reviews"].length + ")")
+                    const avg = Math.round(data[parking].averageStars * 10) / 10
+                    $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + data[parking].reviews.length + ")")
                 }
-                if ((reviews["average"] != null && reviews["average"] < rating && checkStelle) || (checkStelle && !reviews["average"])) {
+                if ((data[parking].averageStars != null && data[parking].averageStars < rating && checkStelle) || (checkStelle && !data[parking].averageStars)) {
                     //console.log("continue")
                     continue;
                 }
@@ -242,6 +239,7 @@ async function getAllParkings(checkStelle, rating) {
             $('#noParks').removeAttr("hidden")
         }
     } catch (err) {
+        console.log(err)
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")

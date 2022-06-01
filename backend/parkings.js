@@ -12,12 +12,13 @@ const storage = multer.diskStorage({
         cb(null, "static/uploads")
     },
     filename: (rew, file, cb) => {
-        cb(null, ""+  Date.now() + ".png")
+        cb(null, "" + Date.now() + ".png")
     }
 })
 
 // Needed to receive uploaded images from the users
-const upload = multer({storage: storage,
+const upload = multer({
+    storage: storage,
     fileFilter: (req, file, cb) => {
         if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
             cb(null, true);
@@ -31,14 +32,14 @@ const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
 router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
-    if(!req.file) {
+    if (!req.file) {
         return res.status(415).send({ message: 'Wrong file type for images' })
     }
     let bodyJSON = await JSON.parse(req.body["json"])
-    bodyJSON.image = "uploads/"+ req.file["filename"]
+    bodyJSON.image = "uploads/" + req.file["filename"]
 
     let parking = new Parking(bodyJSON)
-    
+
     try {
         let user = await User.findById(req.loggedInUser.userId)
 
@@ -69,9 +70,9 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            
+
             const parkings = await Parking.find({ owner: idUser })
-            
+
             return res.status(200).json(parkings)
         } catch (err) {
             console.log(err)
@@ -93,42 +94,42 @@ router.get('/:parkingId', async (req, res) => {
 
 // Get all parkings
 router.get('', async (req, res) => {
-    try {      
+    try {
         const query = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
         const insertionMatch = {}
         const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
         let fuzzySearchQuery = ""
-        if(Object.keys(req.query).length >= 0) {
+        if (Object.keys(req.query).length >= 0) {
             const validParams = ["search", "priceMin", "priceMax", "dateMin", "dateMax"]
             const queryDict = {}
             for (let field in req.query) {
-                if(validParams.includes(field)) {
+                if (validParams.includes(field)) {
                     queryDict[field] = req.query[field]
                 } else {
                     return res.status(400).send({ message: 'Invalid query parameter' })
                 }
             }
-            if("search" in queryDict) {
+            if ("search" in queryDict) {
                 fuzzySearchQuery = queryDict["search"]
             }
-            if("priceMin" in queryDict) {
+            if ("priceMin" in queryDict) {
                 insertionMatch.priceHourly = {}
                 insertionMatch.priceHourly.$gte = queryDict["priceMin"]
-            } 
-            if("priceMax" in queryDict) {
-                if(insertionMatch.priceHourly == null) {
+            }
+            if ("priceMax" in queryDict) {
+                if (insertionMatch.priceHourly == null) {
                     insertionMatch.priceHourly = {}
                 }
-                insertionMatch.priceHourly.$lte = queryDict["priceMax"] 
-            } 
-            if("dateMin" in queryDict) {
+                insertionMatch.priceHourly.$lte = queryDict["priceMax"]
+            }
+            if ("dateMin" in queryDict) {
                 console.log(queryDict["dateMin"])
                 insertionMatch.datetimeStart = {}
                 insertionMatch.datetimeEnd = {}
                 insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMin"])
                 insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
             }
-            if("dateMax" in queryDict) {
+            if ("dateMax" in queryDict) {
                 console.log(queryDict["dateMax"])
                 if (insertionMatch.datetimeStart == null) {
                     insertionMatch.datetimeStart = {}
@@ -136,40 +137,62 @@ router.get('', async (req, res) => {
                 if (insertionMatch.datetimeEnd == null) {
                     insertionMatch.datetimeEnd = {}
                 }
-                if(insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
+                if (insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
                     insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMax"])
                 }
-                if(insertionMatch.datetimeEnd.$gte != null && insertionMatch.datetimeEnd.$gte < new Date(queryDict["dateMax"])) {
+                if (insertionMatch.datetimeEnd.$gte != null && insertionMatch.datetimeEnd.$gte < new Date(queryDict["dateMax"])) {
                     insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
                 }
                 insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
             }
         }
-        
+
         let parkings = []
-        if(fuzzySearchQuery !== "") {
-            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({__v: 0, confidenceScore: 0 }).populate(
-                {
+        if (fuzzySearchQuery !== "") {
+            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({ __v: 0, confidenceScore: 0 }).populate(
+                [{
                     path: "insertions",
                     model: "Insertion",
-                    select: {_id: 0, __v:0,},
+                    select: { _id: 0, __v: 0, },
                     match: insertionMatch
-                })
-        } else {   
+                },
+                {
+                    path: "reviews",
+                    model: "Review",
+                    select: { stars: 1 }
+                }
+                ])
+        } else {
             parkings = await Parking.find(query, { __v: 0 }).populate(
-                {
+                [{
                     path: "insertions",
                     model: "Insertion",
-                    select: {_id: 0, __v:0,},
+                    select: { _id: 0, __v: 0, },
                     match: insertionMatch
-                })
+                },
+                {
+                    path: "reviews",
+                    model: "Review",
+                    select: { stars: 1 }
+                }])
         }
         parkings = parkings.filter(parking => parking.visible === true && parking.insertions.length > 0)
         // remove property visible from the parkings
         for (let parking of parkings) {
             parking.visible = undefined
         }
-        return res.status(200).json(parkings)
+        //calculate average stars for each parking
+        let parkingObjects = []
+        for (let parking of parkings) {
+            let sum = 0
+            for (let review of parking.reviews) {
+                sum += review.stars
+            }
+            let avg = sum / parking.reviews.length
+            avg = Math.round(avg * 10) / 10
+            parkingObjects.push(Object.assign(parking.toObject(), { averageStars: avg }))
+        }
+        return res.status(200).json(parkingObjects)
     } catch (err) {
         console.log(err)
         return res.status(500).send({ message: 'Unexpected error' })
@@ -179,15 +202,15 @@ router.get('', async (req, res) => {
 // Modify a parking
 router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, res) => {
     let bodyJSON
-    if(req.body["json"] !== undefined) {
+    if (req.body["json"] !== undefined) {
         bodyJSON = await JSON.parse(req.body["json"])
-        if(!req.file) {
+        if (!req.file) {
             // if no image is uploaded, the old one is kept
             const oldParking = await Parking.findById(req.params.parkingId)
             bodyJSON.image = oldParking.image
             //return res.status(415).send({ message: 'Wrong file type for images' })
         } else {
-            bodyJSON.image = "uploads/"+ req.file["filename"]
+            bodyJSON.image = "uploads/" + req.file["filename"]
         }
 
         const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
@@ -197,7 +220,7 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
             }
         }
 
-        if(!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
+        if (!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
             return res.status(400).send({ message: "Some fields are empty or undefined" })
         }
     } else {
@@ -213,8 +236,8 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true , new: true })
-        
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true, new: true })
+
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)
@@ -230,8 +253,7 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
         // if user is not the owner of the parking, return error
         if (parkingOwner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
-        }if(parking.insertions.length != 0)
-        {
+        } if (parking.insertions.length != 0) {
             return res.status(405).send({ message: 'Cannot delete parking with active insertions' })
         }
 

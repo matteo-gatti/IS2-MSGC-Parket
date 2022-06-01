@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+<html class="min-vh-100">
 <head>
     <title>Inserimento nuovo parcheggio!</title>
+    <link rel="icon" href="img/logo.png">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="img/logo.png">
  <!-- JQuery-->
  <script
  src="https://code.jquery.com/jquery-3.3.1.js"
@@ -33,28 +34,62 @@ crossorigin="anonymous"></script>
  rel="stylesheet" crossorigin="anonymous">
     <script src="scriptModifyParking.js"></script>
 
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU3e_OE0se9mggt7FEAoqg8Zoye4xuxIk&callback=initAutocomplete&v=weekly&libraries=places"
+      defer
+    ></script>
+
 </head>
 
-<body class="text-center">
+<body class="text-center min-vh-100 d-flex flex-column">
         <%- include("header.ejs", { logged: logged }) %>
-    <div class="container">
-        <div class="row"> 
-        <div class="col-sm" ></div>
-        <div class="col-sm form-signin ">
+    <div class="container flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="row col-4"> 
+        <div class="flex-grow-1 form-signin">
             <form action="/api/v1/parkings" method="POST" enctype="multipart/form-data">
             <!--<img class="mb-4" src="img/logo.png" alt="" width="200" height="200">-->
             <h1 class="h3 mb-3 fw-normal">Modifica Parcheggio</h1>
 
             <p class="text-danger" id="message" hidden>Messaggio</p>
 
-            <div class="form-floating">
+            <div class="form-floating mb-3">
                 <input type="text" class="form-control" id="nome" placeholder="Parcheggio numero 2" required>
                 <label for="nome">Nome</label>
             </div> 
-            <div class="mb-3"></div>
+            <div class="form-floating mb-3">
+                <input
+                type="text"
+                class="form-control"
+                id="indirizzo"
+                name="ship-address"
+                required
+                autocomplete="off"
+                placeholder="Parcheggio numero 2"
+                />
+                <label for="indirizzo">Via</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="text" id="citta" name="locality" class="form-control" disabled placeholder="Parcheggio numero 2" required />
+                <label for="citta">Città</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="text" id="nazione" name="country" class="form-control" disabled placeholder="Parcheggio numero 2" required />
+                <label for="nazione">Nazione</label>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="lat" required>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="long" required>
+            </div>
+
             
-            <div class="form-floating">
-                <input type="text" class="form-control" id="indirizzo" placeholder="Via Lonato, 11" required>
+            <!-- <div class="form-floating">
+                <input type="text" class="form-control" id="indirizzo" placeholder="via Frutta 11" required>
                 <label for="indirizzo">Indirizzo</label>
             </div>
             <div class="mb-3"></div>
@@ -66,7 +101,7 @@ crossorigin="anonymous"></script>
             <div class="form-floating">
                 <input type="text" class="form-control" id="nazione" placeholder="Italia" required>
                 <label for="nazione">Nazione</label>
-            </div>
+            </div> -->
             <div class="mb-3"></div>
             <div class="form-floating">
                 <input type="text" class="form-control" id="descrizione" placeholder="Breve descrizione del parcheggio" required>
@@ -79,14 +114,14 @@ crossorigin="anonymous"></script>
                     <input type="checkbox" class="form-check-input" id="modifyImage" name="modifyImage" onclick="toggleChooseFile()">
                     <label class="form-check-label" for="modifyImage">Modifica immagine</label>
                 </div>
-                <div class="" id="choose-file" hidden>
+                <div class="invisible" id="choose-file">
                     <input type="file" class="form-control" id="image" name="image" onchange="">
                 </div>
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="button" onclick="editParking()">Modifica</button>
+            <!-- <input type="submit" placeholder="ciao"> -->
             </form>
         </div>
-        <div class="col-sm"></div>
     </div>
     </div>
     <%- include("footer.ejs", {logged: logged}) %>

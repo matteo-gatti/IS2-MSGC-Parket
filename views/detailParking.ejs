@@ -47,55 +47,15 @@
       object-fit: cover;
     }
 
-    .form-color {
-      background-color: #fafafa;
-    }
-
-    .form-control {
-
-      height: 48px;
-      border-radius: 25px;
-    }
-
-    .form-control:focus {
-      color: #495057;
-      background-color: #fff;
-      border-color: #35b69f;
-      outline: 0;
-      box-shadow: none;
-      text-indent: 10px;
-    }
-
-    .c-badge {
-      background-color: #35b69f;
-      color: white;
-      height: 20px;
-      font-size: 11px;
-      width: 92px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 2px;
-    }
-
     .comment-text {
       font-size: 13px;
     }
-
-    .wish {
-
-      color: #35b69f;
-    }
-
 
     .user-feed {
 
       font-size: 14px;
       margin-top: 12px;
     }
-
-
 
     .rating-card {
       background-color: #fff;
@@ -248,14 +208,25 @@
           <div class="col-md-4 d-flex flex-column">
             <!--<h3 class="my-3" id="parkingName"></h3>-->
             <p id="parkingId" hidden></p>
-            Indirizzo:
-            <h4 class="my-3" id="parkingAddress"></h4>
-            Città:
-            <h4 class="my-3" id="parkingCity"></h4>
-            Nazione:
-            <h4 class="my-3" id="parkingCountry"></h4>
-            Descrizione:
-            <h5 id="parkingDesc"></h5>
+            <div>
+              <p style="margin:0; padding:0">Indirizzo:</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <h4 class="my-3 d-inline" id="parkingAddress"></h4>
+                <button class="btn btn-sm btn-outline-primary d-inline me-3" id="btnOpenMap">Apri nella mappa</button>
+              </div>
+            </div>
+            <div>
+              <p>Città:</p>
+              <h4 class="my-3" id="parkingCity"></h4>
+            </div>
+            <div>
+              <p>Nazione:</p>
+              <h4 class="my-3" id="parkingCountry"></h4>
+            </div>
+            <div>
+              <p>Descrizione:</p>
+              <h5 id="parkingDesc"></h5>
+            </div>
 
 
             <% if (owner) { %>
@@ -433,11 +404,11 @@
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Nuova recensione per: </h5>
+                    <h5 class="modal-title" id="exampleModalReviewLabel">Nuova recensione per: </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <label id="message" class="text-danger d-block text-center"></label>
-                  <div class="modal-body" id="form">
+                  <label id="messageReview" class="text-danger d-block text-center"></label>
+                  <div class="modal-body" id="divFormReview">
                     <form id="reviewForm">
                       <div class="mb-3">
                         <label id="title" class="text-danger d-block"></label>

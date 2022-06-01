@@ -70,7 +70,6 @@ router.get('/:userId/reservations', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
         const reservations = await Reservation.find({ client: { $eq: req.params.userId } }, { _id: 0, __v: 0, client: 0 })
-        console.log("Printing user's reservations", reservations)
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)

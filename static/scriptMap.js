@@ -2,7 +2,7 @@ function imageClick(url) {
     window.location = url;
 }
 
-function addMarker(map, id, lat, lng, title, description, image) {
+function addMarker(map, id, lat, lng, title, description, image, stars, reviews) {
     const marker = new google.maps.Marker({
         position: {
             lat: lat,
@@ -20,14 +20,17 @@ function addMarker(map, id, lat, lng, title, description, image) {
     });
 
     //add info window to the marker
-    const contentString = `<div class="card" style="width: 18rem;">
-                            <img src="${image}" class="card-img-top rounded" style="cursor:pointer" alt="..." onclick='imageClick("detailParking?id=${id}")'>
+    let contentString = `<div class="card d-flex flex-column justify-content-center" style="">
+                            <img src="${image}" class="card-img-top rounded mx-auto" style="cursor:pointer;width:100px" alt="..." onclick='imageClick("detailParking?id=${id}")'>
                             <div class="card-body">
                             <h5 class="card-title">${title}</h5>
-                            <p class="card-text">${description}</p>
-                            <a href="detailParking?id=${id}" class="btn btn-primary">Vai ai dettagli</a>
-                            </div>
-                            </div>`;
+                            <p class="card-text">${description}</p>`
+    if (stars != null) {
+        contentString += `<p>${stars}&nbsp;<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>&nbsp;(${reviews})</p>`
+    }
+    contentString += `<a href="detailParking?id=${id}" class="btn btn-primary">Vai ai dettagli</a>
+                        </div>
+                        </div>`;
 
     const infowindow = new google.maps.InfoWindow({
         content: contentString
@@ -40,7 +43,6 @@ function addMarker(map, id, lat, lng, title, description, image) {
         });
     });
 }
-
 let map, infoWindow
 
 // Initialize and add the map
@@ -57,31 +59,37 @@ async function initMap() {
 
     const locationButton = document.createElement("button");
 
-    locationButton.textContent = "Pan to Current Location";
+    locationButton.textContent = "Mostra la tua posizione";
     locationButton.classList.add("custom-map-control-button");
+    locationButton.classList.add("btn");
+    locationButton.classList.add("btn-sm");
+    locationButton.classList.add("btn-primary");
+    locationButton.classList.add("mb-2");
     map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
     locationButton.addEventListener("click", () => {
         // Try HTML5 geolocation.
         if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-            const pos = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-            };
-
-            infoWindow.setPosition(pos);
-            infoWindow.setContent("Location found.");
-            infoWindow.open(map);
-            map.setCenter(pos);
-            },
-            () => {
-            handleLocationError(true, infoWindow, map.getCenter());
-            }
-        );
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    new google.maps.Marker({
+                        map,
+                        title: "Sei qui!",
+                        position: pos,
+                    })
+                    map.setCenter(pos);
+                    map.setZoom(15);
+                },
+                () => {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                }
+            );
         } else {
-        // Browser doesn't support Geolocation
-        handleLocationError(false, infoWindow, map.getCenter());
+            // Browser doesn't support Geolocation
+            handleLocationError(false, infoWindow, map.getCenter());
         }
     });
 
@@ -100,6 +108,7 @@ async function initMap() {
         '<h1 id="firstHeading" class="firstHeading">Vietnam</h1>' +
         '<div id="bodyContent">' +
         "<p>Il <b>Vietnam</b> di Trento è il parcheggio più bello del mondo e per questo non è prenotabile.<br>Prova con uno dei tanti parcheggi di Parket!</p>" +
+        `<p>100&nbsp;<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>&nbsp;(1000000)</p>` +
         "</div>" +
         "</div>";
 
@@ -135,7 +144,7 @@ async function initMap() {
     data = await res.json()
     console.log(data)
     data.forEach(parking => {
-        addMarker(map, parking._id, parking.latitude, parking.longitude, parking.name, parking.description, parking.image)
+        addMarker(map, parking._id, parking.latitude, parking.longitude, parking.name, parking.description, parking.image, parking.averageStars, parking.reviews.length)
     });
 
     initAutocomplete(map)
@@ -208,9 +217,9 @@ function initAutocomplete(map) {
 function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     infoWindow.setPosition(pos);
     infoWindow.setContent(
-      browserHasGeolocation
-        ? "Error: The Geolocation service failed."
-        : "Error: Your browser doesn't support geolocation."
+        browserHasGeolocation
+            ? "Error: The Geolocation service failed."
+            : "Error: Your browser doesn't support geolocation."
     );
     infoWindow.open(map);
 }

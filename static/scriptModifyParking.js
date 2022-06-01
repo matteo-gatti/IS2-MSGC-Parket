@@ -10,6 +10,8 @@ async function editParking() {
     var city = $("#citta").val();
     var country = $("#nazione").val();
 
+    console.log(name, address, desc, city, country)
+
     image = $("#image").prop("files")[0];
 
     const formData = new FormData();
@@ -33,7 +35,7 @@ async function editParking() {
         if (!res.ok) {
             throw await res.json()
         } else {
-            window.location.href = "/privateArea"
+            window.location.href = "/detailParking" + "?" + "id=" + parkId
         }
 
     } catch (err) {
@@ -54,13 +56,18 @@ async function getParkingData() {
     $("#nome").val(parkData.name)
     $("#searchBar").val(parkData.address + ", " + parkData.city + ", " + parkData.country)
     $("#indirizzo").val(parkData.address)
+    $("#citta").val(parkData.city)
+    $("#nazione").val(parkData.country)
+    $("#descrizione").val(parkData.description)
 }
 
 function toggleChooseFile() {
     if ($("#modifyImage").is(":checked")) {
-        $("#choose-file").removeAttr("hidden")
+        $("#choose-file").removeClass("invisible")
+        $("#choose-file").addClass("visible")
     } else {
-        $("#choose-file").attr("hidden", "true")
+        $("#choose-file").removeClass("visible")
+        $("#choose-file").addClass("invisible")
     }
 }
 

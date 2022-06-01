@@ -135,7 +135,6 @@ router.get('/detailParking', tokenValid, async function (req, res) {
         try {
             let parking = await Parking.findById(req.query.id).populate("owner")
             const reservations = await Reservation.find({ client: req.loggedInUser.userId, reviewed: false })
-            console.log(reservations)
             let reviewable = false
             if (reservations.length !== 0) {
                 reviewable = true

@@ -930,7 +930,7 @@ async function modifyInsertionSubmit(insertionid) {
 
 async function deleteInsertion(insertionid) {
     //chiamata per eliminare la reservation
-    if (confirm('Are you sure you want to delete this insertion?')) {
+    if (confirm('Vuoi veramente eliminare questa inserzione?\nL\'operazione non può essere annullata.')) {
         try {
             const res = await fetch(`/api/v1/insertions/${insertionid}`, {
                 method: "DELETE",
@@ -954,7 +954,7 @@ async function modifyParking(parkId) {
 
 async function deleteParking(parkingid) {
     console.log(parkingid)
-    if (confirm('Are you sure you want to delete this parking?')) {
+    if (confirm('Vuoi veramente eliminare questo parcheggio?\nL\'operazione non può essere annullata.')) {
         try {
             const res = await fetch(`/api/v1/parkings/${parkingid}`, {
                 method: "DELETE",

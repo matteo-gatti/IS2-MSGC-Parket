@@ -301,33 +301,53 @@ $('#insertion-dailyPrice').keypress(function(e){
     }
 })
 
+let autocomplete;
+let addressField;
 function initAutocomplete() {
-    // Create the search box and link it to the UI element.
-    const searchBar = document.getElementById("searchBar")
-    const searchBox = new google.maps.places.Autocomplete(searchBar)
-
-    searchBox.addListener("place_changed", () => {
-        $("#lat").val("")
-        $("#long").val("")
-        $("#message").attr('hidden', true);
-        const place = searchBox.getPlace();
-
-        if (!place.geometry || !place.geometry.location) {
-            $("#message").text("Indirizzo non valido")
-            $("#message").removeAttr('hidden');
-            return;
-        }
-
-        const base = place.address_components.length === 8 ? 1 : 0;
-        let address = place.address_components[base].long_name
-        if(place.address_components.length === 8) {
-            address += ", " + place.address_components[0].long_name
-        }
-
-        $("#lat").val(place.geometry.location.lat())
-        $("#long").val(place.geometry.location.lng())
-        $("#citta").val(place.address_components[base+1].long_name)
-        $("#nazione").val(place.address_components[base+5].long_name)
-        $("#indirizzo").val(address)
+    addressField = document.querySelector("#indirizzo");
+    // Create the autocomplete object, restricting the search predictions to
+    // addresses in the US and Canada.
+    autocomplete = new google.maps.places.Autocomplete(addressField, {
+        fields: ["address_components", "geometry"],
+        types: ["address"],
     });
+    addressField.focus();
+    // When the user selects an address from the drop-down, populate the
+    // address fields in the form.
+    autocomplete.addListener("place_changed", fillInAddress);
 }
+
+function fillInAddress() {
+    // Get the place details from the autocomplete object.
+    const place = autocomplete.getPlace();
+    let address1 = "";
+
+    for (const component of place.address_components) {
+        const componentType = component.types[0];
+
+        switch (componentType) {
+            case "street_number": {
+                address1 = `${component.long_name}`;
+                break;
+            }
+            case "route": {
+                number = address1
+                address1 = `${component.long_name}`;
+                if (number != "") address1 += ", " + number
+                break;
+            }
+            case "locality":
+                document.querySelector("#citta").value = component.long_name;
+                break;
+            case "country":
+                document.querySelector("#nazione").value = component.long_name;
+                break;
+        }
+    }
+
+    addressField.value = address1;
+    document.querySelector("#lat").value = place.geometry.location.lat();
+    document.querySelector("#long").value = place.geometry.location.lng();
+}
+
+window.initAutocomplete = initAutocomplete;

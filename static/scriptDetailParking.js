@@ -123,6 +123,10 @@ async function createInsertion() {
 
 }
 
+function openMap(lat, long) {
+    window.location.href = `map?lat=${lat}&long=${long}`
+}
+
 // load the details of the parking
 async function loadDetails() {
     try {
@@ -152,6 +156,8 @@ async function loadDetails() {
             $("#btnVisible").addClass(data.visible ? "btn-outline-success" : "btn-outline-dark")
             $("#btnElimina").attr("onclick", `deleteParking('${data._id}')`);
             $("#btnModifica").attr("onclick", `modifyParking('${data._id}')`);
+
+            $("#btnOpenMap").attr("onclick", `openMap('${data.latitude}', '${data.longitude}')`);
 
             if (data.image != "")
                 $('#parkingImage').attr("src", data.image)

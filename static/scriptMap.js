@@ -47,11 +47,14 @@ let map, infoWindow
 
 // Initialize and add the map
 async function initMap() {
-
+    var urlParams = new URLSearchParams(window.location.search);
+    const lat = urlParams.has("lat") ? parseFloat(urlParams.get("lat")) : 46.06900002992592;
+    const lng = urlParams.has("long") ? parseFloat(urlParams.get("long")) : 11.149703082567576;
+    console.log(lat, lng)
     const vietnam = { lat: 46.06900002992592, lng: 11.149703082567576 };
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
-        center: vietnam,
+        center: {lat: lat, lng: lng},
         mapId: "cdf6eba00718c578"
     });
 

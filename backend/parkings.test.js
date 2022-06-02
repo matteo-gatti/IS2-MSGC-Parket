@@ -62,19 +62,6 @@ describe("POST /api/v2/parkings", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
-
-        const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        }
     })
 
     test('POST /api/v2/parkings should respond with 201', async () => {

@@ -148,21 +148,7 @@ describe("POST /api/v2/insertions/:insertionId/reservations", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
-        console.log("MONGO CONN", mongoServer.state)
-
-        const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        }
     })
 
     test("POST /api/v2/insertions/:insertionId/reservations with non-existing insertion, should respond with 404", async () => {

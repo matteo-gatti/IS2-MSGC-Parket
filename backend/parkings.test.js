@@ -133,7 +133,7 @@ describe("POST /api/v1/parkings", () => {
                 .attach("image", "./static/img/logo.png")
                 .set('content-type', 'multipart/form-data').expect(401, { auth: false, message: 'Token missing or invalid' })
         } catch (err) {
-            console.log(err)
+            console.log("ERRORONE", err)
         }
     })
 })

@@ -311,7 +311,7 @@ function initAutocomplete() {
         fields: ["address_components", "geometry"],
         types: ["address"],
     });
-    addressField.focus();
+    
     // When the user selects an address from the drop-down, populate the
     // address fields in the form.
     autocomplete.addListener("place_changed", fillInAddress);

@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 
 import User from './models/user.js'
 import Reservation from './models/reservation.js'
+import Parking from './models/parking.js'
+import Insertion from './models/insertion.js'
 
 import config from '../config.js'
 import tokenChecker from './tokenChecker.js'
@@ -68,7 +70,6 @@ router.get('/:userId/reservations', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
         const reservations = await Reservation.find({ client: { $eq: req.params.userId } }, { _id: 0, __v: 0, client: 0 })
-        console.log("Printing user's reservations", reservations)
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)
@@ -103,12 +104,29 @@ router.put('/:userId', tokenChecker, async (req, res) => {
     }
 })
 
-// Delete a user
+// Delete a user and related resources
 router.delete('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
+        // populate user's parkings
+        const user = await User.findById(req.params.userId).populate("parkings")
+        for (let parking of user.parkings) {
+            // populate parkings' insertions
+            const insertions = await Parking.findById(parking._id).populate("insertions")
+            for (let insertion of insertions.insertions) {
+                // delete insertions' reservations
+                await Reservation.deleteMany({ insertion: insertion._id })
+                // delete all insertions
+                await Insertion.findByIdAndDelete(insertion._id)
+            }
+            // delete the parking
+            await Parking.findByIdAndDelete(parking._id)
+        }
+        // delete all reservations of the user
+        await Reservation.deleteMany({ client: { $eq: req.params.userId} })
+        // finally delete the user
         await User.findByIdAndDelete((req.params.userId))
-        return res.status(200).send({ message: 'User deleted' })
+        return res.status(200).send({ message: 'Delete successful' })
     } catch {
         return res.status(404).send({ message: 'User not found' })
     }

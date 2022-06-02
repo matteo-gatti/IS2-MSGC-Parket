@@ -2,6 +2,9 @@
 
 <head>
   <title>Inserimento nuovo parcheggio!</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="img/logo.png">
   <!-- JQuery-->
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
@@ -32,6 +35,11 @@
     crossorigin="anonymous">
   <script src="scriptNewInsertionAndParking.js" defer></script>
 
+  <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU3e_OE0se9mggt7FEAoqg8Zoye4xuxIk&callback=initAutocomplete&v=weekly&libraries=places"
+      defer
+    ></script>
+
 </head>
 
 <body class="text-center">
@@ -42,14 +50,45 @@
         <div class="col-md-8 form-signin ">
           <form>
             <!--<img class="mb-4" src="img/logo.png" alt="" width="200" height="200">-->
-            <h1 class="h3 mb-3 fw-normal">Dati Parcheggio</h1>
+            <h1 class="h3 mb-4 fw-normal">Dati Parcheggio</h1>
             <div class="form-floating">
-              <input type="text" class="form-control" id="nome" placeholder="Parcheggio numero 2" required>
+              <input type="text" class="form-control" id="nome" placeholder="Parcheggio numero 2" autofocus required>
               <label for="nome">Nome</label>
             </div>
             <div class="mb-3"></div>
 
-            <div class="form-floating">
+            <div class="form-floating mb-3">
+              <input
+              type="text"
+              class="form-control"
+              id="indirizzo"
+              name="ship-address"
+              required
+              autocomplete="off"
+              placeholder="Parcheggio numero 2"
+              />
+              <label for="indirizzo">Via</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="text" id="citta" name="locality" class="form-control" disabled placeholder="Parcheggio numero 2" required />
+              <label for="citta">Città</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="text" id="nazione" name="country" class="form-control" disabled placeholder="Parcheggio numero 2" required />
+              <label for="nazione">Nazione</label>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="lat" required>
+            </div>
+
+            <div class="form-floating" hidden>
+                <input type="text" class="form-control" id="long" required>
+            </div>
+
+            <!-- <div class="form-floating">
               <input type="text" class="form-control" id="indirizzo" placeholder="via Frutta 11" required>
               <label for="indirizzo">Indirizzo</label>
             </div>
@@ -62,7 +101,7 @@
             <div class="form-floating">
               <input type="text" class="form-control" id="nazione" placeholder="Italia" required>
               <label for="nazione">Nazione</label>
-            </div>
+            </div> -->
             <div class="mb-3"></div>
             <div class="form-floating">
               <input type="text" class="form-control" id="descrizione" placeholder="Breve descrizione del parcheggio"
@@ -87,10 +126,9 @@
         <form id="insertionForm" class="col-md-8">
           <h1 class="h3 mb-3 fw-normal">Dati Inserzione</h1>
           <div class="mb-3 text-start">
-            <label id="message" class="text-danger d-block"></label>
             <label id="parkId" hidden></label>
             <label for="recipient-name" class="col-form-label">Nome:</label>
-            <input type="text" class="form-control" id="insertion-name" required>
+            <input type="text" class="form-control" id="insertion-name" autofocus required>
           </div>
           <!-- dt picker -->
           <div class='row mb-3'>

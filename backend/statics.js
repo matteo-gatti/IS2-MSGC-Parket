@@ -3,7 +3,8 @@ import express from 'express'
 import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
 import Insertion from './models/insertion.js'
-import user from './models/user.js'
+import Reservation from './models/reservation.js'
+import User from './models/user.js'
 
 const router = express.Router()
 
@@ -21,6 +22,51 @@ router.get('/login', tokenValid, function (req, res) {
 router.get('/register', tokenValid, function (req, res) {
     if (!isAuthToken(req))
         res.render('./register.ejs', { logged: false })
+    else
+        res.redirect("/")
+})
+
+// Register page
+router.get('/success', tokenValid, async function (req, res) {
+    if (isAuthToken(req)) {
+        try {
+            const insId = req.query.insertion
+            const resId = req.query.reservation
+            let reservation = await Reservation.findById(resId)
+            let insertion = await Insertion.findById(insId).populate("reservations parking")
+            let parking = await Parking.findById(insertion.parking.id).populate("owner")
+            insertion.reservations.push(reservation)
+            await insertion.save()
+            if (req.loggedInUser.userId !== parking.owner.id) {
+                res.status(201).render('./insertion.ejs', { logged: true, owner: false })
+            } else {
+                res.status(201).render('./insertion.ejs', { logged: true, owner: true })
+            }
+        } catch(err){
+            console.log(err)
+            res.redirect("/")
+        }
+    }
+    else
+        res.redirect("/")
+})
+
+// Register page
+router.get('/cancel', tokenValid, async function (req, res) {
+    if (isAuthToken(req)) {
+        try {
+            const resId = req.query.reservation
+            let reservation = await Reservation.findById(resId)
+            console.log("cancel reser", reservation)
+            if (reservation !==null) {
+                await reservation.remove()
+            }
+            res.render('./cancel.ejs', { logged: true })
+        } catch(err){
+            console.log(err)
+            res.redirect("/")
+        }
+    }
     else
         res.redirect("/")
 })
@@ -64,6 +110,15 @@ router.get('/createParking', tokenValid, function (req, res) {
         res.redirect("/login")
 })
 
+// Form page to modify a parking
+router.get('/modifyParking', tokenValid, function (req, res) {
+    if (isAuthToken(req)) {
+        res.render('./modifyPark.ejs', { logged: true })
+    }
+    else
+        res.redirect("/login")
+})
+
 // Form page for creating a new parking and a new insertion together
 router.get('/createParkingInsertion', tokenValid, function (req, res) {
     if (isAuthToken(req)) {
@@ -78,10 +133,15 @@ router.get('/detailParking', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
             let parking = await Parking.findById(req.query.id).populate("owner")
+            const reservations = await Reservation.find({ client: req.loggedInUser.userId, reviewed: false })
+            let reviewable = false
+            if (reservations.length !== 0) {
+                reviewable = true
+            }
             if (req.loggedInUser.userId !== parking.owner.id) {
-                res.render('./detailParking.ejs', { logged: true, owner: false })
+                res.render('./detailParking.ejs', { logged: true, owner: false, reviewable: reviewable })
             } else {
-                res.render('./detailParking.ejs', { logged: true, owner: true })
+                res.render('./detailParking.ejs', { logged: true, owner: true, reviewable: reviewable })
             }
         } catch (err) {
             console.log(err)
@@ -99,6 +159,22 @@ router.get('/parkings', tokenValid, function (req, res) {
         loggedBool = true
     res.render('./parkings.ejs', { logged: loggedBool })
 
+})
+
+// Map page
+router.get('/map', tokenValid, function (req, res) {
+    let loggedBool = false
+    if (isAuthToken(req))
+        loggedBool = true
+    res.render('./map.ejs', { logged: loggedBool})
+})
+
+// Info page
+router.get('/info', tokenValid, function (req, res) {
+    let loggedBool = false
+    if (isAuthToken(req))
+        loggedBool = true
+    res.render('./info.ejs', { logged: loggedBool })
 })
 
 // Index page

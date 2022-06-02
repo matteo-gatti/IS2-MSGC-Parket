@@ -1,9 +1,14 @@
 import express from 'express'
 import multer from 'multer'
+import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
+import fs from 'fs'
+import path from 'path'
 
+import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import GCloud from './gcloud/gcloud.js'
 
 // Storage engine
 const storage = multer.diskStorage({
@@ -11,12 +16,13 @@ const storage = multer.diskStorage({
         cb(null, "static/uploads")
     },
     filename: (rew, file, cb) => {
-        cb(null, ""+  Date.now() + ".png")
+        cb(null, "" + Date.now() + ".png")
     }
 })
 
 // Needed to receive uploaded images from the users
-const upload = multer({storage: storage,
+const upload = multer({
+    storage: storage,
     fileFilter: (req, file, cb) => {
         if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
             cb(null, true);
@@ -30,14 +36,15 @@ const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
 router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
-    if(!req.file) {
+    if (!req.file) {
         return res.status(415).send({ message: 'Wrong file type for images' })
     }
+
     let bodyJSON = await JSON.parse(req.body["json"])
-    bodyJSON.image = "uploads/"+ req.file["filename"]
+    bodyJSON.image = "uploads/" + req.file["filename"]
 
     let parking = new Parking(bodyJSON)
-    
+
     try {
         let user = await User.findById(req.loggedInUser.userId)
 
@@ -47,7 +54,14 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
 
         let parkingId = newParking._id
         newParking.self = "/api/v1/parkings/" + parkingId
+
+        await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+        newParking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
         newParking = await newParking.save()
+                
+        fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+            if (err) throw err;
+        });
 
         // add reference into the user object
         user.parkings.push(newParking)
@@ -57,6 +71,9 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         res.location('/api/v1/parkings/' + parkingId).status(201).send()
     } catch (err) {
         console.log(err)
+        fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+            if (err) console.log(err)
+        });
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 })
@@ -68,9 +85,9 @@ router.get('/myParkings', tokenValid, async (req, res) => {
     } else {
         try {
             const idUser = req.loggedInUser.userId
-            
+
             const parkings = await Parking.find({ owner: idUser })
-            
+
             return res.status(200).json(parkings)
         } catch (err) {
             console.log(err)
@@ -93,8 +110,104 @@ router.get('/:parkingId', async (req, res) => {
 // Get all parkings
 router.get('', async (req, res) => {
     try {
-        const parkings = await Parking.find({ $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }, { visible: 0, __v: 0 })
-        return res.status(200).json(parkings)
+        const query = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        const insertionMatch = {}
+        const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
+        let fuzzySearchQuery = ""
+        if (Object.keys(req.query).length >= 0) {
+            const validParams = ["search", "priceMin", "priceMax", "dateMin", "dateMax"]
+            const queryDict = {}
+            for (let field in req.query) {
+                if (validParams.includes(field)) {
+                    queryDict[field] = req.query[field]
+                } else {
+                    return res.status(400).send({ message: 'Invalid query parameter' })
+                }
+            }
+            if ("search" in queryDict) {
+                fuzzySearchQuery = queryDict["search"]
+            }
+            if ("priceMin" in queryDict) {
+                insertionMatch.priceHourly = {}
+                insertionMatch.priceHourly.$gte = queryDict["priceMin"]
+            }
+            if ("priceMax" in queryDict) {
+                if (insertionMatch.priceHourly == null) {
+                    insertionMatch.priceHourly = {}
+                }
+                insertionMatch.priceHourly.$lte = queryDict["priceMax"]
+            }
+            if ("dateMin" in queryDict) {
+                console.log(queryDict["dateMin"])
+                insertionMatch.datetimeStart = {}
+                insertionMatch.datetimeEnd = {}
+                insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMin"])
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
+            }
+            if ("dateMax" in queryDict) {
+                console.log(queryDict["dateMax"])
+                if (insertionMatch.datetimeStart == null) {
+                    insertionMatch.datetimeStart = {}
+                }
+                if (insertionMatch.datetimeEnd == null) {
+                    insertionMatch.datetimeEnd = {}
+                }
+                if (insertionMatch.datetimeStart.$lte != null && insertionMatch.datetimeStart.$lte > new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMax"])
+                }
+                if (insertionMatch.datetimeEnd.$gte != null && insertionMatch.datetimeEnd.$gte < new Date(queryDict["dateMax"])) {
+                    insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+                }
+                insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMax"])
+            }
+        }
+
+        let parkings = []
+        if (fuzzySearchQuery !== "") {
+            parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({ __v: 0, confidenceScore: 0 }).populate(
+                [{
+                    path: "insertions",
+                    model: "Insertion",
+                    select: { _id: 0, __v: 0, },
+                    match: insertionMatch
+                },
+                {
+                    path: "reviews",
+                    model: "Review",
+                    select: { stars: 1 }
+                }
+                ])
+        } else {
+            parkings = await Parking.find(query, { __v: 0 }).populate(
+                [{
+                    path: "insertions",
+                    model: "Insertion",
+                    select: { _id: 0, __v: 0, },
+                    match: insertionMatch
+                },
+                {
+                    path: "reviews",
+                    model: "Review",
+                    select: { stars: 1 }
+                }])
+        }
+        parkings = parkings.filter(parking => parking.visible === true && parking.insertions.length > 0)
+        // remove property visible from the parkings
+        for (let parking of parkings) {
+            parking.visible = undefined
+        }
+        //calculate average stars for each parking
+        let parkingObjects = []
+        for (let parking of parkings) {
+            let sum = 0
+            for (let review of parking.reviews) {
+                sum += review.stars
+            }
+            let avg = sum / parking.reviews.length
+            avg = Math.round(avg * 10) / 10
+            parkingObjects.push(Object.assign(parking.toObject(), { averageStars: avg }))
+        }
+        return res.status(200).json(parkingObjects)
     } catch (err) {
         console.log(err)
         return res.status(500).send({ message: 'Unexpected error' })
@@ -102,13 +215,40 @@ router.get('', async (req, res) => {
 })
 
 // Modify a parking
-router.put('/:parkingId', tokenChecker, async (req, res) => {
-    const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
-    for (const field in req.body) {
-        if (!validFields.includes(field)) {
-            return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, res) => {
+    let bodyJSON
+    let newImage = null
+    if (req.body["json"] !== undefined) {
+        bodyJSON = await JSON.parse(req.body["json"])
+        const oldParking = await Parking.findById(req.params.parkingId)
+        if (!req.file) {
+            // if no image is uploaded, the old one is kept
+            bodyJSON.image = oldParking.image
+            //return res.status(415).send({ message: 'Wrong file type for images' })
+        } else {
+            await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+            bodyJSON.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
+            const oldImage = oldParking.image.split("/")[oldParking.image.split("/").length - 1]
+            await GCloud.deleteFile(oldImage)
+            fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+                if (err) throw err;
+            });
         }
+
+        const validFields = ["name", "address", "city", "country", "description", "image", "latitude", "longitude", "visible"]
+        for (const field in bodyJSON) {
+            if (!validFields.includes(field)) {
+                return res.status(400).send({ message: "Some fields cannot be modified or do not exist" })
+            }
+        }
+
+        if (!bodyJSON.name || !bodyJSON.address || !bodyJSON.city || !bodyJSON.country || !bodyJSON.description) {
+            return res.status(400).send({ message: "Some fields are empty or undefined" })
+        }
+    } else {
+        bodyJSON = req.body
     }
+
     try {
         const parking = await Parking.findById(req.params.parkingId)
 
@@ -118,8 +258,8 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
 
-        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, req.body, { runValidators: true })
-        
+        const updatedParking = await Parking.findByIdAndUpdate(req.params.parkingId, bodyJSON, { runValidators: true, new: true })
+
         return res.status(200).json(updatedParking)
     } catch (err) {
         console.log(err)
@@ -127,16 +267,30 @@ router.put('/:parkingId', tokenChecker, async (req, res) => {
     }
 })
 
-// Delete a parking
 router.delete('/:parkingId', tokenChecker, async (req, res) => {
     try {
-        const parking = await Parking.findById(req.params.parkingId)
-
-        let parkingOwner = parking.owner
+        const parking = await Parking.findById(req.params.parkingId).populate([{
+            path: "insertions",
+            model: "Insertion",
+            select: { id: 1, reservations: 1 }
+        }])
+        let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
-        if (parkingOwner.substring(parkingOwner.lastIndexOf('/') + 1) !== req.loggedInUser.userId) {
+        if (parkingOwner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
         }
+        if (parking.insertions.length != 0) {
+            for (const insertion of parking.insertions) {
+                if (insertion.reservations.length !== 0) {
+                    return res.status(400).send({ message: 'Cannot delete parking with active insertions' })
+                } else {
+                    await Insertion.findByIdAndDelete(insertion.id)
+                }
+            }
+        }
+
+        const oldImage = parking.image.split("/")[parking.image.split("/").length - 1]
+        await GCloud.deleteFile(oldImage)
 
         await parking.remove()
         return res.status(200).send({ message: 'Parking deleted' })
@@ -145,6 +299,5 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
-
 
 export { router as parkings }

@@ -1,5 +1,11 @@
 function goBack() {
-    history.back();
+    if(window.history.length > 1 && 
+        document.referrer.indexOf(window.location.host) !== -1) {
+          window.history.back();
+    } else {
+        window.location.href = "/detailParking?id=" + $("#idParking").val()
+    }
+    /* history.back(); */
 }
 
 function convertToISO(date) {
@@ -13,7 +19,7 @@ function convertToISO(date) {
         splitDate[0][0] +
         "T" +
         splitDate[1];
-    return date + ":00+01:00";
+    return date + ":00+02:00";
 }
 
 function cleanseList() {
@@ -37,6 +43,8 @@ async function loadInfo() {
             data = await res.json();
 
             if (!res.ok) throw data;
+
+            
 
             $("#insertionName").text(data.name);
             $("#insertionFrom").text(
@@ -91,6 +99,7 @@ async function loadInfo() {
                 );
             }
 
+            $("#idParking").val(data.parking._id);
             $("#imgParking").attr("src", data.parking.image);
             $("#nameParking").text(data.parking.name);
             $("#addressParking").html(
@@ -100,6 +109,13 @@ async function loadInfo() {
                     "<br>" +
                     data.parking.country
             );
+            if (data.reservations.length === 0) {
+                $('#noReservations').removeAttr('hidden');
+                
+            }
+            else {
+                $('#noReservations').attr('hidden', true);
+            }
 
             let container = $("#reservList");
             container.empty();
@@ -243,6 +259,7 @@ async function main() {
 
     //Opzioni di A quando cambia DA
     linked1.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
         let eventDate = new tempusDominus.DateTime(e.date);
         let enabledDates = [];
         let recmaxDate = maxDate;
@@ -293,6 +310,10 @@ async function main() {
                 },
             });
         }
+    });
+
+    linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
     });
 
     /* linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
@@ -359,6 +380,35 @@ async function main() {
     //--------------------------------- end period datepickers ------------------------------------
 }
 
+function checkDatesAndUpdatePrice() {
+    try {
+        let dateFrom = new Date(convertToISO($("#linkedPickers1Input").val()));
+        let dateTo = new Date(convertToISO($("#linkedPickers2Input").val()));
+        if (Object.prototype.toString.call(dateFrom) !== "[object Date]" || Object.prototype.toString.call(dateTo) !== "[object Date]" || isNaN(dateFrom) || isNaN(dateTo))
+            return
+
+        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);   
+        let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0]) : 0
+        let total = 0
+        // get hours between dates
+        let minutes = Math.abs(dateTo - dateFrom) / 60e3;
+        // get days between dates
+        if (priceD !== 0) {
+            let days = Math.floor((dateTo - dateFrom) / 864e5)
+            minutes -= days * 24 * 60;
+            total += days * priceD;
+        }
+        
+        total += minutes / 60 * priceH;
+        // round to 2 decimals
+        total = Math.round(total * 100) / 100;
+        $("#lblTot").text(''+ total)
+
+    } catch(err) {
+        console.log(err)
+    }
+}
+
 async function createReservation() {
     let d1 = $("#linkedPickers1Input").val();
     let d2 = $("#linkedPickers2Input").val();
@@ -384,6 +434,8 @@ async function createReservation() {
         if (!res.ok) {
             throw await res.json();
         } else {
+            let data = await res.json();
+            window.location.href = data.url
             cleanseList();
             await loadInfo();
         }

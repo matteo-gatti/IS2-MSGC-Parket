@@ -8,7 +8,7 @@ async function createNewInsertionAndParking() {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     if (!$('form')[0].checkValidity() || !$('form')[1].checkValidity()) {
@@ -60,6 +60,8 @@ async function createNewInsertionAndParking() {
     var city = $("#citta").val();
     var country = $("#nazione").val();
     var image = $("#image").prop("files")[0];
+    var lat = $("#lat").val();
+    var long = $("#long").val();
 
     const days = []
 
@@ -85,11 +87,13 @@ async function createNewInsertionAndParking() {
         description: desc,
         city: city,
         country: country,
-        image: ""
+        image: "",
+        latitude: lat,
+        longitude: long
     }))
 
-    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00"
-    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00"
+    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00"
+    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00"
     
     formData.append('insertion', JSON.stringify({
         name: name,
@@ -296,3 +300,54 @@ $('#insertion-dailyPrice').keypress(function(e){
         return false;
     }
 })
+
+let autocomplete;
+let addressField;
+function initAutocomplete() {
+    addressField = document.querySelector("#indirizzo");
+    // Create the autocomplete object, restricting the search predictions to
+    // addresses in the US and Canada.
+    autocomplete = new google.maps.places.Autocomplete(addressField, {
+        fields: ["address_components", "geometry"],
+        types: ["address"],
+    });
+    
+    // When the user selects an address from the drop-down, populate the
+    // address fields in the form.
+    autocomplete.addListener("place_changed", fillInAddress);
+}
+
+function fillInAddress() {
+    // Get the place details from the autocomplete object.
+    const place = autocomplete.getPlace();
+    let address1 = "";
+
+    for (const component of place.address_components) {
+        const componentType = component.types[0];
+
+        switch (componentType) {
+            case "street_number": {
+                address1 = `${component.long_name}`;
+                break;
+            }
+            case "route": {
+                number = address1
+                address1 = `${component.long_name}`;
+                if (number != "") address1 += ", " + number
+                break;
+            }
+            case "locality":
+                document.querySelector("#citta").value = component.long_name;
+                break;
+            case "country":
+                document.querySelector("#nazione").value = component.long_name;
+                break;
+        }
+    }
+
+    addressField.value = address1;
+    document.querySelector("#lat").value = place.geometry.location.lat();
+    document.querySelector("#long").value = place.geometry.location.lng();
+}
+
+window.initAutocomplete = initAutocomplete;

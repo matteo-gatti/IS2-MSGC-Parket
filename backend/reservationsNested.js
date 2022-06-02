@@ -5,18 +5,42 @@ import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import Stripe from "stripe"
 
 const router = express.Router()
+const stripe = new Stripe(process.env.STRIPE_PR_KEY)
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
     try {
-        let insertion = await Insertion.findById(req.params.insertionId).populate("reservations parking")
+
+        let insertion = await Insertion.findById(req.params.insertionId).populate([{
+            path: "parking",
+            model: "Parking",
+        },
+        {
+            path: "reservations",
+            model: "Reservation",
+        }])
         let user = await User.findById(req.loggedInUser.userId)
 
         // check if the user is the owner of the parking
-        if (req.loggedInUser.userId === insertion.parking.owner) {
+        if (req.loggedInUser.userId === insertion.parking.owner.toString()) {
             return res.status(403).send({ message: "User is not authorized to perform this action" })
+        }
+
+        // check that correct data fields are sent (w.r.t. the DB model)
+        const validFields = ["datetimeStart", "datetimeEnd"]
+        for (const field in req.body) {
+            if (!validFields.includes(field)) {
+                return res.status(400).send({ message: "Some fields are empty or undefined" })
+            }
+        }
+
+        for (const field of validFields) {
+            if (!req.body.hasOwnProperty(field)) {
+                return res.status(400).send({ message: "Some fields are empty or undefined" })
+            }
         }
 
         const reqDateStart = new Date(req.body.datetimeStart)
@@ -39,7 +63,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             if (!insertion.recurrenceData.daysOfTheWeek.includes(dayId[startDay])) {
                 return res.status(400).send({ message: "Insertion is not available on this day" })
             }
-        } 
+        }
         // check if the insertion is not already reserved
         for (const resv in insertion.reservations) {
             if (reqDateStart >= insertion.reservations[resv].datetimeStart && reqDateStart <= insertion.reservations[resv].datetimeEnd) {
@@ -69,15 +93,33 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             reservation.price += dayDiff * insertion.priceDaily
         }
         reservation.price += minutesDiff / 60 * insertion.priceHourly
+        reservation.price = Math.round(reservation.price * 100) / 100
+        reservation.price = reservation.price.toFixed(2)
 
         reservation = await reservation.save()
         reservation.self = `/api/v1/reservations/${reservation.id}`
         reservation = await reservation.save()
 
-        insertion.reservations.push(reservation)
-        await insertion.save()
+        const URL = req.protocol + '://' + req.get('host')
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [{
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: `Prenotazione per il parcheggio: ${insertion.parking.name} - inserzione: ${insertion.name}`,
+                        description: `Da: ${moment(reservation.datetimeStart).format("DD/MM/YYYY, hh:mm")} A: ${moment(reservation.datetimeEnd).format("DD/MM/YYYY, hh:mm")}`,
+                    },
+                    unit_amount: Math.round(reservation.price * 100)
+                },
+                quantity: 1,
+            }],
+            success_url: `${URL}/success?insertion=${insertion.id}&reservation=${reservation.id}`,
+            cancel_url: `${URL}/cancel?reservation=${reservation.id}`,
+        })
 
-        res.location(reservation.self).status(201).send()
+        res.location(reservation.self).status(202).json({ url: session.url })
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

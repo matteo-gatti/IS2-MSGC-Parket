@@ -3,6 +3,9 @@
 
 <head>
   <title>PARKET - private Area</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="img/logo.png" />
   <!-- JQuery-->
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
@@ -17,15 +20,22 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"
     crossorigin="anonymous"></script>
 
+  <!-- Tempus Dominus JavaScript -->
+  <!-- <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/js/tempus-dominus.js"
+    crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempus-dominus/6-beta4/js/tempus-dominus.js" integrity="sha512-sVBWs4OpF/NBgL3op5qtx2jjGr5MOC7l2T537+iQ9qbekDbXMSDOkBGHiTBaF9904KOxEvNwr6ABARhoaAeW/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/locales/it.js"
+    crossorigin="anonymous"></script>
+
   <!-- Bootstrap-->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
-  <!-- ICONS -->
+    <!-- ICONS -->
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/gh/Eonasdan/tempus-dominus@master/dist/css/tempus-dominus.css" rel="stylesheet"
     crossorigin="anonymous">
-  <!--TODO mergiare-->
+  
   <script src="scriptPrivateArea.js" defer></script>
 
   <style>
@@ -286,7 +296,7 @@
         <div class="col page-content page-container" id="page-content">
           <div class="padding">
             <div class="row d-flex justify-content-center align-content-center">
-              <div class="col-md-9">
+              <div class="col-md-11">
                 <div class="card user-card-full">
                   <div class="row m-l-0 m-r-0">
                     <div class="col-sm-3 bg-c-lite-green user-profile">
@@ -315,6 +325,7 @@
                         </div>
                         <h6 class="m-b-20 m-t-40 p-b-5 b-b-default f-w-600">Prenotazioni</h6>
                         <div class="row" id="reservList">
+                        <h5 id="msgNoReservations" class="text-center" hidden>Nessuna prenotazione 😭</h5>
                         </div>
                         <ul class="social-link list-unstyled m-t-40 m-b-10">
                           <li><a href="#!" data-toggle="tooltip" data-placement="bottom" title=""
@@ -339,6 +350,7 @@
         <div class="col-md-1">
         </div>
       </div>
+
       <section class="py-0 text-center container">
         <div class="row py-lg-0">
           <div class="col-lg-6 col-md-8 mx-auto">
@@ -361,7 +373,7 @@
             <div class="col" id="firstPark" hidden>
               <div class="card shadow-sm">
                 <img style="vertical-align:middle" class="card-img-top img-fluid imgPark" width="500" height="500"
-                  src="https://via.placeholder.com/500x500">
+                  src="">
                 <div class="card-body">
                   <p class="card-text parkName"></p>
                   <p class="card-text parkDesc"></p>
@@ -380,8 +392,8 @@
           </div>
         </div>
       </div>
-      <!-- inserimento -->
-
+      
+      <!-- Inserimento -->
       <div class="px-4 py-1 my-5 text-center">
         <div class="col-lg-6 mx-auto">
           <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
@@ -389,6 +401,77 @@
               parcheggio</button>
             <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="newParkingFromInsertion()">Nuova
               Inserzione</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modifica prenotazione</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="form">
+              <form id="insertionForm">
+                <!-- dt picker -->
+                <div class='row mb-3'>
+                  <label id="message-modal" class="text-danger d-block"></label>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers1Input' class='form-label'>Da:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers1'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers1Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers1'
+                      required
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers1'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                  <div class='col-sm-6'>
+                    <label for='linkedPickers2Input' class='form-label'>A:</label>
+                    <div
+                    class='input-group log-event'
+                    id='linkedPickers2'
+                    data-td-target-input='nearest'
+                    data-td-target-toggle='nearest'
+                    >
+                    <input
+                      id='linkedPickers2Input'
+                      type='text'
+                      class='form-control'
+                      data-td-target='#linkedPickers2'
+                      required
+                    />
+                    <span
+                      class='input-group-text'
+                      data-td-target='#linkedPickers2'
+                      data-td-toggle='datetimepicker'
+                    >
+                      <span class='fa-solid fa-calendar'></span>
+                    </span>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" id="close-modal" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+              <button type="button" class="btn btn-primary" id="btnSubmit" onclick="">Modifica</button>
+            </div>
           </div>
         </div>
       </div>

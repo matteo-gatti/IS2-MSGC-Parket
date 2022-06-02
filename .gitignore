@@ -1,5 +1,8 @@
 # Folders
 /static/uploads/*
+!/static/uploads/.gitkeep
+/backend/keys/*
+!/backend/keys/.gitkeep
 
 # Logs
 logs

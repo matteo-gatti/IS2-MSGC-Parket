@@ -29,7 +29,7 @@ async function editParking() {
         image: ""
     }))
     try {
-        const res = await fetch("../api/v1/parkings/" + parkId, {
+        const res = await fetch("../api/v2/parkings/" + parkId, {
             method: "PUT",
             body: formData
         })
@@ -42,7 +42,7 @@ async function editParking() {
 
     } catch (err) {
         let msg
-        if(err.message == "Unexpected token < in JSON at position 0") {msg = "file non valido per immagine" } else  {msg = err.message}
+        if (err.message == "Unexpected token < in JSON at position 0") { msg = "file non valido per immagine" } else { msg = err.message }
         $("#message").text(msg)
         $("#message").removeAttr('hidden');
     }
@@ -52,7 +52,7 @@ async function getParkingData() {
     // get the park id from the url
     let parkId = window.location.href.split("?")[1].split("=")[1]
     // get the park data from the server
-    let parkData = await fetch("../api/v1/parkings/" + parkId)
+    let parkData = await fetch("../api/v2/parkings/" + parkId)
     parkData = await parkData.json()
     // fill the form with the park data
     $("#nome").val(parkData.name)
@@ -83,7 +83,7 @@ function initAutocomplete() {
         fields: ["address_components", "geometry"],
         types: ["address"],
     });
-    
+
     // When the user selects an address from the drop-down, populate the
     // address fields in the form.
     autocomplete.addListener("place_changed", fillInAddress);

@@ -52,12 +52,12 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         let newParking = await parking.save()
 
         let parkingId = newParking._id
-        newParking.self = "/api/v1/parkings/" + parkingId
+        newParking.self = "/api/v2/parkings/" + parkingId
 
         await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
         newParking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
         newParking = await newParking.save()
-                
+
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
             if (err) throw err;
         });
@@ -67,7 +67,7 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         await user.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/parkings/' + parkingId).status(201).send()
+        res.location('/api/v2/parkings/' + parkingId).status(201).send()
     } catch (err) {
         console.log(err)
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {

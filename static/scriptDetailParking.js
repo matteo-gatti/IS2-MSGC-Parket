@@ -78,7 +78,7 @@ async function createInsertion() {
 
     try {
         // fetch the insertion from the database
-        const res = await fetch(`../api/v1/parkings/${id}/insertions`, {
+        const res = await fetch(`../api/v2/parkings/${id}/insertions`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -135,7 +135,7 @@ async function loadDetails() {
             throw { message: "id not in URL" }
         }
         // fetch the user from the database
-        const res = await fetch(`/api/v1/parkings/${urlParams.get('id')}`, {
+        const res = await fetch(`/api/v2/parkings/${urlParams.get('id')}`, {
             method: "GET",
         })
         data = await res.json()
@@ -186,7 +186,7 @@ async function getMyInsertions() {
         // fetch the user from the database
         const id = $('#parkingId').html()
 
-        const res = await fetch(`/api/v1/parkings/${id}/insertions`, {
+        const res = await fetch(`/api/v2/parkings/${id}/insertions`, {
             method: "GET",
         })
         data = await res.json()
@@ -253,7 +253,7 @@ async function createReview() {
             throw { message: "Seleziona una valutazione" }
         }
 
-        const res = await fetch(`/api/v1/parkings/${id}/reviews`, {
+        const res = await fetch(`/api/v2/parkings/${id}/reviews`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
@@ -288,7 +288,7 @@ async function getReviews() {
     try {
         //get all the reviews from the backend
         const id = $('#parkingId').html()
-        const res = await fetch(`/api/v1/parkings/${id}/reviews`, {
+        const res = await fetch(`/api/v2/parkings/${id}/reviews`, {
             method: "GET",
         })
         data = await res.json()
@@ -362,7 +362,7 @@ async function toggleVisible() {
         const lblVisible = $("#lblVisible").text()
 
         // fetch the user from the database
-        const res = await fetch(`/api/v1/parkings/${urlParams.get('id')}`, {
+        const res = await fetch(`/api/v2/parkings/${urlParams.get('id')}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -422,7 +422,7 @@ reviewModal.addEventListener('show.bs.modal', async function (event) {
         // get all the reservations for this user
         if (mutex === true) {
             mutex = false
-            const res = await fetch(`/api/v1/reservations/myReservations`)
+            const res = await fetch(`/api/v2/reservations/myReservations`)
             data = await res.json()
             if (!res.ok) {
                 throw data
@@ -435,7 +435,7 @@ reviewModal.addEventListener('show.bs.modal', async function (event) {
                         $("#reservationsForm").append(`<option value="${data[i]._id}">${dateStart} - ${dateEnd}</option>`)
                     }
                 }
-                if(($("#reservationsForm")).children().length === 0) {
+                if (($("#reservationsForm")).children().length === 0) {
                     $("#reservationsForm").append(`<option value="">Nessuna prenotazione disponibile</option>`)
                     $("#reservationsForm").attr("disabled", true)
                 }
@@ -646,7 +646,7 @@ $('#exampleModal').on('hidden.bs.modal', function () {
 
 async function modifyInsertion(insertionid) {
     // retrieve old insertion data from the server
-    fetch(`/api/v1/insertions/${insertionid}`)
+    fetch(`/api/v2/insertions/${insertionid}`)
         .then(response => response.json())
         .then(data => {
             var recurrent
@@ -817,7 +817,7 @@ async function modifyInsertionSubmit(insertionid) {
 
     try {
         // fetch the insertion from the database
-        const res = await fetch(`../api/v1/insertions/${insertionid}`, {
+        const res = await fetch(`../api/v2/insertions/${insertionid}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -869,7 +869,7 @@ async function deleteInsertion(insertionid) {
     //chiamata per eliminare la reservation
     if (confirm('Vuoi veramente eliminare questa inserzione?\nL\'operazione non può essere annullata.')) {
         try {
-            const res = await fetch(`/api/v1/insertions/${insertionid}`, {
+            const res = await fetch(`/api/v2/insertions/${insertionid}`, {
                 method: "DELETE",
             });
             data = await res.json();
@@ -892,7 +892,7 @@ async function modifyParking(parkId) {
 async function deleteParking(parkingid) {
     if (confirm('Vuoi veramente eliminare questo parcheggio?\nL\'operazione non può essere annullata.')) {
         try {
-            const res = await fetch(`/api/v1/parkings/${parkingid}`, {
+            const res = await fetch(`/api/v2/parkings/${parkingid}`, {
                 method: "DELETE",
             });
             data = await res.json();

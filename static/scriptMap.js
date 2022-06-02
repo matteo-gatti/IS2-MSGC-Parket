@@ -53,7 +53,7 @@ async function initMap() {
     const vietnam = { lat: 46.06900002992592, lng: 11.149703082567576 };
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
-        center: {lat: lat, lng: lng},
+        center: { lat: lat, lng: lng },
         mapId: "cdf6eba00718c578"
     });
 
@@ -140,7 +140,7 @@ async function initMap() {
     });
 
     // get every parking in the database
-    const res = await fetch("/api/v1/parkings", {
+    const res = await fetch("/api/v2/parkings", {
         method: "GET",
     })
     data = await res.json()

@@ -1,5 +1,5 @@
 function goBack() {
-    if(window.history.length > 1 && 
+    if (window.history.length > 1 &&
         document.referrer.indexOf(window.location.host) !== -1) {
         window.history.back();
     } else {
@@ -35,7 +35,7 @@ async function loadInfo() {
             throw { message: "insertion not in URL!" };
         } else {
             const res = await fetch(
-                `/api/v1/insertions/${urlParams.get("insertion")}`,
+                `/api/v2/insertions/${urlParams.get("insertion")}`,
                 {
                     method: "GET",
                 }
@@ -44,7 +44,7 @@ async function loadInfo() {
 
             if (!res.ok) throw data;
 
-            
+
 
             $("#insertionName").text(data.name);
             $("#insertionFrom").text(
@@ -104,14 +104,14 @@ async function loadInfo() {
             $("#nameParking").text(data.parking.name);
             $("#addressParking").html(
                 data.parking.address +
-                    ", " +
-                    data.parking.city +
-                    "<br>" +
-                    data.parking.country
+                ", " +
+                data.parking.city +
+                "<br>" +
+                data.parking.country
             );
             if (data.reservations.length === 0) {
                 $('#noReservations').removeAttr('hidden');
-                
+
             }
             else {
                 $('#noReservations').attr('hidden', true);
@@ -146,7 +146,7 @@ async function loadInfo() {
                 container.append(tmpHTML);
             }
         }
-    } catch (err) {}
+    } catch (err) { }
 }
 
 async function main() {
@@ -324,7 +324,7 @@ function checkDatesAndUpdatePrice() {
         if (Object.prototype.toString.call(dateFrom) !== "[object Date]" || Object.prototype.toString.call(dateTo) !== "[object Date]" || isNaN(dateFrom) || isNaN(dateTo))
             return
 
-        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);   
+        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);
         let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0]) : 0
         let total = 0
         // get hours between dates
@@ -335,13 +335,13 @@ function checkDatesAndUpdatePrice() {
             minutes -= days * 24 * 60;
             total += days * priceD;
         }
-        
+
         total += minutes / 60 * priceH;
         // round to 2 decimals
         total = Math.round(total * 100) / 100;
-        $("#lblTot").text(''+ total)
+        $("#lblTot").text('' + total)
 
-    } catch(err) {
+    } catch (err) {
         console.log(err)
     }
 }
@@ -356,7 +356,7 @@ async function createReservation() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const res = await fetch(
-            `../api/v1/insertions/${urlParams.get("insertion")}/reservations`,
+            `../api/v2/insertions/${urlParams.get("insertion")}/reservations`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

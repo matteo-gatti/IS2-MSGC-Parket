@@ -63,7 +63,7 @@ $(document).ready(function () {
 });
 
 async function searchParkings() {
-    let query = `/api/v1/parkings?`
+    let query = `/api/v2/parkings?`
 
     //check value of rating field
     let rating = 0
@@ -96,7 +96,7 @@ async function searchParkings() {
                 break
             }
         }
-        if (rating != 0) {  getAllParkings(true) }
+        if (rating != 0) { getAllParkings(true) }
         return
     }
 
@@ -176,7 +176,7 @@ $("#btnSearch").on("click", searchParkings)
 
 async function getAllParkings(checkStelle, rating) {
     try {
-        const res = await fetch("/api/v1/parkings", {
+        const res = await fetch("/api/v2/parkings", {
             method: "GET",
         })
         data = await res.json()

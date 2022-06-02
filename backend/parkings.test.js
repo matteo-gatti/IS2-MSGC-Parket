@@ -34,7 +34,7 @@ async function cleanDB() {
 
 let mongoServer
 
-describe("POST /api/v1/parkings", () => {
+describe("POST /api/v2/parkings", () => {
     let userId
     let payload
     let token
@@ -42,7 +42,7 @@ describe("POST /api/v1/parkings", () => {
         jest.setTimeout(5000);
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
-        const res = await request(app).post('/api/v1/users').send({
+        const res = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -64,7 +64,7 @@ describe("POST /api/v1/parkings", () => {
         await mongoose.connection.close()
     })
 
-    test('POST /api/v1/parkings should respond with 201', async () => {
+    test('POST /api/v2/parkings should respond with 201', async () => {
         expect.assertions(0);
         //const file = Buffer.from(['whatever'])
         let jsonstr = JSON.stringify({
@@ -76,14 +76,14 @@ describe("POST /api/v1/parkings", () => {
             image: ""
         })
         const res = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
-            .set('content-type', 'multipart/form-data').expect(201).expect("location", /\/api\/v1\/parkings\/(.*)/);
+            .set('content-type', 'multipart/form-data').expect(201).expect("location", /\/api\/v2\/parkings\/(.*)/);
     })
 
-    test("POST /api/v1/parkings with some fields empty should respond with 400", async () => {
+    test("POST /api/v2/parkings with some fields empty should respond with 400", async () => {
         //const file = Buffer.from(['whatever'])
         expect.assertions(0)
         let jsonstr = JSON.stringify({
@@ -95,14 +95,14 @@ describe("POST /api/v1/parkings", () => {
             image: ""
         })
         const res = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
             .set('content-type', 'multipart/form-data').expect(400, { message: "Some fields are empty or undefined" })
     })
 
-    test("POST /api/v1/parkings without token should respond with 401", async () => {
+    test("POST /api/v2/parkings without token should respond with 401", async () => {
         expect.assertions(0)
         let jsonstr = JSON.stringify({
             name: "parking",
@@ -114,7 +114,7 @@ describe("POST /api/v1/parkings", () => {
         })
         try {
             const res = await request(app)
-                .post('/api/v1/parkings')
+                .post('/api/v2/parkings')
                 .set("Authorization", null)
                 .field("json", jsonstr)
                 .attach("image", "./static/img/logo.png")
@@ -124,7 +124,7 @@ describe("POST /api/v1/parkings", () => {
     })
 })
 
-describe("GET /api/v1/parkings/myParkings", () => {
+describe("GET /api/v2/parkings/myParkings", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
@@ -135,14 +135,14 @@ describe("GET /api/v1/parkings/myParkings", () => {
         await mongoose.connection.close()
     })
 
-    test("GET /api/v1/parkings/myParkings without token, should respond with 401", async () => {
+    test("GET /api/v2/parkings/myParkings without token, should respond with 401", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .get('/api/v1/parkings/myParkings')
+            .get('/api/v2/parkings/myParkings')
             .expect(401, { message: 'Token missing or invalid' })
     })
 
-    test("GET /api/v1/parkings/myParkings with valid token but no user in DB, should respond with 404", async () => {
+    test("GET /api/v2/parkings/myParkings with valid token but no user in DB, should respond with 404", async () => {
         expect.assertions(0)
         const payload = {
             userId: "test",
@@ -152,15 +152,15 @@ describe("GET /api/v1/parkings/myParkings", () => {
             expiresIn: 86400 // expires in 24 hours
         })
         const res = await request(app)
-            .get('/api/v1/parkings/myParkings')
+            .get('/api/v2/parkings/myParkings')
             .set('authorization', token)
             .expect(404, { message: 'User not found' })
     })
 
-    test("GET /api/v1/parkings/myParkings with valid request, should respond with 200 and a list of parkings", async () => {
+    test("GET /api/v2/parkings/myParkings with valid request, should respond with 200 and a list of parkings", async () => {
         expect.assertions(1)
         // Preconditions: add a user and a parking
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -185,13 +185,13 @@ describe("GET /api/v1/parkings/myParkings", () => {
             image: ""
         })
         await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
 
         const res = await request(app)
-            .get('/api/v1/parkings/myParkings')
+            .get('/api/v2/parkings/myParkings')
             .set('authorization', token)
             .expect(200)
             .expect("Content-Type", /json/)
@@ -214,7 +214,7 @@ describe("GET /api/v1/parkings/myParkings", () => {
     })
 })
 
-describe("GET /api/v1/parkings", () => {
+describe("GET /api/v2/parkings", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
@@ -225,10 +225,10 @@ describe("GET /api/v1/parkings", () => {
         await mongoose.connection.close()
     })
 
-    test("GET /api/v1/parkings/myParkings with valid request, should respond with 200 and a list of parkings", async () => {
+    test("GET /api/v2/parkings/myParkings with valid request, should respond with 200 and a list of parkings", async () => {
         expect.assertions(1)
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -273,14 +273,14 @@ describe("GET /api/v1/parkings", () => {
         })
 
         const resPark = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
         const idPark = resPark.header.location.split("parkings/")[1]
 
         await request(app)
-            .post('/api/v1/parkings/' + idPark + '/insertions')
+            .post('/api/v2/parkings/' + idPark + '/insertions')
             .set("Authorization", token)
             .send({
                 name: "insertion name",
@@ -291,14 +291,14 @@ describe("GET /api/v1/parkings", () => {
             })
 
         const invisiblePark = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr2)
             .attach("image", "./static/img/logo.png")
         const invParkId = invisiblePark.header.location.split("parkings/")[1]
 
         await request(app)
-            .post('/api/v1/parkings/' + invParkId + '/insertions')
+            .post('/api/v2/parkings/' + invParkId + '/insertions')
             .set("Authorization", token)
             .send({
                 name: "insertion 2",
@@ -309,13 +309,13 @@ describe("GET /api/v1/parkings", () => {
             })
 
         await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr3)
             .attach("image", "./static/img/logo.png")
 
         const res = await request(app)
-            .get('/api/v1/parkings')
+            .get('/api/v2/parkings')
             .set('authorization', token)
             .expect(200)
             .expect("Content-Type", /json/)
@@ -337,7 +337,7 @@ describe("GET /api/v1/parkings", () => {
     })
 })
 
-describe("GET /api/v1/parkings with a search filter", () => {
+describe("GET /api/v2/parkings with a search filter", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
@@ -348,10 +348,10 @@ describe("GET /api/v1/parkings with a search filter", () => {
         await mongoose.connection.close()
     })
 
-    test("GET /api/v1/parkings/myParkings?search=pippo&priceMin=10&priceMax=100 with valid request, should respond with 200 and a list of filtered parkings", async () => {
+    test("GET /api/v2/parkings/myParkings?search=pippo&priceMin=10&priceMax=100 with valid request, should respond with 200 and a list of filtered parkings", async () => {
         expect.assertions(1)
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -386,21 +386,21 @@ describe("GET /api/v1/parkings with a search filter", () => {
         })
 
         const resPark = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
         const idPark = resPark.header.location.split("parkings/")[1]
 
         const resPark2 = await request(app)
-            .post('/api/v1/parkings')
+            .post('/api/v2/parkings')
             .set("Authorization", token)
             .field("json", jsonstr2)
             .attach("image", "./static/img/logo.png")
         const idPark2 = resPark2.header.location.split("parkings/")[1]
 
         const insertion = await request(app)
-            .post('/api/v1/parkings/' + idPark + '/insertions')
+            .post('/api/v2/parkings/' + idPark + '/insertions')
             .set("Authorization", token)
             .send({
                 name: "insertion",
@@ -411,7 +411,7 @@ describe("GET /api/v1/parkings with a search filter", () => {
             })
 
         const insertion2 = await request(app)
-            .post('/api/v1/parkings/' + idPark2 + '/insertions')
+            .post('/api/v2/parkings/' + idPark2 + '/insertions')
             .set("Authorization", token)
             .send({
                 name: "insertion 2",
@@ -422,7 +422,7 @@ describe("GET /api/v1/parkings with a search filter", () => {
             })
 
         const res = await request(app)
-            .get('/api/v1/parkings?search=pippo&priceMin=10&priceMax=100')
+            .get('/api/v2/parkings?search=pippo&priceMin=10&priceMax=100')
             .set('authorization', token)
             .expect(200)
             .expect("Content-Type", /json/)
@@ -444,7 +444,7 @@ describe("GET /api/v1/parkings with a search filter", () => {
     })
 })
 
-describe("DELETE /api/v1/parkings/:parkingId", () => {
+describe("DELETE /api/v2/parkings/:parkingId", () => {
     let userId
     let userId2
     let token
@@ -459,7 +459,7 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -475,7 +475,7 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpRes2 = await request(app).post('/api/v1/users').send({
+        const tmpRes2 = await request(app).post('/api/v2/users').send({
             username: "test2",
             password: "test2",
             email: "test2@test2",
@@ -510,7 +510,7 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -539,7 +539,7 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         })
 
         const res2 = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token2)
             .field("parking", jsonstr2)
             .field("insertion", jsonInsertion2)
@@ -549,13 +549,13 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         parkId2 = ((res2.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId2 = ((res2.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
         reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
+            .post('/api/v2/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
                 datetimeStart: "2100-06-10T09:00:00.000+02:00",
                 datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+            .expect(202).expect("location", /\/api\/v2\/reservations\/(.*)/)
 
         reservId = reservId.header.location.split("reservations/")[1]
 
@@ -570,43 +570,43 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         await mongoose.connection.close()
     })
 
-    test("DELETE /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
+    test("DELETE /api/v2/parkings/:parkingId on non existent parking, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .delete('/api/v1/parkings/100')
+            .delete('/api/v2/parkings/100')
             .set("Authorization", token)
             .expect(404, { message: "Parking not found" })
     })
 
-    test("DELETE /api/v1/parkings/:parkingId of another user, should respond with 403", async () => {
+    test("DELETE /api/v2/parkings/:parkingId of another user, should respond with 403", async () => {
         expect.assertions(0);
 
         const res = await request(app)
-            .delete(`/api/v1/parkings/${parkId}`)
+            .delete(`/api/v2/parkings/${parkId}`)
             .set("Authorization", token2)
             .expect(403, { message: 'User is not authorized to do this action' })
     })
 
-    test("DELETE /api/v1/parkings/:parkingId with invalid request (insertion is reserved), should respond with 400", async () => {
+    test("DELETE /api/v2/parkings/:parkingId with invalid request (insertion is reserved), should respond with 400", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .delete(`/api/v1/parkings/${parkId}`)
+            .delete(`/api/v2/parkings/${parkId}`)
             .set("Authorization", token)
             .expect(400, { message: 'Cannot delete parking with active insertions' })
     })
 
-    test("DELETE /api/v1/parkings/:parkingId with valid request, should respond with 200", async () => {
+    test("DELETE /api/v2/parkings/:parkingId with valid request, should respond with 200", async () => {
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
         expect.assertions(0);
         const res = await request(app)
-            .delete(`/api/v1/parkings/${parkId2}`)
+            .delete(`/api/v2/parkings/${parkId2}`)
             .set("Authorization", token2)
             .expect(200, { message: 'Parking deleted' })
     })
 })
 
 
-describe("PUT /api/v1/parkings/:parkingId", () => {
+describe("PUT /api/v2/parkings/:parkingId", () => {
     let userId
     let userId2
     let token
@@ -621,7 +621,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -637,7 +637,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpRes2 = await request(app).post('/api/v1/users').send({
+        const tmpRes2 = await request(app).post('/api/v2/users').send({
             username: "test2",
             password: "test2",
             email: "test2@test2",
@@ -672,7 +672,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -689,27 +689,27 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
         await mongoServer.stop()
     })
 
-    test("PUT /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
+    test("PUT /api/v2/parkings/:parkingId on non existent parking, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .put('/api/v1/parkings/100')
+            .put('/api/v2/parkings/100')
             .set("Authorization", token)
             .expect(404, { message: "Parking not found" })
     })
 
-    test("PUT /api/v1/parkings/:parkingId of another user, should respond with 403", async () => {
+    test("PUT /api/v2/parkings/:parkingId of another user, should respond with 403", async () => {
         expect.assertions(0);
 
         const res = await request(app)
-            .put(`/api/v1/parkings/${parkId}`)
+            .put(`/api/v2/parkings/${parkId}`)
             .set("Authorization", token2)
             .expect(403, { message: 'User is not authorized to do this action' })
     })
 
-    test("PUT /api/v1/parkings/:parkingId with invalid request, should respond with 400", async () => {
+    test("PUT /api/v2/parkings/:parkingId with invalid request, should respond with 400", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .put(`/api/v1/parkings/${parkId}`)
+            .put(`/api/v2/parkings/${parkId}`)
             .set("Authorization", token)
             .field("json", JSON.stringify({
                 name: "parking",
@@ -722,7 +722,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             .expect(400, { message: "Some fields cannot be modified or do not exist" })
     })
 
-    test("PUT /api/v1/parkings/:parkingId with valid request, should respond with 200", async () => {
+    test("PUT /api/v2/parkings/:parkingId with valid request, should respond with 200", async () => {
         expect.assertions(0);
         const jsonUpdate = JSON.stringify({
             name: "parkingUpdated",
@@ -732,7 +732,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             description: "description"
         })
         const res = await request(app)
-            .put(`/api/v1/parkings/${parkId}`)
+            .put(`/api/v2/parkings/${parkId}`)
             .set("Authorization", token)
             .field("json", jsonUpdate)
             .attach("image", "./static/img/logo.png")

@@ -1,7 +1,7 @@
 async function getMyParkings() {
     try {
         // fetch the user from the database
-        const res = await fetch("/api/v1/parkings/myParkings", {
+        const res = await fetch("/api/v2/parkings/myParkings", {
             method: "GET",
         });
         data = await res.json();
@@ -17,10 +17,10 @@ async function getMyParkings() {
                 $(tmpParkHTML.find("p")[0]).text(data[parking].name);
                 $(tmpParkHTML.find("p")[2]).text(
                     data[parking].address +
-                        " " +
-                        data[parking].city +
-                        " " +
-                        data[parking].country
+                    " " +
+                    data[parking].city +
+                    " " +
+                    data[parking].country
                 );
                 $(tmpParkHTML.find("p")[3]).text(data[parking].self);
                 $(tmpParkHTML.find("button")[0]).attr(
@@ -57,7 +57,7 @@ async function loadData() {
         // fetch the user from the database
         var id = $("#usrId").text();
 
-        const res = await fetch(`/api/v1/users/${id}`, {
+        const res = await fetch(`/api/v2/users/${id}`, {
             method: "GET",
         });
         data = await res.json();
@@ -69,11 +69,11 @@ async function loadData() {
             $("#userEmail").text(data.email);
             $("#userNameSurname").text(data.name + " " + data.surname);
         }
-    } catch (err) {}
+    } catch (err) { }
 }
 
 async function loadPrenotazioni() {
-    const res = await fetch(`/api/v1/reservations/myReservations`, {
+    const res = await fetch(`/api/v2/reservations/myReservations`, {
         method: "GET",
     });
     data = await res.json();
@@ -91,7 +91,7 @@ async function loadPrenotazioni() {
         data[i].datetimeEnd = new Date(data[i].datetimeEnd)
             .toLocaleString("it-IT")
             .slice(0, -3);
-            let id = data[i].self.split("/")[4]
+        let id = data[i].self.split("/")[4]
         tmpHTML =
             '<div class="col-sm-4 mb-3">' +
             '<p class="m-b-10 f-w-600">' +
@@ -137,7 +137,7 @@ exampleModal.addEventListener('show.bs.modal', function (event) {
         var button = event.relatedTarget
         var recipient = button.getAttribute('data-bs-name')
         var id = button.getAttribute('data-bs-id')
-        
+
         $('#parkId').text(id)
         var modalTitle = exampleModal.querySelector('.modal-title')
         var modalBodyInput = exampleModal.querySelector('.modal-body input')
@@ -199,8 +199,8 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
         display: {
             components: {
                 useTwentyfourHour: true
+            }
         }
-    }
     });
 });
 //--------------------------------- end period datepickers ------------------------------------
@@ -216,10 +216,10 @@ $('#exampleModal').on('hidden.bs.modal', function () {
 // modify reservation
 async function modifyReserv(reservationId) {
     // retrieve old reservation data from the server
-    fetch(`/api/v1/reservations/${reservationId}`)
+    fetch(`/api/v2/reservations/${reservationId}`)
         .then(response => response.json())
         .then(data => {
-            
+
             // convert date to gg/mm/aaaa, hh:mm format
             var date = new Date(data.datetimeStart)
             date.setHours(date.getHours())
@@ -303,7 +303,7 @@ async function modifyReservSubmit(reservationId) {
 
     try {
         // fetch the insertion from the database
-        const res = await fetch(`../api/v1/reservations/${reservationId}`, {
+        const res = await fetch(`../api/v2/reservations/${reservationId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -320,11 +320,11 @@ async function modifyReservSubmit(reservationId) {
             $('#close-modal').click()
             $('#btnSubmit').prop("disabled", false)
             $('#btnSubmit').text("Invia")
-            $(':input','form')
-            .not(':button, :submit, :reset, :hidden')
-            .val('')
-            .prop('checked', false)
-            .prop('selected', false);
+            $(':input', 'form')
+                .not(':button, :submit, :reset, :hidden')
+                .val('')
+                .prop('checked', false)
+                .prop('selected', false);
             // and reload the reservations
             // empty container
             $('#reservList').empty()
@@ -341,10 +341,9 @@ async function modifyReservSubmit(reservationId) {
 
 async function removeReserv(param) {
     //chiamata per eliminare la reservation
-    if(confirm('Vuoi veramente eliminare questa prenotazione?\nL\'operazione non può essere annullata.'))
-    {
+    if (confirm('Vuoi veramente eliminare questa prenotazione?\nL\'operazione non può essere annullata.')) {
         try {
-            const res = await fetch(`/api/v1/reservations/${param}`, {
+            const res = await fetch(`/api/v2/reservations/${param}`, {
                 method: "DELETE",
             });
             data = await res.json();

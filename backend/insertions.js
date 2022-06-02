@@ -103,8 +103,8 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         }
 
         // Set the correct self field and save it
-        parking.self = "/api/v1/parkings/" + parking.id
-        insertion.self = "/api/v1/insertions/" + insertion.id
+        parking.self = "/api/v2/parkings/" + parking.id
+        insertion.self = "/api/v2/insertions/" + insertion.id
 
         await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
         parking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`

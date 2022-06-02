@@ -18,7 +18,7 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
 
         // check that correct data is sent
         const validInsertionFields = ["name", "datetimeStart", "datetimeEnd", "priceHourly", "priceDaily", "minInterval", "recurrent", "recurrenceData"]
-        
+
         for (const field in req.body) {
             if (!validInsertionFields.includes(field)) {
                 return res.status(400).send({ message: "Some fields are invalid" })
@@ -47,8 +47,8 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         }
 
         insertion = await insertion.save()
-        
-        insertion.self = "/api/v1/insertions/" + insertion.id
+
+        insertion.self = "/api/v2/insertions/" + insertion.id
 
         insertion = await insertion.save()
 
@@ -56,7 +56,7 @@ router.post('/:parkId/insertions', tokenChecker, async (req, res) => {
         await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location('/api/v1/insertions/' + insertion.id).status(201).send()
+        res.location('/api/v2/insertions/' + insertion.id).status(201).send()
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

@@ -89,7 +89,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         if (minutesDiff < insertion.minInterval) {
             return res.status(400).send({ message: "Minimum reservation time interval not met" })
         }
-        
+
         // compute the price (days * pricePerDay + hoursLeft * pricePerHour)) 
         if (insertion.priceDaily) {
             const dayDiff = moment(reservation.datetimeEnd).diff(moment(reservation.datetimeStart), "days")
@@ -101,7 +101,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         reservation.price = reservation.price.toFixed(2)
 
         reservation = await reservation.save()
-        reservation.self = `/api/v1/reservations/${reservation.id}`
+        reservation.self = `/api/v2/reservations/${reservation.id}`
         reservation = await reservation.save()
 
         // Server URL (e.g. http://localhost:3000/)

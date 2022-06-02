@@ -13,13 +13,13 @@ router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
     try {
         // check that correct data is sent
         const validInsertionFields = ["title", "stars", "description", "reservation"]
-        
+
         for (const field in req.body) {
             if (!validInsertionFields.includes(field)) {
                 return res.status(400).send({ message: "Some fields are invalid" })
             }
         }
-        
+
         const reservation = await Reservation.findById(req.body.reservation)
         //check reservation owner
         if (reservation.client.toString() !== req.loggedInUser.userId) {
@@ -54,7 +54,7 @@ router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
         await parking.save()
 
         // link to the newly created resource is returned in the location header
-        res.location("/api/v1/parkings/" + parking.id + "/reviews/" + review.id).status(201).send()
+        res.location("/api/v2/parkings/" + parking.id + "/reviews/" + review.id).status(201).send()
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

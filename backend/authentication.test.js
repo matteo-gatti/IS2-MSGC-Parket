@@ -22,13 +22,13 @@ async function cleanDB() {
 
 let mongoServer
 
-describe("POST /api/v1/auth/login", () => {
+describe("POST /api/v2/auth/login", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
-        await request(app).post('/api/v1/users').send({
+        await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -46,7 +46,7 @@ describe("POST /api/v1/auth/login", () => {
 
     test("POST with wrong username", async () => {
         expect.assertions(2)
-        const response = await request(app).post("/api/v1/auth/login").send({
+        const response = await request(app).post("/api/v2/auth/login").send({
             identifier: "wrongtest",
             password: "wrongtest",
         }).expect(401).expect("Content-Type", /json/)
@@ -56,7 +56,7 @@ describe("POST /api/v1/auth/login", () => {
 
     test("POST with wrong password", async () => {
         expect.assertions(2)
-        const response = await request(app).post("/api/v1/auth/login").send({
+        const response = await request(app).post("/api/v2/auth/login").send({
             identifier: "test",
             password: "wrongtest",
         }).expect(401).expect("Content-Type", /json/)
@@ -66,27 +66,27 @@ describe("POST /api/v1/auth/login", () => {
 
     test("POST with correct credentials", async () => {
         expect.assertions(1)
-        const response = await request(app).post("/api/v1/auth/login").send({
+        const response = await request(app).post("/api/v2/auth/login").send({
             identifier: "test",
             password: "test",
         })
             .expect("Content-Type", /json/)
             .expect(200)
         if (response.body) {
-            expect(response.body).toMatchObject({ auth: true, token: /(.*)/, self: /\/api\/v1\/users\/(.*)/ })
+            expect(response.body).toMatchObject({ auth: true, token: /(.*)/, self: /\/api\/v2\/users\/(.*)/ })
         }
     })
 
 })
 
-describe("POST /api/v1/auth/logout", () => {
+describe("POST /api/v2/auth/logout", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
         //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
         await cleanDB()
-        await request(app).post('/api/v1/users').send({
+        await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -105,7 +105,7 @@ describe("POST /api/v1/auth/logout", () => {
     // the same test as user is or is not logged in, just checking it returns a token
     test("POST logout", async () => {
         expect.assertions(2)
-        const response = await request(app).post("/api/v1/auth/logout").send({
+        const response = await request(app).post("/api/v2/auth/logout").send({
             identifier: "test",
             password: "test",
         }).expect(200)
@@ -113,7 +113,7 @@ describe("POST /api/v1/auth/logout", () => {
             expect(response.body).toMatchObject({ auth: false, token: /(.*)/, })
         }
         // check if the token is invalidated
-        const response2 = await request(app).get("/api/v1/users/100").send({
+        const response2 = await request(app).get("/api/v2/users/100").send({
             token: response.body.token,
         }).expect(401)
         if (response2.body) {

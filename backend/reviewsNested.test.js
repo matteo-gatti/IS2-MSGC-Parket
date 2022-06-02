@@ -34,7 +34,7 @@ async function cleanDB() {
 
 let mongoServer
 
-describe("POST /api/v1/parkings/:parkId/reviews", () => {
+describe("POST /api/v2/parkings/:parkId/reviews", () => {
     let userId
     let userClientId
     let parkId
@@ -48,7 +48,7 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "testReviews",
             password: "testReviews",
             email: "testReviews@testReviews",
@@ -64,7 +64,7 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpResClient = await request(app).post('/api/v1/users').send({
+        const tmpResClient = await request(app).post('/api/v2/users').send({
             username: "clientReviews",
             password: "clientReviews",
             email: "clientReviews@clientReviews",
@@ -99,7 +99,7 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -111,13 +111,13 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
         expect.assertions(0)
 
         reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
+            .post('/api/v2/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
                 datetimeStart: "2100-06-10T09:00:00.000+02:00",
                 datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+            .expect(202).expect("location", /\/api\/v2\/reservations\/(.*)/)
         reservId = reservId.header.location.split("reservations/")[1]
 
         const res2 = await request(app)
@@ -131,10 +131,10 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
         await mongoose.connection.close()
     })
 
-    test("POST /api/v1/parkings/:parkId/reviews with non-existing parking, should respond with 404", async () => {
+    test("POST /api/v2/parkings/:parkId/reviews with non-existing parking, should respond with 404", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/10000000/reviews')
+            .post('/api/v2/parkings/10000000/reviews')
             .set("Authorization", tokenClient)
             .send({
                 stars: 5,
@@ -146,10 +146,10 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
     })
 
 
-    test("POST /api/v1/parkings/:parkId/reviews with wrong token, should respond with 403", async () => {
+    test("POST /api/v2/parkings/:parkId/reviews with wrong token, should respond with 403", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .post('/api/v2/parkings/' + parkId + '/reviews')
             .set("Authorization", token)
             .send({
                 stars: 5,
@@ -160,10 +160,10 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
             .expect(403, { message: "You are not the reservation owner" })
     })
 
-    test("POST /api/v1/parkings/:parkId/reviews with wrong fields, should respond with 400", async () => {
+    test("POST /api/v2/parkings/:parkId/reviews with wrong fields, should respond with 400", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .post('/api/v2/parkings/' + parkId + '/reviews')
             .set("Authorization", tokenClient)
             .send({
                 stars: 5,
@@ -176,10 +176,10 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
     })
 
     //create valid review with location of the new review
-    test("POST /api/v1/parkings/:parkId/reviews with valid fields, should respond with 201", async () => {
+    test("POST /api/v2/parkings/:parkId/reviews with valid fields, should respond with 201", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .post('/api/v2/parkings/' + parkId + '/reviews')
             .set("Authorization", tokenClient)
             .send({
                 stars: 5,
@@ -187,13 +187,13 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
                 title: "title",
                 reservation: reservId
             })
-            .expect(201).expect("location", /\/api\/v1\/parkings\/(.*)\/reviews\/(.*)/)
+            .expect(201).expect("location", /\/api\/v2\/parkings\/(.*)\/reviews\/(.*)/)
     })
 
 
 })
 
-describe("GET /api/v1/parkings/:parkId/reviews", () => {
+describe("GET /api/v2/parkings/:parkId/reviews", () => {
     let userId
     let userClientId
     let userClient2Id
@@ -209,7 +209,7 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "testReviews",
             password: "testReviews",
             email: "testReviews@testReviews",
@@ -225,7 +225,7 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpResClient = await request(app).post('/api/v1/users').send({
+        const tmpResClient = await request(app).post('/api/v2/users').send({
             username: "clientReviews",
             password: "clientReviews",
             email: "clientReviews@clientReviews",
@@ -260,7 +260,7 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -272,13 +272,13 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
         expect.assertions(0)
 
         reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
+            .post('/api/v2/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
                 datetimeStart: "2100-06-10T09:00:00.000+02:00",
                 datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+            .expect(202).expect("location", /\/api\/v2\/reservations\/(.*)/)
         reservId = reservId.header.location.split("reservations/")[1]
 
         const res2 = await request(app)
@@ -287,7 +287,7 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
             .expect(201)
 
         reviewId = await request(app)
-            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .post('/api/v2/parkings/' + parkId + '/reviews')
             .set("Authorization", tokenClient)
             .send({
                 stars: 5,
@@ -306,21 +306,21 @@ describe("GET /api/v1/parkings/:parkId/reviews", () => {
 
     })
 
-    test("GET /api/v1/parkings/:parkId/reviews with wrong parkId, should respond with 404", async () => {
+    test("GET /api/v2/parkings/:parkId/reviews with wrong parkId, should respond with 404", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .get('/api/v1/parkings/100/reviews')
+            .get('/api/v2/parkings/100/reviews')
             .set("Authorization", tokenClient)
             .expect(404, { message: "Parking not found" })
     })
 
-    test("GET /api/v1/parkings/:parkId/reviews with valid request, should respond with 200 and a list of reviews", async () => {
+    test("GET /api/v2/parkings/:parkId/reviews with valid request, should respond with 200 and a list of reviews", async () => {
         expect.assertions(1)
         const res = await request(app)
-            .get('/api/v1/parkings/'+parkId+'/reviews')
+            .get('/api/v2/parkings/' + parkId + '/reviews')
             .set("Authorization", tokenClient)
             .expect(200)
-        
+
         if (res.body) {
             expect(res.body).toMatchObject({
                 reviews: [{

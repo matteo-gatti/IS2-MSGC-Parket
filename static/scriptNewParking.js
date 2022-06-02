@@ -23,7 +23,7 @@ async function createParking() {
         longitude: long
     }))
     try {
-        const res = await fetch("../api/v1/parkings", {
+        const res = await fetch("../api/v2/parkings", {
             method: "POST",
             body: formData
         })
@@ -53,7 +53,7 @@ function initAutocomplete() {
         fields: ["address_components", "geometry"],
         types: ["address"],
     });
-    
+
     // When the user selects an address from the drop-down, populate the
     // address fields in the form.
     autocomplete.addListener("place_changed", fillInAddress);

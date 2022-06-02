@@ -49,16 +49,16 @@ app.use(expressWinston.logger({
 app.set('view engine', 'ejs');
 
 // Authentication routing and middleware
-app.use('/api/v1/auth', authentication)
+app.use('/api/v2/auth', authentication)
 
 // Resource routes
-app.use('/api/v1/users', users)
-app.use('/api/v1/parkings', parkings)
-app.use('/api/v1/parkings', insertionsNested)
-app.use('/api/v1/parkings', reviewsNested)
-app.use('/api/v1/insertions', insertions)
-app.use('/api/v1/insertions', reservationsNested)
-app.use('/api/v1/reservations', reservations)
+app.use('/api/v2/users', users)
+app.use('/api/v2/parkings', parkings)
+app.use('/api/v2/parkings', insertionsNested)
+app.use('/api/v2/parkings', reviewsNested)
+app.use('/api/v2/insertions', insertions)
+app.use('/api/v2/insertions', reservationsNested)
+app.use('/api/v2/reservations', reservations)
 
 // Winston error logging middleware
 app.use(expressWinston.errorLogger({

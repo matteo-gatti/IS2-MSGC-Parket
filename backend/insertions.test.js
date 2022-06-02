@@ -33,7 +33,7 @@ async function cleanDB() {
 
 let mongoServer
 
-describe("POST /api/v1/insertions", () => {
+describe("POST /api/v2/insertions", () => {
     let userId
     let token
 
@@ -42,7 +42,7 @@ describe("POST /api/v1/insertions", () => {
         mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -64,7 +64,7 @@ describe("POST /api/v1/insertions", () => {
         await mongoose.connection.close()
     })
 
-    test("POST /api/v1/insertions with invalid request, should respond with 400", async () => {
+    test("POST /api/v2/insertions with invalid request, should respond with 400", async () => {
         expect.assertions(0);
         const jsonstr = JSON.stringify({
             name: "parking",
@@ -84,7 +84,7 @@ describe("POST /api/v1/insertions", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -92,7 +92,7 @@ describe("POST /api/v1/insertions", () => {
             .expect(400, { message: "Bad request" })
     })
 
-    test("POST /api/v1/insertions with valid request, should respond with 201, and the locations of the parking and of the insertion", async () => {
+    test("POST /api/v2/insertions with valid request, should respond with 201, and the locations of the parking and of the insertion", async () => {
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
         expect.assertions(2);
 
@@ -114,7 +114,7 @@ describe("POST /api/v1/insertions", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -123,13 +123,13 @@ describe("POST /api/v1/insertions", () => {
         const locParking = (res.header.location.split(",")[0]).split(":")[1]
         const parkings = await Parking.find({})
         const locInsertion = (res.header.location.split(",")[1]).split(":")[1]
-        expect(locParking).toMatch(/\/api\/v1\/parkings\/(.*)/)
-        expect(locInsertion).toMatch(/\/api\/v1\/insertions\/(.*)/)
+        expect(locParking).toMatch(/\/api\/v2\/parkings\/(.*)/)
+        expect(locInsertion).toMatch(/\/api\/v2\/insertions\/(.*)/)
     })
 })
 
 
-describe("DELETE /api/v1/insertions/:insertionId", () => {
+describe("DELETE /api/v2/insertions/:insertionId", () => {
     let userId
     let userId2
     let token
@@ -145,7 +145,7 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
         //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -161,7 +161,7 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpRes2 = await request(app).post('/api/v1/users').send({
+        const tmpRes2 = await request(app).post('/api/v2/users').send({
             username: "test2",
             password: "test2",
             email: "test2@test2",
@@ -196,7 +196,7 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -225,7 +225,7 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
         })
 
         const res2 = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token2)
             .field("parking", jsonstr2)
             .field("insertion", jsonInsertion2)
@@ -236,13 +236,13 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
         insertionId2 = ((res2.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
         reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
+            .post('/api/v2/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
                 datetimeStart: "2100-06-10T09:00:00.000+02:00",
                 datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+            .expect(202).expect("location", /\/api\/v2\/reservations\/(.*)/)
 
         reservId = reservId.header.location.split("reservations/")[1]
 
@@ -257,43 +257,43 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
         await mongoose.connection.close()
     })
 
-    test("DELETE /api/v1/insertions/:insertionId on non existent insertion, should respond with 404", async () => {
+    test("DELETE /api/v2/insertions/:insertionId on non existent insertion, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .delete('/api/v1/insertions/100')
+            .delete('/api/v2/insertions/100')
             .set("Authorization", token)
             .expect(404, { message: "Insertion not found" })
     })
 
-    test("DELETE /api/v1/insertions/:insertionId of another user, should respond with 403", async () => {
+    test("DELETE /api/v2/insertions/:insertionId of another user, should respond with 403", async () => {
         expect.assertions(0);
 
         const res = await request(app)
-            .delete(`/api/v1/insertions/${insertionId2}`)
+            .delete(`/api/v2/insertions/${insertionId2}`)
             .set("Authorization", token)
             .expect(403, { message: "User doesn't have the permission to delete this Insertion" })
     })
 
-    test("DELETE /api/v1/insertions/:insertionId with invalid request (insertion is reserved), should respond with 400", async () => {
+    test("DELETE /api/v2/insertions/:insertionId with invalid request (insertion is reserved), should respond with 400", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .delete(`/api/v1/insertions/${insertionId}`)
+            .delete(`/api/v2/insertions/${insertionId}`)
             .set("Authorization", token)
             .expect(400, { message: "Can't delete insertion with active reservations" })
     })
 
-    test("DELETE /api/v1/insertions/:insertionId with valid request, should respond with 200", async () => {
+    test("DELETE /api/v2/insertions/:insertionId with valid request, should respond with 200", async () => {
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
         expect.assertions(0);
         const res = await request(app)
-            .delete(`/api/v1/insertions/${insertionId2}`)
+            .delete(`/api/v2/insertions/${insertionId2}`)
             .set("Authorization", token2)
             .expect(200, { message: "Insertion deleted" })
     })
 })
 
 
-describe("PUT /api/v1/insertions/:insertionId", () => {
+describe("PUT /api/v2/insertions/:insertionId", () => {
     let userId
     let userId2
     let token
@@ -309,7 +309,7 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
-        const tmpRes = await request(app).post('/api/v1/users').send({
+        const tmpRes = await request(app).post('/api/v2/users').send({
             username: "test",
             password: "test",
             email: "test@test",
@@ -325,7 +325,7 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             expiresIn: 86400 // expires in 24 hours
         })
 
-        const tmpRes2 = await request(app).post('/api/v1/users').send({
+        const tmpRes2 = await request(app).post('/api/v2/users').send({
             username: "test2",
             password: "test2",
             email: "test2@test2",
@@ -360,7 +360,7 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         })
 
         const res = await request(app)
-            .post('/api/v1/insertions')
+            .post('/api/v2/insertions')
             .set("Authorization", token)
             .field("parking", jsonstr)
             .field("insertion", jsonInsertion)
@@ -371,14 +371,14 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
         reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
+            .post('/api/v2/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
                 datetimeStart: "2100-06-10T09:00:00.000+02:00",
                 datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
-            
+            .expect(202).expect("location", /\/api\/v2\/reservations\/(.*)/)
+
         reservId = reservId.header.location.split("reservations/")[1]
     })
 
@@ -388,10 +388,10 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         await mongoServer.stop()
     })
 
-    test("PUT /api/v1/insertions/:insertionId on non existent insertion, should respond with 404", async () => {
+    test("PUT /api/v2/insertions/:insertionId on non existent insertion, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .put('/api/v1/insertions/100')
+            .put('/api/v2/insertions/100')
             .send({
                 name: "insertionUpdated",
                 datetimeStart: "2100-06-06T08:00:00.000+02:00",
@@ -405,11 +405,11 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .expect(404, { message: "Insertion not found" })
     })
 
-    test("PUT /api/v1/insertions/:insertionId of another user, should respond with 403", async () => {
+    test("PUT /api/v2/insertions/:insertionId of another user, should respond with 403", async () => {
         expect.assertions(0);
 
         const res = await request(app)
-            .put(`/api/v1/insertions/${insertionId}`)
+            .put(`/api/v2/insertions/${insertionId}`)
             .send({
                 name: "insertionUpdated",
                 datetimeStart: "2100-06-06T08:00:00.000+02:00",
@@ -423,10 +423,10 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .expect(403, { message: "You are not the owner of this parking" })
     })
 
-    test("PUT /api/v1/insertions/:insertionId with invalid request, should respond with 400", async () => {
+    test("PUT /api/v2/insertions/:insertionId with invalid request, should respond with 400", async () => {
         expect.assertions(0);
         const res = await request(app)
-            .put(`/api/v1/insertions/${insertionId}`)
+            .put(`/api/v2/insertions/${insertionId}`)
             .send({
                 name: "insertionUpdated",
                 datetimeStart: "2100-06-06T08:00:00.000+02:00",
@@ -441,11 +441,11 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .expect(400, { message: "Some fields cannot be modified" })
     })
 
-    test("PUT /api/v1/insertions/:insertionId with valid request, should respond with 200", async () => {
+    test("PUT /api/v2/insertions/:insertionId with valid request, should respond with 200", async () => {
         // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
         expect.assertions(0);
         const res = await request(app)
-            .put(`/api/v1/insertions/${insertionId}`)
+            .put(`/api/v2/insertions/${insertionId}`)
             .set("Authorization", token)
             .send({
                 name: "insertionUpdated",
@@ -472,10 +472,10 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         }
     })
 
-    test("PUT /api/v1/insertions/:insertionId with lower fees, should respond with 200 and edit the reservation list", async () => {
+    test("PUT /api/v2/insertions/:insertionId with lower fees, should respond with 200 and edit the reservation list", async () => {
         expect.assertions(1);
         const res = await request(app)
-            .put(`/api/v1/insertions/${insertionId}`)
+            .put(`/api/v2/insertions/${insertionId}`)
             .set("Authorization", token)
             .send({
                 name: "insertionUpdated",
@@ -489,7 +489,7 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .expect(200)
 
         const resReservation = await request(app)
-            .get(`/api/v1/reservations/${reservId}`)
+            .get(`/api/v2/reservations/${reservId}`)
             .set("Authorization", token2)
             .expect(200)
 

@@ -93,7 +93,12 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         let user = await User.findById(req.loggedInUser.userId)
         parking.owner = user
         parking = await parking.save()
-        insertion = await insertion.save()
+        try {
+            insertion = await insertion.save()
+        } catch(err) {
+            await parking.remove()
+            return res.status(400).json({ message: "Bad request" })
+        }
 
         // Set the correct self field and save it
         parking.self = "/api/v1/parkings/" + parking.id
@@ -101,22 +106,22 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
 
         await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
         parking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
-
+        
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
             if (err) throw err;
-        });
-
+        });        
         insertion = await insertion.save()
         parking = await parking.save()
-
+        
         // Insert the insertion in the parking and save
         parking.insertions.push(insertion)
         parking = await parking.save()
-
+        
         // Insert the parking in the user and save
         user.parkings.push(parking)
         await user.save()
-
+        
+        //print where this call came from
         res.status(201).location(`parking:${parking.self},insertion:${insertion.self}`).send()
     } catch (err) {
         console.log(err)
@@ -179,7 +184,7 @@ router.get('/:insertionId', async (req, res) => {
 // Modify an insertion 
 router.put('/:insertionId', tokenChecker, async (req, res) => {
     // check that correct data fields are sent
-    const validInsertionFields = ["id", "name", "priceHourly", "priceDaily", "minInterval", "datetimeStart", "datetimeEnd", "recurrent", "recurrenceData"]
+    const validInsertionFields = ["name", "priceHourly", "priceDaily", "minInterval", "datetimeStart", "datetimeEnd", "recurrent", "recurrenceData"]
     for (const field in req.body) {
         if (!validInsertionFields.includes(field)) {
             return res.status(400).send({ message: "Some fields cannot be modified" })
@@ -190,10 +195,7 @@ router.put('/:insertionId', tokenChecker, async (req, res) => {
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 
-    // check that the new insertion is not in the past
-    if (new Date(req.body.datetimeStart) < new Date()) {
-        return res.status(400).send({ message: "The new insertion is in the past" })
-    }
+    
 
     // if datetimeStart is after datetimeEnd, return error
     if (new Date(req.body.datetimeStart) > new Date(req.body.datetimeEnd)) {
@@ -213,12 +215,15 @@ router.put('/:insertionId', tokenChecker, async (req, res) => {
 
     try {
         // let the user modify the datetime start and end, if there is no reservation for that days
-        let insertion = await Insertion.findById(req.body.id).populate("parking")
-
+        let insertion = await Insertion.findById(req.params.insertionId).populate("parking")
         // if the user is not the owner of the parking, return 403
         var owner = String(insertion.parking.owner)
         if(owner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: "You are not the owner of this parking" })
+        }
+        // check that the new insertion is not in the past
+        if ( (new Date(insertion.datetimeStart)).toString() !== req.body.datetimeStart.toString() && req.body.datetimeStart < new Date()) {
+            return res.status(400).send({ message: "The new insertion is in the past" })
         }
 
         // prevent from modifying the insertion from non recurrent to recurrent
@@ -286,7 +291,7 @@ router.put('/:insertionId', tokenChecker, async (req, res) => {
         // therefore modifications only apply to the future reservations
 
         // finally update the insertion
-        insertion = await Insertion.findByIdAndUpdate(req.body.id, req.body)
+        insertion = await Insertion.findByIdAndUpdate(req.params.insertionId, req.body)
 
         return res.status(200).json(insertion)
     } catch(err) {
@@ -320,7 +325,7 @@ router.delete('/:insertionId', tokenChecker, async (req, res) => {
             return res.status(403).send({message: "User doesn't have the permission to delete this Insertion"})
         }
         if(insertion.reservations.length != 0) {
-            return res.status(405).send({message: "Can't delete insertion with active reservations"})
+            return res.status(400).send({message: "Can't delete insertion with active reservations"})
         }
         
        // cancello inserzione dalla lista nell'oggetto parcheggio

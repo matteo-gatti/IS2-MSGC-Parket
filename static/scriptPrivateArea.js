@@ -306,7 +306,6 @@ async function modifyReservSubmit(reservationId) {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                id: reservationId,
                 datetimeStart: d1,
                 datetimeEnd: d2,
             }),

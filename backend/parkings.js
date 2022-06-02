@@ -5,6 +5,7 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
+import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
@@ -275,16 +276,26 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
     }
 })
 
-// Delete a parking
 router.delete('/:parkingId', tokenChecker, async (req, res) => {
     try {
-        const parking = await Parking.findById(req.params.parkingId)
+        const parking = await Parking.findById(req.params.parkingId).populate([{
+            path: "insertions",
+            model: "Insertion",
+            select: { id: 1, reservations: 1 }
+        }])
         let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
         if (parkingOwner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
-        } if (parking.insertions.length != 0) {
-            return res.status(405).send({ message: 'Cannot delete parking with active insertions' })
+        } 
+        if (parking.insertions.length != 0) {
+            for (const insertion of parking.insertions) {
+                if (insertion.reservations.length !== 0) {
+                    return res.status(400).send({ message: 'Cannot delete parking with active insertions' })
+                } else {
+                    await Insertion.findByIdAndDelete(insertion.id)
+                }
+            }
         }
 
         const oldImage = parking.image.split("/")[parking.image.split("/").length - 1]
@@ -297,6 +308,5 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
-
 
 export { router as parkings }

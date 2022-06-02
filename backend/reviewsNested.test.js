@@ -165,15 +165,58 @@ describe("POST /api/v1/parkings/:parkId/reviews", () => {
         } */
     })
 
-    /*test("POST /api/v1/insertions/:insertionId/reservations with non-existing insertion, should respond with 404", async () => {
+    //non sono sicuro dei campi che devono essere settati
+
+    test("POST /api/v1/parkings/:parkId/reviews with non-existing parking, should respond with 404", async () => {
         expect.assertions(0)
         const res = await request(app)
-            .post('/api/v1/insertions/1000/reservations')
+            .post('/api/v1/parkings/1000/reviews')
             .set("Authorization", token)
-            .expect(404, { message: "Insertion not found" })
+            .send({
+                rating: 5,
+                comment: "comment",
+                title: "title"
+            })
+            .expect(404, { message: "Parking not found" })
+        })
 
-    })
 
+    test("POST /api/v1/parkings/:parkId/reviews with wrong fields, should respond with 400", async () => {
+        expect.assertions(0)
+        const res = await request(app)
+            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .set("Authorization", token)
+            .send({
+                rating: 5,
+                comment: "comment",
+                title: "title",
+                ciaoMamma: "sono famoso!"
+            })
+            .expect(400, { message: 'Some fields are invalid' })
+        })
+
+    //create valid review with location of the new review
+    test("POST /api/v1/parkings/:parkId/reviews with valid fields, should respond with 201", async () => {
+        expect.assertions(0)
+        const res = await request(app)
+            .post('/api/v1/parkings/' + parkId + '/reviews')
+            .set("Authorization", token)
+            .send({
+                rating: 5,
+                comment: "comment",
+                title: "title"
+            })
+            .expect(201) //se metto l'altro expect smette di andare metà roba? lmao
+        })
+
+        /*let review = new Review()
+        review.title = req.body.title
+        review.stars = req.body.stars
+        review.description = req.body.description
+        review.parking = parking
+        review.writer = user
+        review.datetime = new Date()*/
+    /*
     test("POST /api/v1/insertions/:insertionId/reservations without authentication, should respond with 403", async () => {
         expect.assertions(0)
         const res = await request(app)

@@ -2,6 +2,9 @@
 
 <head>
   <title>Dettaglio Inserzione</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="img/logo.png" />
   <!-- JQuery-->
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
@@ -201,6 +204,7 @@
                   <div class="col-sm-3 bg-c-lite-green user-profile">
                     <div class="card-block text-center text-white">
                       <div class="m-b-25">
+                        <input id="idParking" hidden></input>
                         <img src="" class="img-rounded img" style="border-radius: 50%;object-fit:cover;" id="imgParking" alt="Parking Image"
                           width="150px" height="150px">
                       </div>
@@ -244,6 +248,7 @@
                         </div>
                       </div>
                       <h6 class="m-b-20 m-t-40 p-b-5 b-b-default f-w-600">Prenotazioni</h6>
+                      <h5 id="noReservations" class="text-center" hidden>Nessuna prenotazione 😭</h5>
                       <div class="col-sm-4 mb-3" id="reservTemplate" hidden>
                         <h6 class="d-inline">Cliente: </h6>
                         <span class='text-muted' id="reservationClient" style='font-size: 14px;'></span>
@@ -313,12 +318,12 @@
     <div class="px-4 py-5  text-center" <% if (owner) { %> hidden <% } %>>
         <div class="col-lg-6 mx-auto">
           <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <button class="btn btn-outline-primary" disabled>Totale: <label id="lblTot">0</label>€</button>
             <button type="button" class="btn btn-primary btn-lg px-4 gap-3"
               onclick="createReservation()">Prenota</button>
-            <button class="btn btn-outline-primary" disabled>Pagamento in contanti</button>
           </div>
         </div>
-        <p><br>Altre opzioni di pagamento coming soon™️</p>
+        <div class="mt-2"><img src="https://cdn.brandfolder.io/KGT2DTA4/at/rvgw5pc69nhv9wkh7rw8ckv/Powered_by_Stripe_-_blurple.svg" width="150vw"></div>
     </div>
 
     <%- include("footer.ejs", {logged: logged}) %>

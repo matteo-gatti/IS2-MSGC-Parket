@@ -8,7 +8,7 @@ async function createNewInsertionAndParking() {
         splitDate = (date.replace(", ", "T").replaceAll("/", "-").split("T"))
         splitDate[0] = splitDate[0].split("-")
         date = splitDate[0][2] + "-" + splitDate[0][1] + "-" + splitDate[0][0] + "T" + splitDate[1]
-        return date + ":00+01:00"
+        return date + ":00+02:00"
     }
 
     if (!$('form')[0].checkValidity() || !$('form')[1].checkValidity()) {
@@ -60,6 +60,8 @@ async function createNewInsertionAndParking() {
     var city = $("#citta").val();
     var country = $("#nazione").val();
     var image = $("#image").prop("files")[0];
+    var lat = $("#lat").val();
+    var long = $("#long").val();
 
     const days = []
 
@@ -85,12 +87,14 @@ async function createNewInsertionAndParking() {
         description: desc,
         city: city,
         country: country,
-        image: ""
+        image: "",
+        latitude: lat,
+        longitude: long
     }))
 
-    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+01:00"
-    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+01:00"
-    
+    let timeS = "2000-07-17T" + $("#recurrenceStartInput").val() + ":00+02:00"
+    let timeE = "2000-07-17T" + $("#recurrenceEndInput").val() + ":00+02:00"
+
     formData.append('insertion', JSON.stringify({
         name: name,
         datetimeStart: d1,
@@ -108,7 +112,7 @@ async function createNewInsertionAndParking() {
     }))
 
     try {
-        const res = await fetch('../api/v1/insertions', {
+        const res = await fetch('../api/v2/insertions', {
             method: "POST",
             body: formData
         })
@@ -116,11 +120,11 @@ async function createNewInsertionAndParking() {
         if (!res.ok) {
             throw await res.json()
         } else {
-            
+
             window.location.href = "privateArea"
         }
     } catch (err) {
-        
+
         $("#message").text(err.message)
         $("#message").removeAttr('hidden')
         $('#btnSubmit').prop("disabled", false)
@@ -155,24 +159,24 @@ linked1Recurrence.updateOptions({
             seconds: false
         }
     },
-    defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+    defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
 })
 
 const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementById('recurrenceEndInput'), {
-        display: {
-            viewMode: "clock",
-            components: {
-                useTwentyfourHour: true,
-                decades: false,
-                year: false,
-                month: false,
-                date: false,
-                hours: true,
-                minutes: true,
-                seconds: false
-            }
-        },
-        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+    display: {
+        viewMode: "clock",
+        components: {
+            useTwentyfourHour: true,
+            decades: false,
+            year: false,
+            month: false,
+            date: false,
+            hours: true,
+            minutes: true,
+            seconds: false
+        }
+    },
+    defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
 });
 
 //using event listeners
@@ -194,7 +198,7 @@ linkedPicker1ElementRecurrence.addEventListener(tempusDominus.Namespace.events.c
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(0,0,0,0))),
+        defaultDate: (new Date((new Date()).setHours(0, 0, 0, 0))),
     });
 
 });
@@ -218,7 +222,7 @@ const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.event
                 seconds: false
             }
         },
-        defaultDate: (new Date((new Date()).setHours(23,59,0,0))),
+        defaultDate: (new Date((new Date()).setHours(23, 59, 0, 0))),
     });
 });
 
@@ -269,8 +273,8 @@ const subscription = linked2.subscribe(tempusDominus.Namespace.events.change, (e
         display: {
             components: {
                 useTwentyfourHour: true
+            }
         }
-    }
     });
 });
 function toggleRecurrence() {
@@ -281,18 +285,67 @@ function toggleRecurrence() {
     }
 }
 
-$('#insertion-hourlyPrice').keypress(function(e){
+$('#insertion-hourlyPrice').keypress(function (e) {
     var txt = String.fromCharCode(e.which);
-    if(!txt.match(/[0-9,]/)) 
-    {
+    if (!txt.match(/[0-9,]/)) {
         return false;
     }
 })
 
-$('#insertion-dailyPrice').keypress(function(e){
+$('#insertion-dailyPrice').keypress(function (e) {
     var txt = String.fromCharCode(e.which);
-    if(!txt.match(/[0-9,]/)) 
-    {
+    if (!txt.match(/[0-9,]/)) {
         return false;
     }
 })
+
+let autocomplete;
+let addressField;
+function initAutocomplete() {
+    addressField = document.querySelector("#indirizzo");
+    // Create the autocomplete object, restricting the search predictions to
+    // addresses in the US and Canada.
+    autocomplete = new google.maps.places.Autocomplete(addressField, {
+        fields: ["address_components", "geometry"],
+        types: ["address"],
+    });
+
+    // When the user selects an address from the drop-down, populate the
+    // address fields in the form.
+    autocomplete.addListener("place_changed", fillInAddress);
+}
+
+function fillInAddress() {
+    // Get the place details from the autocomplete object.
+    const place = autocomplete.getPlace();
+    let address1 = "";
+
+    for (const component of place.address_components) {
+        const componentType = component.types[0];
+
+        switch (componentType) {
+            case "street_number": {
+                address1 = `${component.long_name}`;
+                break;
+            }
+            case "route": {
+                number = address1
+                address1 = `${component.long_name}`;
+                if (number != "") address1 += ", " + number
+                break;
+            }
+            case "locality":
+                document.querySelector("#citta").value = component.long_name;
+                break;
+            case "country":
+                document.querySelector("#nazione").value = component.long_name;
+                break;
+        }
+    }
+
+    addressField.value = address1;
+    document.querySelector("#lat").value = place.geometry.location.lat();
+    document.querySelector("#long").value = place.geometry.location.lng();
+}
+
+window.initAutocomplete = initAutocomplete;

@@ -1,6 +1,8 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import winston from 'winston'
+import expressWinston from 'express-winston'
 
 import { users } from './users.js'
 import { parkings } from './parkings.js'
@@ -8,11 +10,10 @@ import { insertions } from './insertions.js'
 import { insertionsNested } from './insertionsNested.js'
 import { reservations } from './reservations.js'
 import { reservationsNested } from './reservationsNested.js'
+import { reviewsNested } from './reviewsNested.js'
 import authentication from './authentication.js'
 import statics from './statics.js'
 
-import winston from 'winston'
-import expressWinston from 'express-winston'
 
 const app = express()
 
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '100mb' }))
 app.use(cookieParser())
 app.use(cors())
 
+// Winston logging middleware
 app.use(expressWinston.logger({
   transports: [
     new winston.transports.Console()
@@ -44,20 +46,21 @@ app.use(expressWinston.logger({
   }
 }));
 
-
 app.set('view engine', 'ejs');
 
 // Authentication routing and middleware
-app.use('/api/v1/auth', authentication)
+app.use('/api/v2/auth', authentication)
 
 // Resource routes
-app.use('/api/v1/users', users)
-app.use('/api/v1/parkings', parkings)
-app.use('/api/v1/parkings', insertionsNested)
-app.use('/api/v1/insertions', insertions)
-app.use('/api/v1/insertions', reservationsNested)
-app.use('/api/v1/reservations', reservations)
+app.use('/api/v2/users', users)
+app.use('/api/v2/parkings', parkings)
+app.use('/api/v2/parkings', insertionsNested)
+app.use('/api/v2/parkings', reviewsNested)
+app.use('/api/v2/insertions', insertions)
+app.use('/api/v2/insertions', reservationsNested)
+app.use('/api/v2/reservations', reservations)
 
+// Winston error logging middleware
 app.use(expressWinston.errorLogger({
   transports: [
     new winston.transports.Console()

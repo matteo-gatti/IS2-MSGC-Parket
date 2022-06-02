@@ -26,6 +26,10 @@ const reservationSchema = new Schema({
         type: 'Number',
         required: true,
     },
+    reviewed: {
+        type: 'Boolean',
+        default: false
+    }
 })
 
 export default mongoose.model('Reservation', reservationSchema)

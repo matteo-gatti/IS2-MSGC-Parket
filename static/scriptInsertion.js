@@ -1,5 +1,11 @@
 function goBack() {
-    history.back();
+    if (window.history.length > 1 &&
+        document.referrer.indexOf(window.location.host) !== -1) {
+        window.history.back();
+    } else {
+        window.location.href = "/detailParking?id=" + $("#idParking").val()
+    }
+    /* history.back(); */
 }
 
 function convertToISO(date) {
@@ -13,7 +19,7 @@ function convertToISO(date) {
         splitDate[0][0] +
         "T" +
         splitDate[1];
-    return date + ":00+01:00";
+    return date + ":00+02:00";
 }
 
 function cleanseList() {
@@ -29,7 +35,7 @@ async function loadInfo() {
             throw { message: "insertion not in URL!" };
         } else {
             const res = await fetch(
-                `/api/v1/insertions/${urlParams.get("insertion")}`,
+                `/api/v2/insertions/${urlParams.get("insertion")}`,
                 {
                     method: "GET",
                 }
@@ -37,6 +43,8 @@ async function loadInfo() {
             data = await res.json();
 
             if (!res.ok) throw data;
+
+
 
             $("#insertionName").text(data.name);
             $("#insertionFrom").text(
@@ -91,15 +99,23 @@ async function loadInfo() {
                 );
             }
 
+            $("#idParking").val(data.parking._id);
             $("#imgParking").attr("src", data.parking.image);
             $("#nameParking").text(data.parking.name);
             $("#addressParking").html(
                 data.parking.address +
-                    ", " +
-                    data.parking.city +
-                    "<br>" +
-                    data.parking.country
+                ", " +
+                data.parking.city +
+                "<br>" +
+                data.parking.country
             );
+            if (data.reservations.length === 0) {
+                $('#noReservations').removeAttr('hidden');
+
+            }
+            else {
+                $('#noReservations').attr('hidden', true);
+            }
 
             let container = $("#reservList");
             container.empty();
@@ -130,7 +146,7 @@ async function loadInfo() {
                 container.append(tmpHTML);
             }
         }
-    } catch (err) {}
+    } catch (err) { }
 }
 
 async function main() {
@@ -146,7 +162,6 @@ async function main() {
     const linkedPicker1Element = document.getElementById("linkedPickers1");
     const linkedPicker2Element = document.getElementById("linkedPickers2");
     const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
-    //linked1.locale(localization)
 
     let recurrent = false;
     let daysOfWeekDisabled = [];
@@ -243,6 +258,7 @@ async function main() {
 
     //Opzioni di A quando cambia DA
     linked1.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
         let eventDate = new tempusDominus.DateTime(e.date);
         let enabledDates = [];
         let recmaxDate = maxDate;
@@ -259,7 +275,6 @@ async function main() {
             }
         }
 
-        //
         try {
             linked2.updateOptions({
                 defaultDate: eventDate,
@@ -295,68 +310,40 @@ async function main() {
         }
     });
 
-    /* linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
-        
-        
+    linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
+        checkDatesAndUpdatePrice();
+    });
 
-        const spasticMinDate = new tempusDominus.DateTime(minDate);
-        spasticMinDate.setDate(spasticMinDate.getDate()-1);
-
-        
-
-        let newminDate = new tempusDominus.DateTime().startOf("minutes");
-        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
-            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
-        }
-
-        linked1.updateOptions({
-            defaultDate: newminDate,
-            restrictions: {
-                minDate: newminDate,
-                maxDate: e.date,
-                daysOfWeekDisabled: daysOfWeekDisabled,
-                enabledHours: enabledHours
-            },
-            display: {
-                components: {
-                    useTwentyfourHour: true
-                }
-            }
-        });
-      }); */
-
-    // !BROKEN
-    /* //Opzioni di DA quando cambia A
-    linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, function (e) {
-        
-        
-
-        const spasticMinDate = new tempusDominus.DateTime(minDate);
-        spasticMinDate.setDate(spasticMinDate.getDate()-1);
-
-        
-
-        let newminDate = new tempusDominus.DateTime().startOf("minutes");
-        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
-            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
-        }
-
-        linked1.updateOptions({
-            defaultDate: newminDate,
-            restrictions: {
-                minDate: newminDate,
-                maxDate: e.detail.date,
-                daysOfWeekDisabled: daysOfWeekDisabled,
-                enabledHours: enabledHours
-            },
-            display: {
-                components: {
-                    useTwentyfourHour: true
-                }
-            }
-        });
-    }); */
     //--------------------------------- end period datepickers ------------------------------------
+}
+
+function checkDatesAndUpdatePrice() {
+    try {
+        let dateFrom = new Date(convertToISO($("#linkedPickers1Input").val()));
+        let dateTo = new Date(convertToISO($("#linkedPickers2Input").val()));
+        if (Object.prototype.toString.call(dateFrom) !== "[object Date]" || Object.prototype.toString.call(dateTo) !== "[object Date]" || isNaN(dateFrom) || isNaN(dateTo))
+            return
+
+        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);
+        let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0]) : 0
+        let total = 0
+        // get hours between dates
+        let minutes = Math.abs(dateTo - dateFrom) / 60e3;
+        // get days between dates
+        if (priceD !== 0) {
+            let days = Math.floor((dateTo - dateFrom) / 864e5)
+            minutes -= days * 24 * 60;
+            total += days * priceD;
+        }
+
+        total += minutes / 60 * priceH;
+        // round to 2 decimals
+        total = Math.round(total * 100) / 100;
+        $("#lblTot").text('' + total)
+
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 async function createReservation() {
@@ -369,7 +356,7 @@ async function createReservation() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const res = await fetch(
-            `../api/v1/insertions/${urlParams.get("insertion")}/reservations`,
+            `../api/v2/insertions/${urlParams.get("insertion")}/reservations`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -379,11 +366,11 @@ async function createReservation() {
                 }),
             }
         );
-
-        // data = await res.json()
         if (!res.ok) {
             throw await res.json();
         } else {
+            let data = await res.json();
+            window.location.href = data.url
             cleanseList();
             await loadInfo();
         }

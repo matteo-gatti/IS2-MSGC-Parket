@@ -30,20 +30,20 @@ router.post('', async (req, res) => {
     if (!req.body.password) {
         return res.status(400).send({ message: 'Some fields are empty or undefined' })
     }
-    
+
     // Hash the password
     user.password = await bcrypt.hash(user.password, stage.saltingRounds)
 
     try {
         let newUser = await user.save()
-        newUser.self = "/api/v1/users/" + newUser._id
+        newUser.self = "/api/v2/users/" + newUser._id
 
         let userId = newUser._id
-        
+
         await newUser.save()
 
         // link to the newly created resource is returned in the location header
-        return res.location('/api/v1/users/' + userId).status(201).send()
+        return res.location('/api/v2/users/' + userId).status(201).send()
     } catch (err) {
         console.log(err)
         if (err.code === 11000) {
@@ -57,7 +57,7 @@ router.post('', async (req, res) => {
 router.get('/:userId', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
-        const user = await User.findById(req.params.userId, {_id: 0, __v: 0}).populate("parkings")
+        const user = await User.findById(req.params.userId, { _id: 0, __v: 0 }).populate("parkings")
         return res.status(200).send({ self: user.self, name: user.name, surname: user.surname, email: user.email, username: user.username, parkings: user.parkings })
     } catch (err) {
         console.log(err)
@@ -70,7 +70,6 @@ router.get('/:userId/reservations', tokenChecker, async (req, res) => {
     if (!checkUserAuthorization(req, res)) return
     try {
         const reservations = await Reservation.find({ client: { $eq: req.params.userId } }, { _id: 0, __v: 0, client: 0 })
-        console.log("Printing user's reservations", reservations)
         return res.status(200).json(reservations)
     } catch (err) {
         console.log(err)
@@ -92,7 +91,7 @@ router.put('/:userId', tokenChecker, async (req, res) => {
     if (req.body["password"]) {
         req.body["password"] = await bcrypt.hash(req.body["password"], stage.saltingRounds)
     }
-    
+
     try {
         await User.findByIdAndUpdate(req.params.userId, req.body, { runValidators: true })
         return res.status(200).send({ message: 'Update successful' })
@@ -124,7 +123,7 @@ router.delete('/:userId', tokenChecker, async (req, res) => {
             await Parking.findByIdAndDelete(parking._id)
         }
         // delete all reservations of the user
-        await Reservation.deleteMany({ client: { $eq: req.params.userId} })
+        await Reservation.deleteMany({ client: { $eq: req.params.userId } })
         // finally delete the user
         await User.findByIdAndDelete((req.params.userId))
         return res.status(200).send({ message: 'Delete successful' })

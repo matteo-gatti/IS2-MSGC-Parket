@@ -13,8 +13,8 @@ async function register(e) {
         if (!emailPattern.test(email)) {
             throw { message: "Email is not valid" }
         }
-        
-        const res = await fetch("../api/v1/users", {
+
+        const res = await fetch("../api/v2/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -46,7 +46,7 @@ async function login(e) {
     const password = $("#password").val()
     try {
         // fetch the user from the database
-        const res = await fetch("../api/v1/auth/login", {
+        const res = await fetch("../api/v2/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ identifier: identifier, password: password }),
@@ -59,7 +59,7 @@ async function login(e) {
         if (data.token) {
             // save jwt token to cookie
             document.cookie = "token=" + data.token
-            window.location.href = "/"
+            window.location.href = document.referrer
         }
     } catch (err) {
         $("#message").text(err.message)
@@ -73,7 +73,7 @@ $("#register").submit(register)
 // This function is called when logout button is clicked
 async function logout() {
     // remove jwt token
-    const res = await fetch("/api/v1/auth/logout", {
+    const res = await fetch("/api/v2/auth/logout", {
         method: "POST"
     })
     data = await res.json()

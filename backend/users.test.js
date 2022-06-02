@@ -1,7 +1,7 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
+import Parking from './models/parking.js'
 import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
@@ -9,7 +9,24 @@ import { MongoMemoryServer } from "mongodb-memory-server"
 import fs from 'fs'
 import path from 'path'
 
+import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
+
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
+
 async function cleanDB() {
+    //iterate over parkings
+    const parkings = await Parking.find({});
+    for (let parking of parkings) {
+        const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
+        await GCloud.deleteFile(imageName);
+    }
+
     const collections = mongoose.connection.collections
 
     for (const key in collections) {
@@ -17,7 +34,7 @@ async function cleanDB() {
     }
 }
 let mongoServer
-describe("POST /api/v1/users", () => {
+describe("POST /api/v2/users", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
@@ -46,46 +63,46 @@ describe("POST /api/v1/users", () => {
         }
     });
 
-    test("POST /api/v1/users/ without username should respond with an error message", async () => {
+    test("POST /api/v2/users/ without username should respond with an error message", async () => {
         expect.assertions(1)
-        const res = await request(app).post('/api/v1/users').send({ password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
+        const res = await request(app).post('/api/v2/users').send({ password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
             .expect(400).expect("Content-Type", /json/)
         if (res.body)
             expect(res.body).toMatchObject({ message: 'Some fields are empty or undefined' });
     });
 
-    test("POST /api/v1/users/ without password should respond with an error message", async () => {
+    test("POST /api/v2/users/ without password should respond with an error message", async () => {
         expect.assertions(1)
-        const res = await request(app).post('/api/v1/users').send({ username: "ciao", name: "ciao", surname: "ciao", email: "ciao" })
+        const res = await request(app).post('/api/v2/users').send({ username: "ciao", name: "ciao", surname: "ciao", email: "ciao" })
             .expect(400).expect("Content-Type", /json/)
         if (res.body)
             expect(res.body).toMatchObject({ message: 'Some fields are empty or undefined' });
     });
 
-    test("POST /api/v1/users/ with already used username should respond with a 409 and error message", async () => {
+    test("POST /api/v2/users/ with already used username should respond with a 409 and error message", async () => {
         expect.assertions(1)
-        await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
-        const res = await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao2", name: "ciao2", surname: "ciao2", email: "ciao2" })
+        await request(app).post('/api/v2/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
+        const res = await request(app).post('/api/v2/users').send({ username: "ciao", password: "passCiao2", name: "ciao2", surname: "ciao2", email: "ciao2" })
             .expect(409).expect("Content-Type", /json/)
         if (res.body)
             expect(res.body).toMatchObject({ message: 'Username or email already exists' });
     });
 
-    test("POST /api/v1/users/ with correct data should respond with a success message", async () => {
+    test("POST /api/v2/users/ with correct data should respond with a success message", async () => {
         expect.assertions(0)
-        await request(app).post('/api/v1/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
-            .expect(201).expect("location", /\/api\/v1\/users\/(.*)/);
+        await request(app).post('/api/v2/users').send({ username: "ciao", password: "passCiao", name: "ciao", surname: "ciao", email: "ciao" })
+            .expect(201).expect("location", /\/api\/v2\/users\/(.*)/);
     });
 })
 
-describe("GET /api/v1/users/:userid", () => {
+describe("GET /api/v2/users/:userid", () => {
     let userId
     let token
     let faketoken
     beforeAll(async () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
-        userId = await request(app).post('/api/v1/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matte@circa.com' })
+        userId = await request(app).post('/api/v2/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matte@circa.com' })
         userId = userId.header.location.split("users/")[1]
         var payload = {
             userId: userId,
@@ -106,43 +123,30 @@ describe("GET /api/v1/users/:userid", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
-
-        const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        }
     });
 
-    test("GET /api/v1/users/:userid should respond with the user info", async () => {
+    test("GET /api/v2/users/:userid should respond with the user info", async () => {
         expect.assertions(1)
-        let res = await request(app).get('/api/v1/users/' + userId).set("Authorization", token).expect("Content-Type", /json/)
+        let res = await request(app).get('/api/v2/users/' + userId).set("Authorization", token).expect("Content-Type", /json/)
             .expect(200)
         if (res.body) {
-            expect(res.body).toMatchObject({ self: /\/api\/v1\/users\/(.*)/, username: 'pollino22', name: 'matteo', surname: 'circa', email: 'matte@circa.com', parkings: [] })
+            expect(res.body).toMatchObject({ self: /\/api\/v2\/users\/(.*)/, username: 'pollino22', name: 'matteo', surname: 'circa', email: 'matte@circa.com', parkings: [] })
         }
 
     });
 
-    test("GET /api/v1/users/:userid should respond with 401 with token missing", async () => {
+    test("GET /api/v2/users/:userid should respond with 401 with token missing", async () => {
         expect.assertions(0)
-        await request(app).get('/api/v1/users/100').expect(401, { auth: false, message: 'Token missing or invalid' });
+        await request(app).get('/api/v2/users/100').expect(401, { auth: false, message: 'Token missing or invalid' });
     });
 
-    test("GET /api/v1/users/:userid should respond with 403 with wrong token", async () => {
+    test("GET /api/v2/users/:userid should respond with 403 with wrong token", async () => {
         expect.assertions(0)
-        await request(app).get('/api/v1/users/100').set("Authorization", faketoken).expect(403, { message: 'User is not authorized to do this action' });
+        await request(app).get('/api/v2/users/100').set("Authorization", faketoken).expect(403, { message: 'User is not authorized to do this action' });
     });
 })
 
-describe("GET /api/v1/users/:userid/reservations", () => {
+describe("GET /api/v2/users/:userid/reservations", () => {
     let mockUser
     let mockReserv
     let payload
@@ -151,24 +155,24 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         jest.setTimeout(5000);
         app.locals.db = await mongoose.connect(mongoServer.getUri())
         await cleanDB()
-        mockUser = await request(app).post('/api/v1/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matteo@circa.com' })
+        mockUser = await request(app).post('/api/v2/users').send({ username: 'pollino22', password: "random", name: 'matteo', surname: 'circa', email: 'matteo@circa.com' })
 
         mockUser = mockUser.header.location.split("users/")[1]
         mockReserv = jest.spyOn(Reservation, "find").mockImplementation((criterias) => {
             let ret = [{
-                datetimeStart: "2022-05-31T11:34:00.000+00:00",
-                datetimeEnd: "2022-05-31T14:34:00.000+00:00",
+                datetimeStart: "2100-05-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-05-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 3,
-                self: "/api/v1/reservations/sjdlkasdjsd"
+                self: "/api/v2/reservations/sjdlkasdjsd"
 
             },
             {
-                datetimeStart: "2022-06-31T11:34:00.000+00:00",
-                datetimeEnd: "2022-06-31T14:34:00.000+00:00",
+                datetimeStart: "2100-06-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-06-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 7,
-                self: "/api/v1/reservations/asdasdad"
+                self: "/api/v2/reservations/asdasdad"
             }
             ];
             return ret
@@ -186,25 +190,11 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         mockReserv.mockRestore()
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
-        console.log("MONGO CONN", mongoServer.state)
-
-        const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        }
     });
 
-    test("GET /api/v1/users/:userid/reservations should respond with 200 and a list of reservations", async () => {
+    test("GET /api/v2/users/:userid/reservations should respond with 200 and a list of reservations", async () => {
         expect.assertions(0)
-        const res = await request(app).get('/api/v1/users/' + mockUser + '/reservations').set("Authorization", token).expect(200)//, { message: 'User is not authorized to do this action' });
+        const res = await request(app).get('/api/v2/users/' + mockUser + '/reservations').set("Authorization", token).expect(200)//, { message: 'User is not authorized to do this action' });
     })
 })

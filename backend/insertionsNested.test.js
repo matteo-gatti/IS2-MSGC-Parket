@@ -10,18 +10,17 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
+import GCloud from './gcloud/gcloud.js'
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -150,8 +149,8 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 //name: "insertion name", 
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -165,8 +164,8 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -219,8 +218,8 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })

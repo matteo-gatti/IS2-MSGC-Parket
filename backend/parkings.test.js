@@ -10,18 +10,18 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
+import GCloud from './gcloud/gcloud.js'
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -116,7 +116,6 @@ describe("POST /api/v1/parkings", () => {
 
     //returns write ECONNABORTED, se metto try catch passa ma non credo sia giusto cosi, non riesco a vedere i console log :(
     test("POST /api/v1/parkings without token should respond with 401", async () => {
-        console.log("NON STO CAOENDO")
         expect.assertions(0)
         let jsonstr = JSON.stringify({
             name: "parking",
@@ -126,19 +125,15 @@ describe("POST /api/v1/parkings", () => {
             description: "description",
             image: ""
         })
-        console.log("ERIC SUARDIIIIII")
-        try{
-        console.log("MATTEO CIRCAAAAA")
-        const res = await request(app)
-            .post('/api/v1/parkings')
-            .set("Authorization", null)
-            .field("json", jsonstr)
-            .attach("image", "./static/img/logo.png")
-            .set('content-type', 'multipart/form-data').expect(401, { auth: false, message: 'Token missing or invalid' })
-        console.log("MATTEO MERLERRRRRR")
-        }catch(err){
-            console.log(`AAAAAAAAAAA ${err.message}`) // non printa ;(
-            //expect 401?
+        try {
+            const res = await request(app)
+                .post('/api/v1/parkings')
+                .set("Authorization", null)
+                .field("json", jsonstr)
+                .attach("image", "./static/img/logo.png")
+                .set('content-type', 'multipart/form-data').expect(401, { auth: false, message: 'Token missing or invalid' })
+        } catch (err) {
+            console.log(err)
         }
     })
 })
@@ -334,8 +329,8 @@ describe("GET /api/v1/parkings", () => {
             .set("Authorization", token)
             .send({
                 name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -352,8 +347,8 @@ describe("GET /api/v1/parkings", () => {
             .set("Authorization", token)
             .send({
                 name: "insertion 2",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 99,
                 priceDaily: 999,
             })
@@ -470,8 +465,8 @@ describe("GET /api/v1/parkings search filter", () => {
             .set("Authorization", token)
             .send({
                 name: "insertion",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 50,
                 priceDaily: 50,
             })
@@ -481,8 +476,8 @@ describe("GET /api/v1/parkings search filter", () => {
             .set("Authorization", token)
             .send({
                 name: "insertion 2",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 150,
                 priceDaily: 150,
             })
@@ -569,8 +564,8 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -583,35 +578,35 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
             .field("insertion", jsonInsertion)
             .attach("image", "./static/img/logo.png")
             .expect(201)
-        
+
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
         const jsonstr2 = JSON.stringify({
-                name: "parking",
-                address: "address",
-                city: "city",
-                country: "country",
-                description: "description",
-                image: "",
-            })
-    
+            name: "parking",
+            address: "address",
+            city: "city",
+            country: "country",
+            description: "description",
+            image: "",
+        })
+
         const jsonInsertion2 = JSON.stringify({
-                name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
-                priceHourly: 10,
-                priceDaily: 100,
-                minInterval: 60
-            })
-    
+            name: "insertion name",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
+            priceHourly: 10,
+            priceDaily: 100,
+            minInterval: 60
+        })
+
         const res2 = await request(app)
-                .post('/api/v1/insertions')
-                .set("Authorization", token2)
-                .field("parking", jsonstr2)
-                .field("insertion", jsonInsertion2)
-                .attach("image", "./static/img/logo.png")
-                .expect(201)
+            .post('/api/v1/insertions')
+            .set("Authorization", token2)
+            .field("parking", jsonstr2)
+            .field("insertion", jsonInsertion2)
+            .attach("image", "./static/img/logo.png")
+            .expect(201)
 
         parkId2 = ((res2.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId2 = ((res2.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
@@ -619,15 +614,15 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
-            
+
         reservId = reservId.header.location.split("reservations/")[1]
 
         await request(app)
-            .get('/success?insertion=' + insertionId+ "&reservation=" + reservId)
+            .get('/success?insertion=' + insertionId + "&reservation=" + reservId)
             .set("Authorization", token2)
             .expect(201)
     })
@@ -650,21 +645,21 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
         } */
     })
 
-    test("DELETE /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => { 
+    test("DELETE /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
             .delete('/api/v1/parkings/100')
             .set("Authorization", token)
-            .expect(404, { message: "Parking not found" })   
+            .expect(404, { message: "Parking not found" })
     })
 
-    test("DELETE /api/v1/parkings/:parkingId of another user, should respond with 403", async () => { 
+    test("DELETE /api/v1/parkings/:parkingId of another user, should respond with 403", async () => {
         expect.assertions(0);
-        
+
         const res = await request(app)
             .delete(`/api/v1/parkings/${parkId}`)
             .set("Authorization", token2)
-            .expect(403, { message: 'User is not authorized to do this action' })   
+            .expect(403, { message: 'User is not authorized to do this action' })
     })
 
     test("DELETE /api/v1/parkings/:parkingId with invalid request (insertion is reserved), should respond with 400", async () => {
@@ -745,8 +740,8 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -759,16 +754,16 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             .field("insertion", jsonInsertion)
             .attach("image", "./static/img/logo.png")
             .expect(201)
-        
+
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
-    
+
         /* reservId = await request(app)
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
             
@@ -793,21 +788,21 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
         } */
     })
 
-    test("PUT /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => { 
+    test("PUT /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
         expect.assertions(0);
         const res = await request(app)
             .put('/api/v1/parkings/100')
             .set("Authorization", token)
-            .expect(404, { message: "Parking not found" })   
+            .expect(404, { message: "Parking not found" })
     })
 
-    test("PUT /api/v1/parkings/:parkingId of another user, should respond with 403", async () => { 
+    test("PUT /api/v1/parkings/:parkingId of another user, should respond with 403", async () => {
         expect.assertions(0);
-        
+
         const res = await request(app)
             .put(`/api/v1/parkings/${parkId}`)
             .set("Authorization", token2)
-            .expect(403, { message: 'User is not authorized to do this action' })   
+            .expect(403, { message: 'User is not authorized to do this action' })
     })
 
     test("PUT /api/v1/parkings/:parkingId with invalid request, should respond with 400", async () => {
@@ -816,12 +811,12 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             .put(`/api/v1/parkings/${parkId}`)
             .set("Authorization", token)
             .field("json", JSON.stringify({
-                    name: "parking",
-                    address: "address",
-                    city: "city",
-                    country: "country",
-                    description: "description",
-                    ciaoMamma: 'guarda come mi diverto'
+                name: "parking",
+                address: "address",
+                city: "city",
+                country: "country",
+                description: "description",
+                ciaoMamma: 'guarda come mi diverto'
             }))
             .expect(400, { message: "Some fields cannot be modified or do not exist" })
     })
@@ -842,7 +837,7 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
             .field("json", jsonUpdate)
             .attach("image", "./static/img/logo.png")
             .expect(200)
-            
+
         if (res.body && res.body.length === 1 && res.body[0]) {
             expect(res.body[0]).toMatchObject({
                 _id: idPark,

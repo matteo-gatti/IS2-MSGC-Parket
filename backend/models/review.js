@@ -2,10 +2,10 @@ import mongoose from 'mongoose'
 var Schema = mongoose.Schema
 
 const reviewSchema = new Schema({
-    self: {
+    /* self: {
         type: 'String',
         trim: 'true'
-    },
+    }, */
     title: {
         type: 'String',
         trim: true,
@@ -17,13 +17,13 @@ const reviewSchema = new Schema({
     },
     stars: {
         type: 'Number',
-        default: 5
+        required: true
     },
     description: {
         type: 'String',
-        default: false,
+        required: true
     },
-    writer:{
+    writer: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },

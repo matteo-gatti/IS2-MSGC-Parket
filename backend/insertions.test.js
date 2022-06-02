@@ -11,18 +11,17 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
+import GCloud from './gcloud/gcloud.js'
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -91,8 +90,8 @@ describe("POST /api/v1/insertions", () => {
 
         const jsonInsertion = JSON.stringify({
             //name: "insertion name", 
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
         })
@@ -121,8 +120,8 @@ describe("POST /api/v1/insertions", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
         })
@@ -203,8 +202,8 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -232,8 +231,8 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
 
         const jsonInsertion2 = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -254,8 +253,8 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
 
@@ -380,8 +379,8 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -400,16 +399,16 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
 
         const inser = await Insertion.find({})
 
-        /* reservId = await request(app)
+        reservId = await request(app)
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
             
-        reservId = reservId.header.location.split("reservations/")[1] */
+        reservId = reservId.header.location.split("reservations/")[1]
     })
 
     afterAll(async () => {
@@ -436,8 +435,8 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .put('/api/v1/insertions/100')
             .send({
                 name: "insertionUpdated",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 minInterval: 10,
                 priceHourly: 10,
                 priceDaily: 10,
@@ -454,8 +453,8 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .put(`/api/v1/insertions/${insertionId}`)
             .send({
                 name: "insertionUpdated",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 minInterval: 10,
                 priceHourly: 10,
                 priceDaily: 10,
@@ -471,8 +470,8 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .put(`/api/v1/insertions/${insertionId}`)
             .send({
                 name: "insertionUpdated",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 minInterval: 10,
                 priceHourly: 10,
                 priceDaily: 10,
@@ -491,8 +490,8 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             .set("Authorization", token)
             .send({
                 name: "insertionUpdated",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-08-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-08-06T08:00:00.000+02:00",
                 priceHourly: 100,
                 priceDaily: 100,
                 minInterval: 10,
@@ -504,12 +503,45 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
             expect(res.body[0]).toMatchObject({
                 _id: insertionId,
                 name: "insertionUpdated",
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-08-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-08-06T08:00:00.000+02:00",
                 priceHourly: 100,
                 priceDaily: 100,
                 minInterval: 10,
                 recurrent: false
+            })
+        }
+    })
+
+    test("PUT /api/v1/insertions/:insertionId with lower fees, should respond with 200 and edit the reservation list", async () => {
+        expect.assertions(1);
+        const res = await request(app)
+            .put(`/api/v1/insertions/${insertionId}`)
+            .set("Authorization", token)
+            .send({
+                name: "insertionUpdated",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-08-06T08:00:00.000+02:00",
+                priceHourly: 1,
+                priceDaily: 1,
+                minInterval: 10,
+                recurrent: false
+            })
+            .expect(200)
+
+        const resReservation = await request(app)
+            .get(`/api/v1/reservations/${reservId}`)
+            .set("Authorization", token2)
+            .expect(200)
+
+        if (resReservation.body) {
+            expect(resReservation.body).toMatchObject({
+                datetimeStart: expect.any(String),
+                datetimeEnd: expect.any(String),
+                price: 1,
+                client: {
+                    _id: userId2
+                }
             })
         }
     })

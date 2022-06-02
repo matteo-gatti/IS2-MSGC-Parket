@@ -12,7 +12,7 @@ async function cleanDB() {
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections

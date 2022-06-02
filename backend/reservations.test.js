@@ -11,18 +11,17 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
+import GCloud from './gcloud/gcloud.js'
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -41,6 +40,7 @@ describe("GET /api/v1/reservations/myReservations", () => {
     let token2
     let parkId
     let insertionId
+    let reservId
 
     beforeAll(async () => {
         jest.setTimeout(5000);
@@ -92,8 +92,8 @@ describe("GET /api/v1/reservations/myReservations", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -109,14 +109,20 @@ describe("GET /api/v1/reservations/myReservations", () => {
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
-        await request(app)
+        reservId = await request(app)
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+        reservId = reservId.header.location.split("reservations/")[1]
+
+        await request(app)
+            .get('/success?insertion=' + insertionId + "&reservation=" + reservId)
+            .set("Authorization", token2)
+            .expect(201)
     })
 
     afterAll(async () => {
@@ -188,9 +194,11 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
     let userClientId
     let parkId
     let insertionId
+    let insertionWarrantyId
     let token
     let tokenClient
     let reservId
+    let reservIdWarranty
 
     beforeAll(async () => {
         jest.setTimeout(5000);
@@ -238,14 +246,23 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
             image: "",
         })
 
+
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
         })
+        const jsonInsertionWarranty = {
+            name: "insertion name",
+            datetimeStart: new Date(Date.now() + 3600000),
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
+            priceHourly: 10,
+            priceDaily: 100,
+            minInterval: 60
+        }
 
         const res = await request(app)
             .post('/api/v1/insertions')
@@ -257,17 +274,45 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
+        insertionWarrantyId = await request(app)
+            .post('/api/v1/parkings/' + parkId + '/insertions')
+            .set("Authorization", token)
+            .send(jsonInsertionWarranty)
+            .expect(201)
+        insertionWarrantyId = insertionWarrantyId.header.location.split("insertions/")[1]
+
         expect.assertions(0)
 
         reservId = await request(app)
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
         reservId = reservId.header.location.split("reservations/")[1]
+
+        await request(app)
+            .get('/success?insertion=' + insertionId + "&reservation=" + reservId)
+            .set("Authorization", tokenClient)
+            .expect(201)
+
+        console.log("DATE", (new Date(Date.now() + 3610000)).toISOString().replace())
+        reservIdWarranty = await request(app)
+            .post('/api/v1/insertions/' + insertionWarrantyId + '/reservations')
+            .set("Authorization", tokenClient)
+            .send({
+                datetimeStart: (new Date(Date.now() + 3610000)).toISOString(),
+                datetimeEnd: (new Date(Date.now() + 100e6)).toISOString(),
+            })
+            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
+        reservIdWarranty = reservIdWarranty.header.location.split("reservations/")[1]
+
+        await request(app)
+            .get('/success?insertion=' + insertionWarrantyId + "&reservation=" + reservIdWarranty)
+            .set("Authorization", tokenClient)
+            .expect(201)
     })
 
     afterAll(async () => {
@@ -316,6 +361,15 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
 
     })
 
+    test("DELETE /api/v1/reservations/:reservationId with 2 days warranty check, should respond with 400", async () => {
+        expect.assertions(0)
+        const res = await request(app)
+            .delete('/api/v1/reservations/' + reservIdWarranty)
+            .set("Authorization", tokenClient)
+            .expect(400, { message: "Reservation cannot be deleted before two days" })
+
+    })
+
     test("DELETE /api/v1/reservations/:reservationId, should respond with 200", async () => {
         expect.assertions(0)
         const res = await request(app)
@@ -325,10 +379,6 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
 
     })
 })
-
-
-
-
 
 
 describe("PUT /api/v1/reservations/:reservationId", () => {
@@ -390,8 +440,8 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -412,15 +462,15 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
-            
+
         reservId = reservId.header.location.split("reservations/")[1]
 
         const res2 = await request(app)
-            .get('/success?insertion=' + insertionId+ "&reservation=" + reservId)
+            .get('/success?insertion=' + insertionId + "&reservation=" + reservId)
             .set("Authorization", token2)
             .expect(201)
 
@@ -449,8 +499,8 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
         const res = await request(app)
             .put('/api/v1/reservations/100')
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
             })
             .set("Authorization", token2)
             .expect(404, { message: "Reservation not found" })
@@ -462,8 +512,8 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
         const res = await request(app)
             .put(`/api/v1/reservations/${reservId}`)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
             })
             .set("Authorization", token)
             .expect(403, { message: "You are not allowed to modify this reservation" })
@@ -474,8 +524,8 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
         const res = await request(app)
             .put(`/api/v1/reservations/${reservId}`)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
                 ciaoMamma: "oggi ho mangiato pasta col tonno",
             })
             .set("Authorization", token2)
@@ -489,16 +539,16 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
             .put(`/api/v1/reservations/${reservId}`)
             .set("Authorization", token2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T11:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T11:00:00.000+02:00",
             })
             .expect(200)
 
         if (res.body && res.body.length === 1 && res.body[0]) {
             expect(res.body[0]).toMatchObject({
-                self: "/api/v1/reservations/"+ reservId,
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-08-06T08:00:00.000+02:00",
+                self: "/api/v1/reservations/" + reservId,
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-08-06T08:00:00.000+02:00",
                 client: userId2,
                 insertion: insertionId,
                 parking: parkId,

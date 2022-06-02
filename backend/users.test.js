@@ -7,22 +7,20 @@ import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
+import GCloud from './gcloud/gcloud.js'
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -172,16 +170,16 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         mockUser = mockUser.header.location.split("users/")[1]
         mockReserv = jest.spyOn(Reservation, "find").mockImplementation((criterias) => {
             let ret = [{
-                datetimeStart: "2022-05-31T11:34:00.000+02:00",
-                datetimeEnd: "2022-05-31T14:34:00.000+02:00",
+                datetimeStart: "2100-05-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-05-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 3,
                 self: "/api/v1/reservations/sjdlkasdjsd"
 
             },
             {
-                datetimeStart: "2022-06-31T11:34:00.000+02:00",
-                datetimeEnd: "2022-06-31T14:34:00.000+02:00",
+                datetimeStart: "2100-06-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-06-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 7,
                 self: "/api/v1/reservations/asdasdad"

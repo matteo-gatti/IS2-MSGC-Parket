@@ -12,7 +12,7 @@ const stripe = new Stripe(process.env.STRIPE_PR_KEY)
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
-    try { 
+    try {
 
         let insertion = await Insertion.findById(req.params.insertionId).populate([{
             path: "parking",
@@ -63,7 +63,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             if (!insertion.recurrenceData.daysOfTheWeek.includes(dayId[startDay])) {
                 return res.status(400).send({ message: "Insertion is not available on this day" })
             }
-        } 
+        }
         // check if the insertion is not already reserved
         for (const resv in insertion.reservations) {
             if (reqDateStart >= insertion.reservations[resv].datetimeStart && reqDateStart <= insertion.reservations[resv].datetimeEnd) {
@@ -119,7 +119,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             cancel_url: `${URL}/cancel?reservation=${reservation.id}`,
         })
 
-        res.location(reservation.self).status(202).json({url: session.url})
+        res.location(reservation.self).status(202).json({ url: session.url })
     } catch (err) {
         console.log(err)
         if (err.name === "ValidationError") {

@@ -11,18 +11,18 @@ import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
-const googleStorage = new Storage();
 
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
+import GCloud from './gcloud/gcloud.js'
+
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
 
 async function cleanDB() {
     //iterate over parkings
     const parkings = await Parking.find({});
     for (let parking of parkings) {
         const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
-        await deleteFile(imageName);
+        await GCloud.deleteFile(imageName);
     }
 
     const collections = mongoose.connection.collections
@@ -109,8 +109,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
 
         const jsonInsertion = JSON.stringify({
             name: "insertion name",
-            datetimeStart: "2022-06-06T08:00:00.000+02:00",
-            datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+            datetimeStart: "2100-06-06T08:00:00.000+02:00",
+            datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             priceHourly: 10,
             priceDaily: 100,
             minInterval: 60
@@ -132,14 +132,14 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient2)
             .send({
-                datetimeStart: "2022-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:00:00.000+02:00",
+                datetimeStart: "2100-06-10T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
         reservId = reservId.header.location.split("reservations/")[1]
 
         const res2 = await request(app)
-            .get('/success?insertion=' + insertionId+ "&reservation=" + reservId)
+            .get('/success?insertion=' + insertionId + "&reservation=" + reservId)
             .set("Authorization", tokenClient2)
             .expect(201)
     })
@@ -196,8 +196,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-06T07:00:00.000+02:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+02:00",
+                datetimeStart: "2100-06-06T07:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
             })
             .expect(400, { message: "Timeslot not valid" })
 
@@ -209,8 +209,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-06T10:00:00.000+02:00",
-                datetimeEnd: "2022-06-06T09:00:00.000+02:00",
+                datetimeStart: "2100-06-06T10:00:00.000+02:00",
+                datetimeEnd: "2100-06-06T09:00:00.000+02:00",
             })
             .expect(400, { message: "Timeslot not valid" })
 
@@ -223,8 +223,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-10T09:30:00.000+02:00",
-                datetimeEnd: "2022-06-10T10:30:00.000+02:00",
+                datetimeStart: "2100-06-10T09:30:00.000+02:00",
+                datetimeEnd: "2100-06-10T10:30:00.000+02:00",
             })
             .expect(400, { message: "Insertion is already reserved for this timeslot" })
 
@@ -236,8 +236,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                datetimeEnd: "2022-06-06T08:30:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-06-06T08:30:00.000+02:00",
             })
             .expect(400, { message: "Minimum reservation time interval not met" })
 
@@ -249,8 +249,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-06T08:00:00.000+02:00",
-                //datetimeEnd: "2022-06-06T09:30:00.000+02:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                //datetimeEnd: "2100-06-06T09:30:00.000+02:00",
             })
             .expect(400, { message: "Some fields are empty or undefined" })
 
@@ -263,8 +263,8 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", tokenClient)
             .send({
-                datetimeStart: "2022-06-06T09:00:00.000+02:00",
-                datetimeEnd: "2022-06-06T10:30:00.000+02:00",
+                datetimeStart: "2100-06-06T09:00:00.000+02:00",
+                datetimeEnd: "2100-06-06T10:30:00.000+02:00",
             })
             .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
 

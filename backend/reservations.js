@@ -5,7 +5,7 @@ import moment from 'moment'
 import Reservation from './models/reservation.js'
 import Review from './models/review.js'
 import Insertion from './models/insertion.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import tokenChecker from './tokenChecker.js'
 
 const router = express.Router()
 

@@ -1,21 +1,21 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
 import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
-import fs from 'fs'
-import path from 'path'
-
 
 import GCloud from './gcloud/gcloud.js'
+import Stripe from "./stripe/stripe.js"
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 async function cleanDB() {
     //iterate over parkings
@@ -34,6 +34,7 @@ async function cleanDB() {
 
 let mongoServer
 
+// POST reservationsNested
 describe("POST /api/v1/insertions/:insertionId/reservations", () => {
     let userId
     let userClientId
@@ -148,20 +149,6 @@ describe("POST /api/v1/insertions/:insertionId/reservations", () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("POST /api/v1/insertions/:insertionId/reservations with non-existing insertion, should respond with 404", async () => {

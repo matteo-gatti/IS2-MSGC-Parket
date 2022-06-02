@@ -1,6 +1,8 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import winston from 'winston'
+import expressWinston from 'express-winston'
 
 import { users } from './users.js'
 import { parkings } from './parkings.js'
@@ -12,8 +14,6 @@ import { reviewsNested } from './reviewsNested.js'
 import authentication from './authentication.js'
 import statics from './statics.js'
 
-import winston from 'winston'
-import expressWinston from 'express-winston'
 
 const app = express()
 
@@ -21,6 +21,7 @@ app.use(express.json({ limit: '100mb' }))
 app.use(cookieParser())
 app.use(cors())
 
+// Winston logging middleware
 app.use(expressWinston.logger({
   transports: [
     new winston.transports.Console()
@@ -45,7 +46,6 @@ app.use(expressWinston.logger({
   }
 }));
 
-
 app.set('view engine', 'ejs');
 
 // Authentication routing and middleware
@@ -60,6 +60,7 @@ app.use('/api/v1/insertions', insertions)
 app.use('/api/v1/insertions', reservationsNested)
 app.use('/api/v1/reservations', reservations)
 
+// Winston error logging middleware
 app.use(expressWinston.errorLogger({
   transports: [
     new winston.transports.Console()

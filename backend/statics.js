@@ -4,7 +4,6 @@ import { tokenValid, isAuthToken } from './tokenChecker.js'
 import Parking from './models/parking.js'
 import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
-import User from './models/user.js'
 
 const router = express.Router()
 
@@ -26,7 +25,7 @@ router.get('/register', tokenValid, function (req, res) {
         res.redirect("/")
 })
 
-// Register page
+// Success after correct payment
 router.get('/success', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
@@ -51,13 +50,12 @@ router.get('/success', tokenValid, async function (req, res) {
         res.redirect("/")
 })
 
-// Register page
+// Error after payment canceled successfully
 router.get('/cancel', tokenValid, async function (req, res) {
     if (isAuthToken(req)) {
         try {
             const resId = req.query.reservation
             let reservation = await Reservation.findById(resId)
-            console.log("cancel reser", reservation)
             if (reservation !==null) {
                 await reservation.remove()
             }

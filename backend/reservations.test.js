@@ -1,20 +1,20 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
-import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
-import fs from 'fs'
-import path from 'path'
 
 import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 async function cleanDB() {
     //iterate over parkings
@@ -33,6 +33,7 @@ async function cleanDB() {
 
 let mongoServer
 
+// GET reservations
 describe("GET /api/v1/reservations/myReservations", () => {
     let userId
     let userId2
@@ -128,21 +129,6 @@ describe("GET /api/v1/reservations/myReservations", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("GET /api/v1/reservations/myReservations with non-exisisting user, should respond with 404", async () => {
@@ -298,7 +284,6 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
             .set("Authorization", tokenClient)
             .expect(201)
 
-        console.log("DATE", (new Date(Date.now() + 3610000)).toISOString().replace())
         reservIdWarranty = await request(app)
             .post('/api/v1/insertions/' + insertionWarrantyId + '/reservations')
             .set("Authorization", tokenClient)
@@ -318,21 +303,6 @@ describe("DELETE /api/v1/reservations/:insertionId/", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("DELETE /api/v1/reservations/:reservationId without a valid token, should respond with 401", async () => {
@@ -394,7 +364,6 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
         const tmpRes = await request(app).post('/api/v1/users').send({
@@ -480,18 +449,6 @@ describe("PUT /api/v1/reservations/:reservationId", () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("PUT /api/v1/reservations/:reservationId on non existent reservation, should respond with 404", async () => {

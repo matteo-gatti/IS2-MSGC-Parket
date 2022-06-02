@@ -1,6 +1,5 @@
 import express from 'express'
 import multer from 'multer'
-import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
 import fs from 'fs'
 import path from 'path'
 
@@ -114,6 +113,7 @@ router.get('', async (req, res) => {
         const insertionMatch = {}
         const testQuery = { $and: [{ visible: true }, { insertions: { $exists: true, $ne: [] } }] }
         let fuzzySearchQuery = ""
+        //If parameters are in the query we need to filter the results
         if (Object.keys(req.query).length >= 0) {
             const validParams = ["search", "priceMin", "priceMax", "dateMin", "dateMax"]
             const queryDict = {}
@@ -127,25 +127,27 @@ router.get('', async (req, res) => {
             if ("search" in queryDict) {
                 fuzzySearchQuery = queryDict["search"]
             }
+            // If the user wants to filter by price
             if ("priceMin" in queryDict) {
                 insertionMatch.priceHourly = {}
                 insertionMatch.priceHourly.$gte = queryDict["priceMin"]
             }
+            // If the user wants to filter by price
             if ("priceMax" in queryDict) {
                 if (insertionMatch.priceHourly == null) {
                     insertionMatch.priceHourly = {}
                 }
                 insertionMatch.priceHourly.$lte = queryDict["priceMax"]
             }
+            // If dateMin is defined, we need to filter the results by the date
             if ("dateMin" in queryDict) {
-                console.log(queryDict["dateMin"])
                 insertionMatch.datetimeStart = {}
                 insertionMatch.datetimeEnd = {}
                 insertionMatch.datetimeStart.$lte = new Date(queryDict["dateMin"])
                 insertionMatch.datetimeEnd.$gte = new Date(queryDict["dateMin"])
             }
+            // If the dateMax is defined, we need to filter the results by the date
             if ("dateMax" in queryDict) {
-                console.log(queryDict["dateMax"])
                 if (insertionMatch.datetimeStart == null) {
                     insertionMatch.datetimeStart = {}
                 }
@@ -164,6 +166,7 @@ router.get('', async (req, res) => {
 
         let parkings = []
         if (fuzzySearchQuery !== "") {
+            // Fuzzy search
             parkings = await Parking.fuzzySearch(fuzzySearchQuery).select({ __v: 0, confidenceScore: 0 }).populate(
                 [{
                     path: "insertions",
@@ -191,6 +194,7 @@ router.get('', async (req, res) => {
                     select: { stars: 1 }
                 }])
         }
+        // remove parkings which have no insertions (or that have no insertions found after the filter)
         parkings = parkings.filter(parking => parking.visible === true && parking.insertions.length > 0)
         // remove property visible from the parkings
         for (let parking of parkings) {

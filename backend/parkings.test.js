@@ -1,19 +1,20 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
-import fs from 'fs'
-import path from 'path'
 
 import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 
 async function cleanDB() {
@@ -61,19 +62,6 @@ describe("POST /api/v1/parkings", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test('POST /api/v1/parkings should respond with 201', async () => {
@@ -114,7 +102,6 @@ describe("POST /api/v1/parkings", () => {
             .set('content-type', 'multipart/form-data').expect(400, { message: "Some fields are empty or undefined" })
     })
 
-    //returns write ECONNABORTED, se metto try catch passa ma non credo sia giusto cosi, non riesco a vedere i console log :(
     test("POST /api/v1/parkings without token should respond with 401", async () => {
         expect.assertions(0)
         let jsonstr = JSON.stringify({
@@ -133,7 +120,6 @@ describe("POST /api/v1/parkings", () => {
                 .attach("image", "./static/img/logo.png")
                 .set('content-type', 'multipart/form-data').expect(401, { auth: false, message: 'Token missing or invalid' })
         } catch (err) {
-            console.log("ERRORONE", err)
         }
     })
 })
@@ -141,26 +127,12 @@ describe("POST /api/v1/parkings", () => {
 describe("GET /api/v1/parkings/myParkings", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("GET /api/v1/parkings/myParkings without token, should respond with 401", async () => {
@@ -245,28 +217,12 @@ describe("GET /api/v1/parkings/myParkings", () => {
 describe("GET /api/v1/parkings", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("GET /api/v1/parkings/myParkings with valid request, should respond with 200 and a list of parkings", async () => {
@@ -322,7 +278,6 @@ describe("GET /api/v1/parkings", () => {
             .field("json", jsonstr)
             .attach("image", "./static/img/logo.png")
         const idPark = resPark.header.location.split("parkings/")[1]
-        console.log("idp", idPark)
 
         await request(app)
             .post('/api/v1/parkings/' + idPark + '/insertions')
@@ -382,31 +337,15 @@ describe("GET /api/v1/parkings", () => {
     })
 })
 
-describe("GET /api/v1/parkings search filter", () => {
+describe("GET /api/v1/parkings with a search filter", () => {
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
     })
 
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("GET /api/v1/parkings/myParkings?search=pippo&priceMin=10&priceMax=100 with valid request, should respond with 200 and a list of filtered parkings", async () => {
@@ -518,7 +457,6 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
         const tmpRes = await request(app).post('/api/v1/users').send({
@@ -630,19 +568,6 @@ describe("DELETE /api/v1/parkings/:parkingId", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("DELETE /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
@@ -694,7 +619,6 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
 
         const tmpRes = await request(app).post('/api/v1/users').send({
@@ -757,35 +681,12 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
 
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
-
-        /* reservId = await request(app)
-            .post('/api/v1/insertions/' + insertionId + '/reservations')
-            .set("Authorization", token2)
-            .send({
-                datetimeStart: "2100-06-10T09:00:00.000+02:00",
-                datetimeEnd: "2100-06-10T10:00:00.000+02:00",
-            })
-            .expect(202).expect("location", /\/api\/v1\/reservations\/(.*)/)
-            
-        reservId = reservId.header.location.split("reservations/")[1] */
     })
 
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("PUT /api/v1/parkings/:parkingId on non existent parking, should respond with 404", async () => {
@@ -822,7 +723,6 @@ describe("PUT /api/v1/parkings/:parkingId", () => {
     })
 
     test("PUT /api/v1/parkings/:parkingId with valid request, should respond with 200", async () => {
-        // Preconditions: add a user and 3 parkings (visible with insertion, invisible with insertion and visible without insertion)
         expect.assertions(0);
         const jsonUpdate = JSON.stringify({
             name: "parkingUpdated",

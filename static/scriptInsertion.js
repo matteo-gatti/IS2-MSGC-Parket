@@ -1,7 +1,7 @@
 function goBack() {
     if(window.history.length > 1 && 
         document.referrer.indexOf(window.location.host) !== -1) {
-          window.history.back();
+        window.history.back();
     } else {
         window.location.href = "/detailParking?id=" + $("#idParking").val()
     }
@@ -162,7 +162,6 @@ async function main() {
     const linkedPicker1Element = document.getElementById("linkedPickers1");
     const linkedPicker2Element = document.getElementById("linkedPickers2");
     const linked1 = new tempusDominus.TempusDominus(linkedPicker1Element);
-    //linked1.locale(localization)
 
     let recurrent = false;
     let daysOfWeekDisabled = [];
@@ -276,7 +275,6 @@ async function main() {
             }
         }
 
-        //
         try {
             linked2.updateOptions({
                 defaultDate: eventDate,
@@ -316,67 +314,6 @@ async function main() {
         checkDatesAndUpdatePrice();
     });
 
-    /* linked2.subscribe(tempusDominus.Namespace.events.change, (e) => {
-        
-        
-
-        const spasticMinDate = new tempusDominus.DateTime(minDate);
-        spasticMinDate.setDate(spasticMinDate.getDate()-1);
-
-        
-
-        let newminDate = new tempusDominus.DateTime().startOf("minutes");
-        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
-            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
-        }
-
-        linked1.updateOptions({
-            defaultDate: newminDate,
-            restrictions: {
-                minDate: newminDate,
-                maxDate: e.date,
-                daysOfWeekDisabled: daysOfWeekDisabled,
-                enabledHours: enabledHours
-            },
-            display: {
-                components: {
-                    useTwentyfourHour: true
-                }
-            }
-        });
-      }); */
-
-    // !BROKEN
-    /* //Opzioni di DA quando cambia A
-    linkedPicker2Element.addEventListener(tempusDominus.Namespace.events.change, function (e) {
-        
-        
-
-        const spasticMinDate = new tempusDominus.DateTime(minDate);
-        spasticMinDate.setDate(spasticMinDate.getDate()-1);
-
-        
-
-        let newminDate = new tempusDominus.DateTime().startOf("minutes");
-        if(newminDate.isBefore(new tempusDominus.DateTime(convertDate("insertionFrom")))) {
-            newminDate = new tempusDominus.DateTime(convertDate("insertionFrom"));
-        }
-
-        linked1.updateOptions({
-            defaultDate: newminDate,
-            restrictions: {
-                minDate: newminDate,
-                maxDate: e.detail.date,
-                daysOfWeekDisabled: daysOfWeekDisabled,
-                enabledHours: enabledHours
-            },
-            display: {
-                components: {
-                    useTwentyfourHour: true
-                }
-            }
-        });
-    }); */
     //--------------------------------- end period datepickers ------------------------------------
 }
 
@@ -429,8 +366,6 @@ async function createReservation() {
                 }),
             }
         );
-
-        // data = await res.json()
         if (!res.ok) {
             throw await res.json();
         } else {

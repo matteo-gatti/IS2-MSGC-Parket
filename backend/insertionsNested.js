@@ -2,7 +2,7 @@ import express from 'express'
 
 import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import tokenChecker from './tokenChecker.js'
 
 const router = express.Router()
 

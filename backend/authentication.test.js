@@ -1,7 +1,5 @@
 import request from "supertest"
-import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"

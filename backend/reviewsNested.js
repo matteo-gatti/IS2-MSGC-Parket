@@ -4,7 +4,7 @@ import User from './models/user.js'
 import Review from './models/review.js'
 import Parking from './models/parking.js'
 import Reservation from './models/reservation.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import tokenChecker from './tokenChecker.js'
 
 const router = express.Router()
 
@@ -50,10 +50,6 @@ router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
         review.reservation = reservation
         review = await review.save()
 
-        /* review.self = "/api/v1/parkings/" + parking.id + "/reviews/" + review.id
-
-        review = await review.save() */
-
         parking.reviews.push(review)
         await parking.save()
 
@@ -86,6 +82,7 @@ router.get('/:parkId/reviews', async (req, res) => {
                 select: { datetimeStart: 1, datetimeEnd: 1 },
             }]
         })
+        // compute average stars
         let average = 0
         review["reviews"].forEach((review) => {
             average += review.stars

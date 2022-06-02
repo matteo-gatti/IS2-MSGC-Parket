@@ -1,20 +1,20 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
-import Insertion from './models/insertion.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
-import fs from 'fs'
-import path from 'path'
 
 import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 async function cleanDB() {
     //iterate over parkings
@@ -62,19 +62,6 @@ describe("POST /api/v1/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("POST /api/v1/insertions with invalid request, should respond with 400", async () => {
@@ -136,7 +123,6 @@ describe("POST /api/v1/insertions", () => {
         const locParking = (res.header.location.split(",")[0]).split(":")[1]
         const parkings = await Parking.find({})
         const locInsertion = (res.header.location.split(",")[1]).split(":")[1]
-        console.log("ins park", locInsertion, locParking)
         expect(locParking).toMatch(/\/api\/v1\/parkings\/(.*)/)
         expect(locInsertion).toMatch(/\/api\/v1\/insertions\/(.*)/)
     })
@@ -269,19 +255,6 @@ describe("DELETE /api/v1/insertions/:insertionId", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        //await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("DELETE /api/v1/insertions/:insertionId on non existent insertion, should respond with 404", async () => {
@@ -397,8 +370,6 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         parkId = ((res.header.location.split(",")[0]).split(":")[1]).split("parkings/")[1]
         insertionId = ((res.header.location.split(",")[1]).split(":")[1]).split("insertions/")[1]
 
-        const inser = await Insertion.find({})
-
         reservId = await request(app)
             .post('/api/v1/insertions/' + insertionId + '/reservations')
             .set("Authorization", token2)
@@ -415,18 +386,6 @@ describe("PUT /api/v1/insertions/:insertionId", () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-            }
-        } */
     })
 
     test("PUT /api/v1/insertions/:insertionId on non existent insertion, should respond with 404", async () => {

@@ -1,19 +1,19 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import { Storage } from '@google-cloud/storage'
-import fs from 'fs'
-import path from 'path'
-
 import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 async function cleanDB() {
     //iterate over parkings
@@ -110,20 +110,6 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-            ;
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("POST /api/v1/parkings/:parkId/insertions with non-existing parking in DB respond with 404", async () => {
@@ -181,7 +167,6 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
 
     beforeAll(async () => {
         jest.setTimeout(5000);
-        //mongoServer = await MongoMemoryServer.create()
         app.locals.db = await mongoose.connect(mongoServer.getUri())
         const res = await request(app).post('/api/v1/users').send({
             username: "test",
@@ -229,20 +214,6 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     })
 
     test("GET /api/v1/parkings/:parkId/insertions with non-existing parking", async () => {

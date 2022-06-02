@@ -23,7 +23,6 @@ $(document).ready(function () {
         // repopulate the search bar with the last query
         query = localStorage.getItem("query")
         query = query.substring(query.indexOf("?") + 1)
-        // console.log(query)
         if (query != null) {
             // if minPrice or maxPrice or dateMin or dateMax are not null check advanced-toggle checkbox and hidden div
             if (query.includes("priceMin") || query.includes("priceMax") || query.includes("dateMin") || query.includes("dateMax")) {
@@ -31,7 +30,6 @@ $(document).ready(function () {
                 $(".advance-search").css("display", "block")
             }
             query = query.split("&")
-            // console.log(query)
             for (i = 0; i < query.length; i++) {
                 query[i] = query[i].split("=")
                 if (query[i][0] == "search") {
@@ -80,9 +78,6 @@ async function searchParkings() {
     const minPrice = $('#minPrice').val()
     const maxPrice = $('#maxPrice').val()
 
-    // console.log("min", minPrice)
-    // console.log("max", maxPrice)
-
     let minDate = $("#linkedPickers1Input").val()
     if (minDate != "") {
         minDate = convertToISO(minDate).replace("+", "%2B")
@@ -91,8 +86,6 @@ async function searchParkings() {
     if (maxDate != "") {
         maxDate = convertToISO(maxDate).replace("+", "%2B")
     }
-
-    // console.log(localStorage.getItem("query"))
 
     if (minDate == "" && maxDate == "" && searchKey == "" && minPrice == "" && maxPrice == "" && localStorage.getItem("query") == null) {
 
@@ -103,7 +96,7 @@ async function searchParkings() {
                 break
             }
         }
-        if (rating != 0) { console.log(`voto minimo ${rating}`); getAllParkings(true) }
+        if (rating != 0) {  getAllParkings(true) }
         return
     }
 
@@ -204,25 +197,15 @@ async function getAllParkings(checkStelle, rating) {
             const parkingHTML = $('#firstPark')
             container.empty()
             for (parking in data) {
-                console.log(parking)
-                //console.log(data[parking])
                 tmpParkHTML = parkingHTML.clone()
                 tmpParkHTML.removeAttr("hidden")
-                /* const res2 = await fetch(data[parking].self + "/reviews", {
-                    method: "GET",
-                })
-                reviews = await res2.json() */
-
-                console.log(data[parking].averageStars)
 
                 if (data[parking].averageStars != null && (!checkStelle || data[parking].averageStars >= rating)) {
-                    //console.log("stelline")
                     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
                     const avg = Math.round(data[parking].averageStars * 10) / 10
                     $(tmpParkHTML.find("span")[0]).html("&nbsp;" + avg + "&nbsp;" + fullStar + "&nbsp;(" + data[parking].reviews.length + ")")
                 }
                 if ((data[parking].averageStars != null && data[parking].averageStars < rating && checkStelle) || (checkStelle && !data[parking].averageStars)) {
-                    //console.log("continue")
                     continue;
                 }
 
@@ -243,7 +226,6 @@ async function getAllParkings(checkStelle, rating) {
         $("#message").text(err.message)
         $("#message").removeAttr('hidden');
         $('#noParks').removeAttr("hidden")
-        //alert(err.message);
     }
 }
 function newParking() {

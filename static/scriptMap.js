@@ -50,7 +50,6 @@ async function initMap() {
     var urlParams = new URLSearchParams(window.location.search);
     const lat = urlParams.has("lat") ? parseFloat(urlParams.get("lat")) : 46.06900002992592;
     const lng = urlParams.has("long") ? parseFloat(urlParams.get("long")) : 11.149703082567576;
-    console.log(lat, lng)
     const vietnam = { lat: 46.06900002992592, lng: 11.149703082567576 };
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 15,
@@ -145,7 +144,6 @@ async function initMap() {
         method: "GET",
     })
     data = await res.json()
-    console.log(data)
     data.forEach(parking => {
         addMarker(map, parking._id, parking.latitude, parking.longitude, parking.name, parking.description, parking.image, parking.averageStars, parking.reviews.length)
     });
@@ -184,7 +182,6 @@ function initAutocomplete(map) {
 
         places.forEach((place) => {
             if (!place.geometry || !place.geometry.location) {
-                console.log("Returned place contains no geometry");
                 return;
             }
 

@@ -51,7 +51,7 @@ async function loadPrenotazioni()
         {
             style: 'currency',
             currency: 'EUR',
-          }) + "</span>" + 
+        }) + "</span>" + 
         "</div>"
         container.append(tmpHTML)
     }

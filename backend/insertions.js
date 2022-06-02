@@ -1,7 +1,6 @@
 import express from 'express'
 import multer from 'multer'
 import moment from 'moment'
-import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
@@ -9,7 +8,7 @@ import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
 import Reservation from './models/reservation.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import tokenChecker from './tokenChecker.js'
 import GCloud from './gcloud/gcloud.js'
 
 // Storage engine
@@ -124,7 +123,6 @@ router.post('/', [tokenChecker, upload.single("image")], async (req, res) => {
         user.parkings.push(parking)
         await user.save()
 
-        //print where this call came from
         res.status(201).location(`parking:${parking.self},insertion:${insertion.self}`).send()
     } catch (err) {
         console.log(err)
@@ -334,7 +332,7 @@ router.delete('/:insertionId', tokenChecker, async (req, res) => {
             return res.status(400).send({ message: "Can't delete insertion with active reservations" })
         }
 
-        // cancello inserzione dalla lista nell'oggetto parcheggio
+        // Delete insertion from parking
         await Parking.findByIdAndUpdate(insertion.parking.id, {
             $pull: {
                 insertions: req.params.insertionId

@@ -1,19 +1,21 @@
 import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
-import User from './models/user.js'
 import Parking from './models/parking.js'
 import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
-import fs from 'fs'
-import path from 'path'
 
 import GCloud from './gcloud/gcloud.js'
+import Stripe from './stripe/stripe.js'
 
 jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
 jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
+jest.spyOn(Stripe, 'create').mockImplementation(() => {
+    return Promise.resolve({ url: "https://www.park.et/checkout" })
+});
 
 async function cleanDB() {
     //iterate over parkings
@@ -119,20 +121,6 @@ describe("GET /api/v1/users/:userid", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-            ;
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     });
 
     test("GET /api/v1/users/:userid should respond with the user info", async () => {
@@ -201,20 +189,6 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         await cleanDB()
         await mongoose.connection.close()
         await mongoServer.stop()
-
-
-        /* const directory = './static/uploads';
-
-        const fileNames = await fs.promises.readdir(directory)
-
-        for (const file of fileNames) {
-            if (file !== ".gitkeep") {
-                fs.unlink(path.join(directory, file), err => {
-                    if (err) throw err;
-                });
-
-            }
-        } */
     });
 
     test("GET /api/v1/users/:userid/reservations should respond with 200 and a list of reservations", async () => {

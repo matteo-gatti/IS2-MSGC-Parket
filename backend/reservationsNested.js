@@ -4,24 +4,26 @@ import moment from 'moment'
 import Insertion from './models/insertion.js'
 import Reservation from './models/reservation.js'
 import User from './models/user.js'
-import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
-import Stripe from "stripe"
+import tokenChecker from './tokenChecker.js'
+import Stripe from "./stripe/stripe.js"
 
 const router = express.Router()
-const stripe = new Stripe(process.env.STRIPE_PR_KEY)
+
 
 // Create a new reservation from an insertion
 router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
     try {
 
-        let insertion = await Insertion.findById(req.params.insertionId).populate([{
-            path: "parking",
-            model: "Parking",
-        },
-        {
-            path: "reservations",
-            model: "Reservation",
-        }])
+        let insertion = await Insertion.findById(req.params.insertionId).populate(
+            [{
+                path: "parking",
+                model: "Parking",
+            },
+            {
+                path: "reservations",
+                model: "Reservation",
+            }]
+        )
         let user = await User.findById(req.loggedInUser.userId)
 
         // check if the user is the owner of the parking
@@ -37,6 +39,7 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
             }
         }
 
+        // check that all the fields are valid
         for (const field of validFields) {
             if (!req.body.hasOwnProperty(field)) {
                 return res.status(400).send({ message: "Some fields are empty or undefined" })
@@ -86,7 +89,8 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         if (minutesDiff < insertion.minInterval) {
             return res.status(400).send({ message: "Minimum reservation time interval not met" })
         }
-
+        
+        // compute the price (days * pricePerDay + hoursLeft * pricePerHour)) 
         if (insertion.priceDaily) {
             const dayDiff = moment(reservation.datetimeEnd).diff(moment(reservation.datetimeStart), "days")
             minutesDiff -= dayDiff * 24 * 60
@@ -100,8 +104,10 @@ router.post('/:insertionId/reservations', tokenChecker, async (req, res) => {
         reservation.self = `/api/v1/reservations/${reservation.id}`
         reservation = await reservation.save()
 
+        // Server URL (e.g. http://localhost:3000/)
         const URL = req.protocol + '://' + req.get('host')
-        const session = await stripe.checkout.sessions.create({
+        // Create Stripe session to charge the user
+        const session = await Stripe.create({
             payment_method_types: ['card'],
             mode: 'payment',
             line_items: [{

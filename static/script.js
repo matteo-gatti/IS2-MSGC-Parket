@@ -59,7 +59,7 @@ async function login(e) {
         if (data.token) {
             // save jwt token to cookie
             document.cookie = "token=" + data.token
-            window.location.href = "/"
+            window.location.href = document.referrer
         }
     } catch (err) {
         $("#message").text(err.message)

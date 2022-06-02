@@ -282,22 +282,6 @@ async function createReview() {
 }
 
 async function getReviews() {
-    /*
-     <div id="reviewContainer">   -- accodare qui
-     <div id="primaReview">  -- copiare questo
-    
-        campi
-        reviewStars
-        <span class="mr-2" id="reviewTitle">Titolo</span>
-                          <span class="mr-2" id="space"> - </span>
-                          <span class="mr-2" id="reviewUser">Utente</span>
-                        </div>
-                        <small id="reviewTime"></small>
-                  </div>
-                  <p class="text-justify comment-text mb-0" id="reviewDescription"></p>
-    
-     */
-
     const fullStar = '<i class="fa-solid fa-star mr-2" style="color: #ffc107"></i>'
     const emptyStar = '<i class="fa-solid fa-star mr-2" style="color: #eeeeee"></i>'
 
@@ -522,7 +506,6 @@ const linked2Recurrrence = new tempusDominus.TempusDominus(document.getElementBy
 
 // using event listeners
 const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events.change, function (e) {
-    console.log("1 updated 2", (linked2Recurrrence.dates._dates))
     linked2Recurrrence.updateOptions({
         restrictions: {
             minDate: e.date,
@@ -552,7 +535,6 @@ const subscription1 = linked1Recurrence.subscribe(tempusDominus.Namespace.events
 
 // using subscribe method
 const subscription2 = linked2Recurrrence.subscribe(tempusDominus.Namespace.events.change, (e) => {
-    console.log("2 updated 1", (linked1Recurrence.dates._dates))
     linked1Recurrence.updateOptions({
         restrictions: {
             minDate: (new tempusDominus.DateTime((new Date()).setHours(0, 0, 0, 0))),
@@ -748,59 +730,10 @@ async function modifyInsertion(insertionid) {
                 $('#recurrenceEndInput').val(`${hoursEnd}:${minutesEnd}`)
 
                 d = (new Date((new Date().setHours(hoursStart, minutesStart, 0, 0))))
-                console.log("modify update 1", d)
                 d2 = (new Date((new Date().setHours(hoursEnd, minutesEnd, 0, 0))))
-                console.log("modify update 2", d2)
 
                 linked1Recurrence.dates.setValue(new tempusDominus.DateTime(d))
                 linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(d2))
-
-                /* linked1Recurrence.updateOptions({
-                    restrictions: {
-                        minDate: (new Date((new Date()).setHours(0,0,0,0)))
-                    },
-                    display: {
-                        viewMode: "clock",
-                        components: {
-                            useTwentyfourHour: true,
-                            decades: false,
-                            year: false,
-                            month: false,
-                            date: false,
-                            hours: true,
-                            minutes: true,
-                            seconds: false
-                        }
-                    },
-                    defaultDate: (new Date((new Date().setHours(hoursStart,minutesStart,0,0)))),
-                    viewDate: (new Date((new Date().setHours(hoursStart,minutesStart,0,0)))),
-                    useCurrent: false
-                });
-                //linked1Recurrence.dates._dates[0] = (new Date((new Date().setHours(hoursStart,minutesStart,0,0))))
-
-
-                linked2Recurrrence.updateOptions({
-                    restrictions: {
-                        maxDate: (new Date((new Date()).setHours(23,59,0,0)))
-                    },
-                    display: {
-                        viewMode: "clock",
-                        components: {
-                            useTwentyfourHour: true,
-                            decades: false,
-                            year: false,
-                            month: false,
-                            date: false,
-                            hours: true,
-                            minutes: true,
-                            seconds: false
-                        }
-                    },
-                    defaultDate: (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0)))),
-                    viewDate: (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0)))),
-                    useCurrent: false
-                }); */
-                //linked2Recurrrence.dates._dates[0] = (new Date((new Date().setHours(hoursEnd,minutesEnd,0,0))))
             }
 
             $('#exampleModalLabel').text('Modifica inserzione')
@@ -918,8 +851,6 @@ async function modifyInsertionSubmit(insertionid) {
                 .prop('checked', false)
                 .prop('selected', false);
 
-            console.log("getting linked")
-
             // and reload the insertions
             await getMyInsertions()
             linked1Recurrence.dates.setValue(new tempusDominus.DateTime((new Date()).setHours(0, 0, 0, 0)))
@@ -959,7 +890,6 @@ async function modifyParking(parkId) {
 }
 
 async function deleteParking(parkingid) {
-    console.log(parkingid)
     if (confirm('Vuoi veramente eliminare questo parcheggio?\nL\'operazione non può essere annullata.')) {
         try {
             const res = await fetch(`/api/v1/parkings/${parkingid}`, {

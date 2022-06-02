@@ -341,8 +341,8 @@ async function modifyReservSubmit(reservationId) {
 
 async function removeReserv(param) {
     //chiamata per eliminare la reservation
-     if(confirm('Vuoi veramente eliminare questa prenotazione?\nL\'operazione non può essere annullata.'))
-     {
+    if(confirm('Vuoi veramente eliminare questa prenotazione?\nL\'operazione non può essere annullata.'))
+    {
         try {
             const res = await fetch(`/api/v1/reservations/${param}`, {
                 method: "DELETE",

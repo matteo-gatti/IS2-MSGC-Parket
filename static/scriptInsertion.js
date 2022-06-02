@@ -324,8 +324,8 @@ function checkDatesAndUpdatePrice() {
         if (Object.prototype.toString.call(dateFrom) !== "[object Date]" || Object.prototype.toString.call(dateTo) !== "[object Date]" || isNaN(dateFrom) || isNaN(dateTo))
             return
 
-        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0]);
-        let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0]) : 0
+        let priceH = parseFloat($("#insertionPriceH").text().split("€")[0].replace(",", "."));
+        let priceD = $("#insertionPriceD").text() !== "Non disponibile" ? parseFloat($("#insertionPriceD").text().split("€")[0].replace(",", ".")) : 0
         let total = 0
         // get hours between dates
         let minutes = Math.abs(dateTo - dateFrom) / 60e3;

@@ -662,7 +662,7 @@ $('#exampleModal').on('hidden.bs.modal', function () {
     $("#message").attr('hidden', 'true')
 })
 
-function modifyInsertion(insertionid) {
+async function modifyInsertion(insertionid) {
     // retrieve old insertion data from the server
     fetch(`/api/v1/insertions/${insertionid}`)
         .then(response => response.json())
@@ -826,7 +826,7 @@ async function modifyInsertionSubmit(insertionid) {
     }
 
     // check if the form is valid
-    if (!$('form')[0].checkValidity()) {
+    if (!$('#insertionForm')[0].checkValidity()) {
         $("#message").removeAttr('hidden')
         $("#message").text("Per favore inserire tutti i dati")
         $('#btnSubmit').prop("disabled", false)
@@ -888,7 +888,6 @@ async function modifyInsertionSubmit(insertionid) {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                id: insertionid,
                 name: name,
                 datetimeStart: d1,
                 datetimeEnd: d2,
@@ -919,11 +918,12 @@ async function modifyInsertionSubmit(insertionid) {
                 .prop('checked', false)
                 .prop('selected', false);
 
-            linked1Recurrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(0, 0, 0, 0)))
+            console.log("getting linked")
 
-            linked2Recurrrence.dates.setValue(new tempusDominus.DateTime(new Date().setHours(23, 59, 0, 0)))
             // and reload the insertions
             await getMyInsertions()
+            linked1Recurrence.dates.setValue(new tempusDominus.DateTime((new Date()).setHours(0, 0, 0, 0)))
+            linked2Recurrrence.dates.setValue(new tempusDominus.DateTime((new Date()).setHours(23, 59, 0, 0)))
         }
     } catch (err) {
         // if the insertion is not modified, show the error message

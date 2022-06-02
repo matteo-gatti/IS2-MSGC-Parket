@@ -2,6 +2,7 @@ import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
 import User from './models/user.js'
+import Parking from './models/parking.js'
 import Reservation from './models/reservation.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
@@ -9,7 +10,19 @@ import { MongoMemoryServer } from "mongodb-memory-server"
 import fs from 'fs'
 import path from 'path'
 
+import GCloud from './gcloud/gcloud.js'
+
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
 async function cleanDB() {
+    //iterate over parkings
+    const parkings = await Parking.find({});
+    for (let parking of parkings) {
+        const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
+        await GCloud.deleteFile(imageName);
+    }
+
     const collections = mongoose.connection.collections
 
     for (const key in collections) {
@@ -32,8 +45,7 @@ describe("POST /api/v1/users", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
-        const directory = './static/uploads';
+        /* const directory = './static/uploads';
 
         const fileNames = await fs.promises.readdir(directory)
 
@@ -42,8 +54,9 @@ describe("POST /api/v1/users", () => {
                 fs.unlink(path.join(directory, file), err => {
                     if (err) throw err;
                 });
+
             }
-        }
+        } */
     });
 
     test("POST /api/v1/users/ without username should respond with an error message", async () => {
@@ -106,9 +119,9 @@ describe("GET /api/v1/users/:userid", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
+            ;
 
-        const directory = './static/uploads';
+        /* const directory = './static/uploads';
 
         const fileNames = await fs.promises.readdir(directory)
 
@@ -117,8 +130,9 @@ describe("GET /api/v1/users/:userid", () => {
                 fs.unlink(path.join(directory, file), err => {
                     if (err) throw err;
                 });
+
             }
-        }
+        } */
     });
 
     test("GET /api/v1/users/:userid should respond with the user info", async () => {
@@ -156,16 +170,16 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         mockUser = mockUser.header.location.split("users/")[1]
         mockReserv = jest.spyOn(Reservation, "find").mockImplementation((criterias) => {
             let ret = [{
-                datetimeStart: "2022-05-31T11:34:00.000+00:00",
-                datetimeEnd: "2022-05-31T14:34:00.000+00:00",
+                datetimeStart: "2100-05-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-05-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 3,
                 self: "/api/v1/reservations/sjdlkasdjsd"
 
             },
             {
-                datetimeStart: "2022-06-31T11:34:00.000+00:00",
-                datetimeEnd: "2022-06-31T14:34:00.000+00:00",
+                datetimeStart: "2100-06-31T11:34:00.000+02:00",
+                datetimeEnd: "2100-06-31T14:34:00.000+02:00",
                 insertion: "ObjID",
                 price: 7,
                 self: "/api/v1/reservations/asdasdad"
@@ -186,11 +200,10 @@ describe("GET /api/v1/users/:userid/reservations", () => {
         mockReserv.mockRestore()
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
-        console.log("MONGO CONN", mongoServer.state)
 
-        const directory = './static/uploads';
+
+        /* const directory = './static/uploads';
 
         const fileNames = await fs.promises.readdir(directory)
 
@@ -199,8 +212,9 @@ describe("GET /api/v1/users/:userid/reservations", () => {
                 fs.unlink(path.join(directory, file), err => {
                     if (err) throw err;
                 });
+
             }
-        }
+        } */
     });
 
     test("GET /api/v1/users/:userid/reservations should respond with 200 and a list of reservations", async () => {

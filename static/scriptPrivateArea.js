@@ -230,6 +230,7 @@ async function modifyReserv(reservationId) {
             var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
             $('#linkedPickers1Input').val(`${day}/${month}/${year}, ${hours}:${minutes}`)
 
+
             // convert date to gg/mm/aaaa, hh:mm format
             var date2 = new Date(data.datetimeEnd)
             date2.setHours(date2.getHours())
@@ -260,8 +261,8 @@ async function modifyReserv(reservationId) {
                 viewDate: (new tempusDominus.DateTime(data.datetimeEnd)),
             }, true);
 
-            linked1.dates.setValue(new tempusDominus.DateTime(data.datetimeStart))
-            linked2.dates.setValue(new tempusDominus.DateTime(data.datetimeEnd))
+            //linked1.dates.setValue(new tempusDominus.DateTime(data.datetimeStart))
+            //linked2.dates.setValue(new tempusDominus.DateTime(data.datetimeEnd))
 
             $('#btnSubmit').attr('onclick', `modifyReservSubmit('${reservationId}')`)
 
@@ -306,7 +307,6 @@ async function modifyReservSubmit(reservationId) {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                id: reservationId,
                 datetimeStart: d1,
                 datetimeEnd: d2,
             }),

@@ -38,16 +38,15 @@ router.get('/success', tokenValid, async function (req, res) {
             insertion.reservations.push(reservation)
             await insertion.save()
             if (req.loggedInUser.userId !== parking.owner.id) {
-                res.render('./insertion.ejs', { logged: true, owner: false })
+                res.status(201).render('./insertion.ejs', { logged: true, owner: false })
             } else {
-                res.render('./insertion.ejs', { logged: true, owner: true })
+                res.status(201).render('./insertion.ejs', { logged: true, owner: true })
             }
         } catch(err){
             console.log(err)
             res.redirect("/")
         }
     }
-
     else
         res.redirect("/")
 })

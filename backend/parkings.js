@@ -1,13 +1,14 @@
 import express from 'express'
 import multer from 'multer'
 import mongoose_fuzzy_searching from "@imranbarbhuiya/mongoose-fuzzy-searching"
-import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
+import Insertion from './models/insertion.js'
 import Parking from './models/parking.js'
 import User from './models/user.js'
 import tokenChecker, { isAuthToken, tokenValid } from './tokenChecker.js'
+import GCloud from './gcloud/gcloud.js'
 
 // Storage engine
 const storage = multer.diskStorage({
@@ -31,19 +32,6 @@ const upload = multer({
     }
 })
 
-const googleStorage = new Storage();
-
-async function uploadFile(filePath, id) {
-    const bucketName = 'parket-pictures';
-    await googleStorage.bucket(bucketName).upload(filePath, {
-        destination: id,
-    });
-}
-
-async function deleteFile(fileName) {
-    await googleStorage.bucket('parket-pictures').file(fileName).delete();
-}
-
 const router = express.Router()
 
 // Create a new parking, pass through token and upload middlewares
@@ -51,6 +39,7 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
     if (!req.file) {
         return res.status(415).send({ message: 'Wrong file type for images' })
     }
+
     let bodyJSON = await JSON.parse(req.body["json"])
     bodyJSON.image = "uploads/" + req.file["filename"]
 
@@ -66,10 +55,10 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         let parkingId = newParking._id
         newParking.self = "/api/v1/parkings/" + parkingId
 
-        await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+        await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
         newParking.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
         newParking = await newParking.save()
-
+                
         fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
             if (err) throw err;
         });
@@ -82,6 +71,9 @@ router.post('', [tokenChecker, upload.single("image")], async (req, res) => {
         res.location('/api/v1/parkings/' + parkingId).status(201).send()
     } catch (err) {
         console.log(err)
+        fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
+            if (err) console.log(err)
+        });
         return res.status(400).send({ message: "Some fields are empty or undefined" })
     }
 })
@@ -234,10 +226,10 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
             bodyJSON.image = oldParking.image
             //return res.status(415).send({ message: 'Wrong file type for images' })
         } else {
-            await uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
+            await GCloud.uploadFile("./static/uploads/" + req.file["filename"], req.file["filename"])
             bodyJSON.image = `https://storage.googleapis.com/parket-pictures/${req.file["filename"]}`
             const oldImage = oldParking.image.split("/")[oldParking.image.split("/").length - 1]
-            await deleteFile(oldImage)
+            await GCloud.deleteFile(oldImage)
             fs.unlink(path.join("static/uploads", req.file["filename"]), err => {
                 if (err) throw err;
             });
@@ -275,20 +267,30 @@ router.put('/:parkingId', [tokenChecker, upload.single("image")], async (req, re
     }
 })
 
-// Delete a parking
 router.delete('/:parkingId', tokenChecker, async (req, res) => {
     try {
-        const parking = await Parking.findById(req.params.parkingId)
+        const parking = await Parking.findById(req.params.parkingId).populate([{
+            path: "insertions",
+            model: "Insertion",
+            select: { id: 1, reservations: 1 }
+        }])
         let parkingOwner = String(parking.owner)
         // if user is not the owner of the parking, return error
         if (parkingOwner !== req.loggedInUser.userId) {
             return res.status(403).send({ message: 'User is not authorized to do this action' })
-        } if (parking.insertions.length != 0) {
-            return res.status(405).send({ message: 'Cannot delete parking with active insertions' })
+        }
+        if (parking.insertions.length != 0) {
+            for (const insertion of parking.insertions) {
+                if (insertion.reservations.length !== 0) {
+                    return res.status(400).send({ message: 'Cannot delete parking with active insertions' })
+                } else {
+                    await Insertion.findByIdAndDelete(insertion.id)
+                }
+            }
         }
 
         const oldImage = parking.image.split("/")[parking.image.split("/").length - 1]
-        await deleteFile(oldImage)
+        await GCloud.deleteFile(oldImage)
 
         await parking.remove()
         return res.status(200).send({ message: 'Parking deleted' })
@@ -297,6 +299,5 @@ router.delete('/:parkingId', tokenChecker, async (req, res) => {
         return res.status(404).send({ message: 'Parking not found' })
     }
 })
-
 
 export { router as parkings }

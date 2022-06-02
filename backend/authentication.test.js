@@ -2,11 +2,19 @@ import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
 import User from './models/user.js'
+import Parking from './models/parking.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
 
 async function cleanDB() {
+    //iterate over parkings
+    const parkings = await Parking.find({});
+    for (let parking of parkings) {
+        const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
+        await GCloud.deleteFile(imageName);
+    }
+
     const collections = mongoose.connection.collections
 
     for (const key in collections) {
@@ -34,8 +42,7 @@ describe("POST /api/v1/auth/login", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
-        console.log("MONGO CONN", mongoServer.state)
+
 
     })
 
@@ -93,9 +100,8 @@ describe("POST /api/v1/auth/logout", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
-        console.log("MONGO CONN", mongoServer.state)
+
     })
 
     // the same test as user is or is not logged in, just checking it returns a token

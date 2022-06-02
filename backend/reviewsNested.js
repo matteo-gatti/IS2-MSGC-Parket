@@ -11,17 +11,23 @@ const router = express.Router()
 // Create a new review
 router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
     try {
-        let parking = await Parking.findById(req.params.parkId).populate("owner")
-        let user = await User.findById(req.loggedInUser.userId)
-
         // check that correct data is sent
         const validInsertionFields = ["title", "stars", "description", "reservation"]
-
+        
         for (const field in req.body) {
             if (!validInsertionFields.includes(field)) {
                 return res.status(400).send({ message: "Some fields are invalid" })
             }
         }
+        
+        const reservation = await Reservation.findById(req.body.reservation)
+        //check reservation owner
+        if (reservation.client.toString() !== req.loggedInUser.userId) {
+            return res.status(403).send({ message: "You are not the reservation owner" })
+        }
+
+        let parking = await Parking.findById(req.params.parkId).populate("owner")
+        let user = await User.findById(req.loggedInUser.userId)
 
         // check if stars is between 1 and 5
         if (req.body.stars < 1 || req.body.stars > 5 || !Number.isInteger(req.body.stars)) {
@@ -38,16 +44,15 @@ router.post('/:parkId/reviews', tokenChecker, async (req, res) => {
         review.datetime = new Date()
 
         // get the reservation
-        const reservation = await Reservation.findById(req.body.reservation)
         reservation.reviewed = true
         await reservation.save()
 
         review.reservation = reservation
         review = await review.save()
 
-        review.self = "/api/v1/parkings/" + parking.id + "/reviews/" + review.id //TODO se viene fatto reviews non nested va cambiato
+        /* review.self = "/api/v1/parkings/" + parking.id + "/reviews/" + review.id
 
-        review = await review.save()
+        review = await review.save() */
 
         parking.reviews.push(review)
         await parking.save()

@@ -2,13 +2,27 @@ import request from "supertest"
 import jwt from "jsonwebtoken"
 import app from "./app.js"
 import User from './models/user.js'
+import Parking from './models/parking.js'
 import { jest } from '@jest/globals'
 import mongoose from "mongoose"
 import { MongoMemoryServer } from "mongodb-memory-server"
+import { Storage } from '@google-cloud/storage'
 import fs from 'fs'
 import path from 'path'
 
+import GCloud from './gcloud/gcloud.js'
+
+jest.spyOn(GCloud, 'uploadFile').mockImplementation((file, id) => Promise.resolve());
+jest.spyOn(GCloud, 'deleteFile').mockImplementation((file) => Promise.resolve());
+
 async function cleanDB() {
+    //iterate over parkings
+    const parkings = await Parking.find({});
+    for (let parking of parkings) {
+        const imageName = parking.image.split('/')[parking.image.split('/').length - 1];
+        await GCloud.deleteFile(imageName);
+    }
+
     const collections = mongoose.connection.collections
 
     for (const key in collections) {
@@ -96,9 +110,9 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
+            ;
 
-        const directory = './static/uploads';
+        /* const directory = './static/uploads';
 
         const fileNames = await fs.promises.readdir(directory)
 
@@ -107,8 +121,9 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
                 fs.unlink(path.join(directory, file), err => {
                     if (err) throw err;
                 });
+
             }
-        }
+        } */
     })
 
     test("POST /api/v1/parkings/:parkId/insertions with non-existing parking in DB respond with 404", async () => {
@@ -134,8 +149,8 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 //name: "insertion name", 
-                datetimeStart: "2022-06-06T08:00:00.000+00:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -149,8 +164,8 @@ describe("POST /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+00:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -203,8 +218,8 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
             .set("authorization", token)
             .send({
                 name: "insertion name",
-                datetimeStart: "2022-06-06T08:00:00.000+00:00",
-                datetimeEnd: "2022-07-06T08:00:00.000+00:00",
+                datetimeStart: "2100-06-06T08:00:00.000+02:00",
+                datetimeEnd: "2100-07-06T08:00:00.000+02:00",
                 priceHourly: 10,
                 priceDaily: 100,
             })
@@ -213,11 +228,10 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
     afterAll(async () => {
         await cleanDB()
         await mongoose.connection.close()
-        console.log("CONN", mongoose.connection.readyState);
         await mongoServer.stop()
-        console.log("MONGO CONN", mongoServer.state)
 
-        const directory = './static/uploads';
+
+        /* const directory = './static/uploads';
 
         const fileNames = await fs.promises.readdir(directory)
 
@@ -226,8 +240,9 @@ describe("GET /api/v1/parkings/:parkId/insertions", () => {
                 fs.unlink(path.join(directory, file), err => {
                     if (err) throw err;
                 });
+
             }
-        }
+        } */
     })
 
     test("GET /api/v1/parkings/:parkId/insertions with non-existing parking", async () => {

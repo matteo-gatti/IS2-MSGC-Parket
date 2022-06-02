@@ -65,7 +65,7 @@ router.put('/:reservationId', tokenChecker, async (req, res) => {
     }
 
     try {
-        let reservation = await Reservation.findById(req.body.id)
+        let reservation = await Reservation.findById(req.params.reservationId)
 
         if (reservation.client.toString() != req.loggedInUser.userId) {
             return res.status(403).send({ message: "You are not allowed to modify this reservation" })
@@ -99,7 +99,7 @@ router.put('/:reservationId', tokenChecker, async (req, res) => {
 
         // if the new timeslot collide with other reservations, return error
         for (const reservation of insertion.reservations) {
-            if (reservation.id != req.body.id) {
+            if (reservation.id != req.params.reservationId) {
                 if (new Date(req.body.datetimeStart) >= new Date(reservation.datetimeStart) && new Date(req.body.datetimeStart) < new Date(reservation.datetimeEnd)) {
                     return res.status(400).send({ message: "The new reservation is overlapping with another reservation" })
                 }
